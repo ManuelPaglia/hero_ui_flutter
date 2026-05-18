@@ -31,6 +31,57 @@ void main() {
     expect(tapped, isTrue);
   });
 
+  testWidgets('HUFButton senza isFullWidth non occupa tutta la larghezza', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: Column(
+            children: [
+              HUFButton(label: 'Compatto', onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final buttonWidth = tester.getSize(find.byType(HUFButton)).width;
+    expect(buttonWidth, lessThan(parentWidth));
+    expect(buttonWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFButton con isFullWidth occupa tutta la larghezza', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: Column(
+            children: [
+              HUFButton(
+                label: 'Largo',
+                isFullWidth: true,
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSize(find.byType(HUFButton)).width,
+      parentWidth,
+    );
+  });
+
   testWidgets('HUFButton disabilitato non invoca onPressed', (tester) async {
     var tapped = false;
 
@@ -257,6 +308,118 @@ void main() {
 
     expect(mid.colors.primary, isNot(light.colors.primary));
     expect(mid.borderRadius.md, light.borderRadius.md);
+  });
+
+  testWidgets('HUFButtonGroup invoca onPressed per segmento', (tester) async {
+    var firstTapped = false;
+    var secondTapped = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFButtonGroup(
+          items: [
+            HUFButtonGroupItem(
+              label: 'Sinistra',
+              onPressed: () => firstTapped = true,
+            ),
+            HUFButtonGroupItem(
+              label: 'Destra',
+              onPressed: () => secondTapped = true,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Sinistra'));
+    await tester.pump();
+    expect(firstTapped, isTrue);
+    expect(secondTapped, isFalse);
+
+    await tester.tap(find.text('Destra'));
+    await tester.pump();
+    expect(secondTapped, isTrue);
+  });
+
+  testWidgets('HUFButtonGroup applica radius solo agli estremi', (tester) async {
+    const pill = HUFBorderRadius.pill;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFButtonGroup(
+          items: [
+            HUFButtonGroupItem(label: 'A', onPressed: () {}),
+            HUFButtonGroupItem(label: 'B', onPressed: () {}),
+            HUFButtonGroupItem(label: 'C', onPressed: () {}),
+          ],
+        ),
+        theme: HUFTheme.light(borderRadius: pill),
+      ),
+    );
+
+    final inkWells = tester.widgetList<InkWell>(find.byType(InkWell)).toList();
+    expect(inkWells.length, 3);
+
+    final firstRadius = inkWells.first.borderRadius!;
+    expect(firstRadius.topLeft.x, pill.md);
+    expect(firstRadius.topRight.x, 0);
+
+    final middleRadius = inkWells[1].borderRadius!;
+    expect(middleRadius.topLeft.x, 0);
+    expect(middleRadius.topRight.x, 0);
+
+    final lastRadius = inkWells.last.borderRadius!;
+    expect(lastRadius.topRight.x, pill.md);
+    expect(lastRadius.topLeft.x, 0);
+  });
+
+  testWidgets(
+    'bottoni e button group con/senza shadow hanno la stessa altezza layout',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          Wrap(
+            children: [
+              HUFButton(label: 'Primary', onPressed: () {}),
+              HUFButton(
+                label: 'Secondary',
+                variant: HUFButtonVariant.secondary,
+                onPressed: () {},
+              ),
+              HUFButtonGroup(
+                items: [
+                  HUFButtonGroupItem(label: 'A', onPressed: () {}),
+                  HUFButtonGroupItem(label: 'B', onPressed: () {}),
+                ],
+              ),
+              HUFButtonGroup(
+                variant: HUFButtonVariant.danger,
+                items: [
+                  HUFButtonGroupItem(label: 'C', onPressed: () {}),
+                  HUFButtonGroupItem(label: 'D', onPressed: () {}),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final heights = <double>[
+        tester.getSize(find.widgetWithText(HUFButton, 'Primary')).height,
+        tester.getSize(find.widgetWithText(HUFButton, 'Secondary')).height,
+        tester.getSize(find.byType(HUFButtonGroup).at(0)).height,
+        tester.getSize(find.byType(HUFButtonGroup).at(1)).height,
+      ];
+
+      expect(heights.toSet().length, 1);
+    },
+  );
+
+  test('HUFButtonGroup richiede almeno 2 elementi', () {
+    expect(
+      () => HUFButtonGroup(items: [HUFButtonGroupItem(label: 'Solo', onPressed: () {})]),
+      throwsAssertionError,
+    );
   });
 
   test('HUFThemeData sovrascrive i colori del tema', () {

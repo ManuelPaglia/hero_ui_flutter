@@ -3,8 +3,8 @@ import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import 'showcase_shared.dart';
 
-class ButtonsShowcasePage extends StatelessWidget {
-  const ButtonsShowcasePage({
+class ButtonGroupsShowcasePage extends StatelessWidget {
+  const ButtonGroupsShowcasePage({
     required this.onToggleTheme,
     super.key,
   });
@@ -17,7 +17,7 @@ class ButtonsShowcasePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bottoni'),
+        title: const Text('Button group'),
         actions: [
           IconButton(
             onPressed: onToggleTheme,
@@ -41,30 +41,50 @@ class ButtonsShowcasePage extends StatelessWidget {
                     for (final size in HUFButtonSize.values) ...[
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: HUFButton(
-                          label:
-                              '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
+                        child: HUFButtonGroup(
                           variant: variant,
                           size: size,
-                          icon: const Icon(Icons.arrow_forward),
-                          onPressed: () {},
+                          items: [
+                            HUFButtonGroupItem(
+                              label:
+                                  '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
+                              icon: Icon(showcaseIconForVariant(variant)),
+                              onPressed: () {},
+                            ),
+                            HUFButtonGroupItem(
+                              icon: const Icon(Icons.arrow_drop_down),
+                              onPressed: () {},
+                            ),
+                          ],
                         ),
                       ),
                     ],
                     const SizedBox(height: 8),
                   ],
-                  ShowcaseSubsectionTitle('Icon only'),
+                  ShowcaseSubsectionTitle('Solo icone'),
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
                     children: [
                       for (final variant in HUFButtonVariant.values)
                         for (final size in HUFButtonSize.values)
-                          HUFButton.iconOnly(
-                            icon: Icon(showcaseIconForVariant(variant)),
+                          HUFButtonGroup(
                             variant: variant,
                             size: size,
-                            onPressed: () {},
+                            items: [
+                              HUFButtonGroupItem(
+                                icon: Icon(showcaseIconForVariant(variant)),
+                                onPressed: () {},
+                              ),
+                              HUFButtonGroupItem(
+                                icon: const Icon(Icons.more_horiz),
+                                onPressed: () {},
+                              ),
+                              HUFButtonGroupItem(
+                                icon: const Icon(Icons.arrow_drop_down),
+                                onPressed: () {},
+                              ),
+                            ],
                           ),
                     ],
                   ),

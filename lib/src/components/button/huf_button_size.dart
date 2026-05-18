@@ -1,4 +1,4 @@
-/// Dimensione del [HUFButton].
+/// Dimensione di [HUFButton] e [HUFButtonGroup].
 enum HUFButtonSize {
   small,
   medium,

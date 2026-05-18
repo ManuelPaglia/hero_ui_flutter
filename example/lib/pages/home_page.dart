@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -44,6 +45,20 @@ class HomePage extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => ButtonsShowcasePage(
+                      onToggleTheme: onToggleTheme,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            HUFButton(
+              label: 'Button group',
+              variant: HUFButtonVariant.secondary,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ButtonGroupsShowcasePage(
                       onToggleTheme: onToggleTheme,
                     ),
                   ),

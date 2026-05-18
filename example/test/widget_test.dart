@@ -7,7 +7,7 @@ void main() {
   testWidgets('mostra la showcase dei pulsanti', (tester) async {
     await tester.pumpWidget(const HeroUIExampleApp(themeData: HUFThemeData.defaults));
 
-    expect(find.text('HUFButton'), findsOneWidget);
-    expect(find.text('Primary'), findsOneWidget);
+    expect(find.text('Bottoni'), findsOneWidget);
+    expect(find.text('Button group'), findsOneWidget);
   });
 }
