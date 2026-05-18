@@ -1,53 +1,52 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/huf_theme.dart';
-import 'huf_checkbox_size.dart';
-import 'huf_checkbox_style.dart';
+import 'huf_radio_button_size.dart';
+import 'huf_radio_button_style.dart';
 
-/// Checkbox del design system Hero UI Flutter.
+/// Radio button circolare del design system Hero UI Flutter.
+///
+/// A differenza di [HUFCheckbox], non usa [HUFBorderRadius] del tema:
+/// la forma è sempre un cerchio.
 ///
 /// Uso singolo: passa [value] e [onChanged].
 ///
-/// Uso in [HUFCheckboxGroup]: passa solo [optionValue] (e label, icone, stile);
+/// Uso in [HUFRadioButtonGroup]: passa solo [optionValue] (e label, stile);
 /// il gruppo fornisce [value] e [onChanged].
 ///
 /// Per override globali personalizza [HUFThemeData] / [HUFThemeColors]; per
-/// override puntuali passa [activeColor], [checkColor] o [borderColor].
-class HUFCheckbox extends StatelessWidget {
-  const HUFCheckbox({
+/// override puntuali passa [activeColor], [dotColor] o [borderColor].
+class HUFRadioButton extends StatelessWidget {
+  const HUFRadioButton({
     super.key,
     this.value,
     this.onChanged,
     this.optionValue,
     this.enabled = true,
-    this.size = HUFCheckboxSize.medium,
+    this.size = HUFRadioButtonSize.medium,
     this.glowSize,
     this.label,
-    this.checkedIcon,
-    this.uncheckedIcon,
     this.activeColor,
-    this.checkColor,
+    this.dotColor,
     this.borderColor,
   }) : assert(
           optionValue == null || (value == null && onChanged == null),
-          'Con optionValue il checkbox è gestito da HUFCheckboxGroup: '
+          'Con optionValue il radio è gestito da HUFRadioButtonGroup: '
           'non passare value né onChanged.',
         );
 
-  /// Collegamento interno da [HUFCheckboxGroup] (non usare direttamente).
-  const HUFCheckbox.wired({
+  /// Collegamento interno da [HUFRadioButtonGroup] (non usare direttamente).
+  const HUFRadioButton.wired({
     super.key,
     required this.value,
     required this.onChanged,
     this.optionValue,
     this.enabled = true,
-    this.size = HUFCheckboxSize.medium,
+    this.size = HUFRadioButtonSize.medium,
     this.glowSize,
     this.label,
-    this.checkedIcon,
-    this.uncheckedIcon,
     this.activeColor,
-    this.checkColor,
+    this.dotColor,
     this.borderColor,
   });
 
@@ -57,37 +56,32 @@ class HUFCheckbox extends StatelessWidget {
   /// Callback al tap (uso singolo). `null` disabilita il controllo.
   final ValueChanged<bool>? onChanged;
 
-  /// Identificativo dell'opzione quando il widget è figlio di [HUFCheckboxGroup].
+  /// Identificativo dell'opzione quando il widget è figlio di [HUFRadioButtonGroup].
   final Object? optionValue;
 
-  /// Se `false`, il checkbox non risponde al tap.
+  /// Se `false`, il radio non risponde al tap.
   final bool enabled;
 
-  final HUFCheckboxSize size;
+  final HUFRadioButtonSize size;
 
   /// Override dell'intensità glow; se null usa [HUFTheme.glowSize].
   final HUFGlowSize? glowSize;
+
   final String? label;
 
-  /// Icona mostrata quando selezionato. Default: segno di spunta.
-  final Widget? checkedIcon;
-
-  /// Icona mostrata quando non selezionato. Se null il box resta vuoto.
-  final Widget? uncheckedIcon;
-
   final Color? activeColor;
-  final Color? checkColor;
+  final Color? dotColor;
   final Color? borderColor;
 
   bool get _isDisabled => !enabled || onChanged == null;
 
-  /// Copia il checkbox con [value] e [onChanged] aggiornati ([HUFCheckboxGroup]).
-  HUFCheckbox copyWith({
+  /// Copia il radio con [value] e [onChanged] aggiornati ([HUFRadioButtonGroup]).
+  HUFRadioButton copyWith({
     bool? value,
     ValueChanged<bool>? onChanged,
     bool? enabled,
   }) {
-    return HUFCheckbox.wired(
+    return HUFRadioButton.wired(
       key: key,
       value: value ?? this.value ?? false,
       onChanged: onChanged ?? this.onChanged,
@@ -96,10 +90,8 @@ class HUFCheckbox extends StatelessWidget {
       size: size,
       glowSize: glowSize,
       label: label,
-      checkedIcon: checkedIcon,
-      uncheckedIcon: uncheckedIcon,
       activeColor: activeColor,
-      checkColor: checkColor,
+      dotColor: dotColor,
       borderColor: borderColor,
     );
   }
@@ -108,29 +100,28 @@ class HUFCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(
       optionValue != null || value != null,
-      'HUFCheckbox richiede value (uso singolo) o optionValue (uso in gruppo).',
+      'HUFRadioButton richiede value (uso singolo) o optionValue (uso in gruppo).',
     );
 
     final theme = context.hufTheme;
     final resolvedGlowSize = glowSize ?? theme.glowSize;
-    final metrics = hufCheckboxMetricsFor(size, theme.borderRadius);
+    final metrics = hufRadioButtonMetricsFor(size);
     final glowLayoutPadding = hufGlowLayoutPaddingFor(resolvedGlowSize);
-    final isChecked = value ?? false;
-    final colors = hufCheckboxColorsFor(
+    final isSelected = value ?? false;
+    final colors = hufRadioButtonColorsFor(
       theme.colors,
-      isChecked,
+      isSelected,
       _isDisabled,
       glowSize: resolvedGlowSize,
       activeColor: activeColor,
-      checkColor: checkColor,
+      dotColor: dotColor,
       borderColor: borderColor,
     );
 
-    final borderRadius = BorderRadius.circular(metrics.borderRadius);
-    final splashColor = colors.activeBackground.withValues(alpha: 0.12);
-    final highlightColor = colors.activeBackground.withValues(alpha: 0.08);
+    final splashColor = colors.activeBorder.withValues(alpha: 0.12);
+    final highlightColor = colors.activeBorder.withValues(alpha: 0.08);
 
-    final box = Padding(
+    final control = Padding(
       padding: glowLayoutPadding,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -138,32 +129,39 @@ class HUFCheckbox extends StatelessWidget {
         width: metrics.size,
         height: metrics.size,
         decoration: BoxDecoration(
-          color: isChecked ? colors.activeBackground : colors.inactiveBackground,
-          borderRadius: borderRadius,
+          shape: BoxShape.circle,
           border: Border.all(
-            color: isChecked ? colors.activeBorder : colors.inactiveBorder,
+            color: isSelected ? colors.activeBorder : colors.inactiveBorder,
             width: metrics.borderWidth,
           ),
           boxShadow: colors.boxShadow,
         ),
-        child: _buildBoxIcon(
-          value: isChecked,
-          metrics: metrics,
-          colors: colors,
-          theme: theme,
-        ),
+        child: isSelected
+            ? Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  width: metrics.dotSize,
+                  height: metrics.dotSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.dotColor,
+                  ),
+                ),
+              )
+            : null,
       ),
     );
 
     final Widget content;
     if (label == null) {
-      content = box;
+      content = control;
     } else {
       content = Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          box,
+          control,
           SizedBox(width: metrics.labelGap),
           Text(
             label!,
@@ -181,15 +179,15 @@ class HUFCheckbox extends StatelessWidget {
     }
 
     return Semantics(
-      checked: isChecked,
+      checked: isSelected,
       enabled: !_isDisabled,
       button: true,
       label: label,
       child: Material(
         color: theme.colors.transparent,
         child: InkWell(
-          onTap: _isDisabled ? null : () => onChanged!(!isChecked),
-          borderRadius: BorderRadius.circular(metrics.borderRadius + 4),
+          onTap: _isDisabled || isSelected ? null : () => onChanged!(true),
+          customBorder: label == null ? const CircleBorder() : null,
           splashColor: splashColor,
           highlightColor: highlightColor,
           child: content,
@@ -198,42 +196,11 @@ class HUFCheckbox extends StatelessWidget {
     );
   }
 
-  double _labelFontSize(HUFCheckboxSize size) {
+  double _labelFontSize(HUFRadioButtonSize size) {
     return switch (size) {
-      HUFCheckboxSize.small => 13,
-      HUFCheckboxSize.medium => 15,
-      HUFCheckboxSize.large => 16,
+      HUFRadioButtonSize.small => 13,
+      HUFRadioButtonSize.medium => 15,
+      HUFRadioButtonSize.large => 16,
     };
-  }
-
-  Widget? _buildBoxIcon({
-    required bool value,
-    required HUFCheckboxMetrics metrics,
-    required HUFCheckboxColors colors,
-    required HUFTheme theme,
-  }) {
-    final Widget? icon;
-    final Color iconColor;
-
-    if (value) {
-      icon = checkedIcon ?? const Icon(Icons.check_rounded);
-      iconColor = colors.checkColor;
-    } else {
-      icon = uncheckedIcon;
-      if (icon == null) return null;
-      iconColor = _isDisabled
-          ? theme.colors.disabled
-          : colors.inactiveBorder;
-    }
-
-    return Center(
-      child: IconTheme(
-        data: IconThemeData(
-          color: iconColor,
-          size: metrics.checkIconSize,
-        ),
-        child: icon,
-      ),
-    );
   }
 }

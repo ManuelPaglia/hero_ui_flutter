@@ -20,6 +20,8 @@ class _CheckboxesShowcasePageState extends State<CheckboxesShowcasePage> {
   bool _checkedSmall = false;
   bool _checkedLarge = true;
   bool _checkedCustom = true;
+  Set<String> _groupSelection = {'notifications'};
+  Set<String> _singleSelection = {};
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +118,55 @@ class _CheckboxesShowcasePageState extends State<CheckboxesShowcasePage> {
             ),
             const SizedBox(height: 16),
           ],
+          const ShowcaseSectionTitle('Checkbox group'),
+          const ShowcaseSubsectionTitle('Selezione multipla'),
+          HUFCheckboxGroup<String>(
+            initialValues: _groupSelection,
+            onChanged: (values) => setState(() => _groupSelection = values),
+            children: const [
+              HUFCheckbox(
+                optionValue: 'notifications',
+                label: 'Notifiche push',
+              ),
+              HUFCheckbox(
+                optionValue: 'newsletter',
+                label: 'Newsletter',
+              ),
+              HUFCheckbox(
+                optionValue: 'marketing',
+                label: 'Comunicazioni marketing',
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Selezionati: ${_groupSelection.join(', ')}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const ShowcaseSubsectionTitle('Selezione singola'),
+          HUFCheckboxGroup<String>(
+            multiSelect: false,
+            initialValues: _singleSelection,
+            onChanged: (values) => setState(() => _singleSelection = values),
+            children: const [
+              HUFCheckbox(optionValue: 'daily', label: 'Giornaliero'),
+              HUFCheckbox(optionValue: 'weekly', label: 'Settimanale'),
+              HUFCheckbox(optionValue: 'monthly', label: 'Mensile'),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _singleSelection.isEmpty
+                  ? 'Nessuna frequenza selezionata'
+                  : 'Frequenza: ${_singleSelection.first}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+          const SizedBox(height: 32),
           const ShowcaseSectionTitle('Interattivi'),
           HUFCheckbox(
             value: _checkedSmall,

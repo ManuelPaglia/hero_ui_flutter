@@ -597,6 +597,412 @@ void main() {
     expect(paddings[1].padding, hufGlowLayoutPaddingFor(HUFGlowSize.large));
   });
 
+  testWidgets('HUFCheckboxGroup gestisce selezione multipla internamente', (
+    tester,
+  ) async {
+    Set<String>? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxGroup<String>(
+          initialValues: {'a'},
+          onChanged: (values) => lastSelection = values,
+          children: const [
+            HUFCheckbox(optionValue: 'a', label: 'Opzione A'),
+            HUFCheckbox(optionValue: 'b', label: 'Opzione B'),
+          ],
+        ),
+      ),
+    );
+
+    expect(lastSelection, isNull);
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+    await tester.tap(find.text('Opzione B'));
+    await tester.pump();
+
+    expect(lastSelection, {'a', 'b'});
+    expect(find.byIcon(Icons.check_rounded), findsNWidgets(2));
+
+    await tester.tap(find.text('Opzione A'));
+    await tester.pump();
+
+    expect(lastSelection, {'b'});
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+  });
+
+  testWidgets('HUFCheckboxGroup single select consente una sola opzione', (
+    tester,
+  ) async {
+    Set<int>? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxGroup<int>(
+          multiSelect: false,
+          onChanged: (values) => lastSelection = values,
+          children: const [
+            HUFCheckbox(optionValue: 1, label: 'Uno'),
+            HUFCheckbox(optionValue: 2, label: 'Due'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Uno'));
+    await tester.pump();
+    expect(lastSelection, {1});
+
+    await tester.tap(find.text('Due'));
+    await tester.pump();
+    expect(lastSelection, {2});
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+  });
+
+  testWidgets('HUFCheckboxGroup elemento disabilitato non cambia selezione', (
+    tester,
+  ) async {
+    Set<String>? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxGroup<String>(
+          onChanged: (values) => lastSelection = values,
+          children: const [
+            HUFCheckbox(optionValue: 'on', label: 'Attivo'),
+            HUFCheckbox(
+              optionValue: 'off',
+              label: 'Disabilitato',
+              enabled: false,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Disabilitato'));
+    await tester.pump();
+
+    expect(lastSelection, isNull);
+  });
+
+  test('HUFCheckboxGroup richiede almeno un elemento', () {
+    expect(
+      () => HUFCheckboxGroup<String>(children: []),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('HUFCheckboxCard risponde al tap e inverte value', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFCheckboxCard(
+              title: 'Email',
+              subtitle: 'Ricevi aggiornamenti',
+              value: value,
+              onChanged: (v) => setState(() => value = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(HUFCheckboxCard));
+    await tester.pump();
+
+    expect(value, isTrue);
+  });
+
+  testWidgets('HUFCheckboxCard disabilitata non invoca onChanged', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxCard(
+          title: 'Disabilitata',
+          value: value,
+          onChanged: null,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFCheckboxCard));
+    await tester.pump();
+
+    expect(value, isFalse);
+  });
+
+  testWidgets('HUFCheckboxCard selezionata usa primary del tema', (tester) async {
+    final theme = HUFTheme.dark();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFCheckboxCard(
+          title: 'Push',
+          value: true,
+          onChanged: _noopBool,
+        ),
+        theme: theme,
+      ),
+    );
+
+    final containers = tester.widgetList<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    ).toList();
+
+    final indicator = containers.last;
+    final decoration = indicator.decoration! as BoxDecoration;
+
+    expect(decoration.color, theme.colors.primary);
+  });
+
+  testWidgets('HUFCheckboxCardGroup gestisce selezione multipla', (tester) async {
+    Set<String>? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxCardGroup<String>(
+          initialValues: {'email'},
+          onChanged: (values) => lastSelection = values,
+          children: const [
+            HUFCheckboxCard(
+              optionValue: 'email',
+              title: 'Email',
+            ),
+            HUFCheckboxCard(
+              optionValue: 'sms',
+              title: 'SMS',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(lastSelection, isNull);
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+    await tester.tap(find.text('SMS'));
+    await tester.pump();
+
+    expect(lastSelection, {'email', 'sms'});
+    expect(find.byIcon(Icons.check_rounded), findsNWidgets(2));
+  });
+
+  testWidgets('HUFCheckboxCardGroup single select consente una sola opzione', (
+    tester,
+  ) async {
+    Set<String>? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxCardGroup<String>(
+          multiSelect: false,
+          onChanged: (values) => lastSelection = values,
+          children: const [
+            HUFCheckboxCard(optionValue: 'email', title: 'Email'),
+            HUFCheckboxCard(optionValue: 'sms', title: 'SMS'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Email'));
+    await tester.pump();
+    expect(lastSelection, {'email'});
+
+    await tester.tap(find.text('SMS'));
+    await tester.pump();
+    expect(lastSelection, {'sms'});
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+  });
+
+  test('HUFCheckboxCardGroup richiede almeno un elemento', () {
+    expect(
+      () => HUFCheckboxCardGroup<String>(children: []),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('HUFRadioButton seleziona al tap', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFRadioButton(
+              value: value,
+              onChanged: (v) => setState(() => value = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(HUFRadioButton));
+    await tester.pump();
+
+    expect(value, isTrue);
+  });
+
+  testWidgets('HUFRadioButton selezionato non si deseleziona al tap', (
+    tester,
+  ) async {
+    var changed = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButton(
+          value: true,
+          onChanged: (_) => changed = true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFRadioButton));
+    await tester.pump();
+
+    expect(changed, isFalse);
+  });
+
+  testWidgets('HUFRadioButton disabilitato non invoca onChanged', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButton(
+          value: value,
+          onChanged: null,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFRadioButton));
+    await tester.pump();
+
+    expect(value, isFalse);
+  });
+
+  testWidgets('HUFRadioButton selezionato ha glow, non selezionato no', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const Row(
+          children: [
+            HUFRadioButton(value: true, onChanged: _noopBool),
+            HUFRadioButton(value: false, onChanged: _noopBool),
+          ],
+        ),
+      ),
+    );
+
+    final containers = tester.widgetList<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    ).toList();
+
+    BoxDecoration outerDecorationAt(int index) {
+      return containers[index * 2].decoration! as BoxDecoration;
+    }
+
+    expect(outerDecorationAt(0).boxShadow, isNotNull);
+    expect(outerDecorationAt(0).boxShadow, isNotEmpty);
+    expect(outerDecorationAt(1).boxShadow, isNull);
+  });
+
+  testWidgets('HUFRadioButtonGroup gestisce selezione singola', (tester) async {
+    String? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButtonGroup<String>(
+          initialValue: 'a',
+          onChanged: (value) => lastSelection = value,
+          children: const [
+            HUFRadioButton(optionValue: 'a', label: 'Opzione A'),
+            HUFRadioButton(optionValue: 'b', label: 'Opzione B'),
+          ],
+        ),
+      ),
+    );
+
+    expect(lastSelection, isNull);
+
+    await tester.tap(find.text('Opzione B'));
+    await tester.pump();
+
+    expect(lastSelection, 'b');
+
+    await tester.tap(find.text('Opzione A'));
+    await tester.pump();
+
+    expect(lastSelection, 'a');
+  });
+
+  testWidgets('HUFRadioButtonGroup elemento disabilitato non cambia selezione', (
+    tester,
+  ) async {
+    String? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButtonGroup<String>(
+          onChanged: (value) => lastSelection = value,
+          children: const [
+            HUFRadioButton(optionValue: 'on', label: 'Attivo'),
+            HUFRadioButton(
+              optionValue: 'off',
+              label: 'Disabilitato',
+              enabled: false,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Disabilitato'));
+    await tester.pump();
+
+    expect(lastSelection, isNull);
+  });
+
+  test('HUFRadioButtonGroup richiede almeno un elemento', () {
+    expect(
+      () => HUFRadioButtonGroup<String>(children: []),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('HUFRadioButton rispetta override activeColor', (tester) async {
+    const custom = Color(0xFF059669);
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFRadioButton(
+          value: true,
+          onChanged: _noopBool,
+          activeColor: custom,
+        ),
+      ),
+    );
+
+    final container = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    );
+    final decoration = container.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
+
+    expect(border.top.color, custom);
+  });
+
   testWidgets('HUFCheckbox mostra checkedIcon e uncheckedIcon custom', (tester) async {
     await tester.pumpWidget(
       _wrap(
