@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/huf_glow.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_checkbox_size.dart';
 
