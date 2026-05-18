@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../theme/huf_theme.dart';
@@ -9,6 +11,7 @@ class HUFSliderMetrics {
   const HUFSliderMetrics({
     required this.trackHeight,
     required this.thumbWidth,
+    required this.borderRadius,
     required this.headerGap,
     required this.labelFontSize,
     required this.valueFontSize,
@@ -21,6 +24,9 @@ class HUFSliderMetrics {
 
   /// Larghezza della pillola orizzontale, contenuta nel track.
   final double thumbWidth;
+
+  /// Token radius del tema per la size corrente (sm / md / lg).
+  final double borderRadius;
 
   final double headerGap;
   final double labelFontSize;
@@ -52,11 +58,18 @@ class HUFSliderColors {
 
 HUFSliderMetrics hufSliderMetricsFor(
   HUFSliderSize size,
-  HUFBorderRadius _,
+  HUFBorderRadius borderRadius,
 ) {
+  final themeRadius = switch (size) {
+    HUFSliderSize.small => borderRadius.sm,
+    HUFSliderSize.medium => borderRadius.md,
+    HUFSliderSize.large => borderRadius.lg,
+  };
+
   return switch (size) {
     HUFSliderSize.small => _hufSliderMetrics(
         trackHeight: 16,
+        borderRadius: themeRadius,
         headerGap: 8,
         labelFontSize: 13,
         valueFontSize: 13,
@@ -65,6 +78,7 @@ HUFSliderMetrics hufSliderMetricsFor(
       ),
     HUFSliderSize.medium => _hufSliderMetrics(
         trackHeight: 20,
+        borderRadius: themeRadius,
         headerGap: 10,
         labelFontSize: 15,
         valueFontSize: 15,
@@ -73,6 +87,7 @@ HUFSliderMetrics hufSliderMetricsFor(
       ),
     HUFSliderSize.large => _hufSliderMetrics(
         trackHeight: 24,
+        borderRadius: themeRadius,
         headerGap: 12,
         labelFontSize: 16,
         valueFontSize: 16,
@@ -84,6 +99,7 @@ HUFSliderMetrics hufSliderMetricsFor(
 
 HUFSliderMetrics _hufSliderMetrics({
   required double trackHeight,
+  required double borderRadius,
   required double headerGap,
   required double labelFontSize,
   required double valueFontSize,
@@ -95,6 +111,7 @@ HUFSliderMetrics _hufSliderMetrics({
   return HUFSliderMetrics(
     trackHeight: trackHeight,
     thumbWidth: thumbWidth,
+    borderRadius: borderRadius,
     headerGap: headerGap,
     labelFontSize: labelFontSize,
     valueFontSize: valueFontSize,
@@ -103,14 +120,14 @@ HUFSliderMetrics _hufSliderMetrics({
   );
 }
 
-/// Track sempre a capsula (estremità completamente arrotondate).
+/// Radius del track, derivato dal token del tema (come [HUFSwitch]).
 double hufSliderTrackRadius(HUFSliderMetrics metrics) {
-  return metrics.trackHeight / 2;
+  return math.min(metrics.borderRadius, metrics.trackHeight / 2);
 }
 
-/// Pillola orizzontale: raggio = metà altezza track.
+/// Radius del thumb pillola, derivato dal token del tema (come [HUFSwitch]).
 double hufSliderThumbRadius(HUFSliderMetrics metrics) {
-  return metrics.trackHeight / 2;
+  return math.min(metrics.borderRadius, metrics.trackHeight / 2);
 }
 
 HUFSliderColors hufSliderColorsFor(

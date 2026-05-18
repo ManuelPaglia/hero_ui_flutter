@@ -1209,6 +1209,24 @@ void main() {
     expect(find.text('100-500'), findsOneWidget);
   });
 
+  testWidgets('HUFSlider applica border radius del tema', (tester) async {
+    const sharp = HUFBorderRadius.sharp;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFSlider(
+          label: 'Volume',
+          value: 30,
+          onChanged: _noopDouble,
+        ),
+        theme: HUFTheme.light(borderRadius: sharp),
+      ),
+    );
+
+    final clip = tester.widget<ClipRRect>(find.byType(ClipRRect));
+    expect(clip.borderRadius, BorderRadius.circular(sharp.md));
+  });
+
   testWidgets(
     'HUFSlider mantiene il valore dopo il drag se il parent non aggiorna value',
     (tester) async {
