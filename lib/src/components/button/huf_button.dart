@@ -64,7 +64,7 @@ class _HUFButtonState extends State<HUFButton> {
       theme.colors,
       widget.variant,
       _isDisabled,
-      hasBorder: widget.isIconOnly,
+      isIconOnly: widget.isIconOnly,
     );
 
     final Widget content;
@@ -74,9 +74,7 @@ class _HUFButtonState extends State<HUFButton> {
       content = _buildLabeledContent(metrics, colors);
     }
 
-    final borderRadius = widget.isIconOnly
-        ? BorderRadius.circular(metrics.height / 2)
-        : BorderRadius.circular(metrics.borderRadius);
+    final borderRadius = BorderRadius.circular(metrics.borderRadius);
 
     final decoration = BoxDecoration(
       color: colors.background,
@@ -285,26 +283,32 @@ _HUFButtonMetrics _metricsFor(
   };
 }
 
-const double _iconOnlyBorderWidth = 1.5;
+const double _labeledOutlinedBorderWidth = 1;
+const double _iconOnlyOutlinedBorderWidth = 1.5;
 
 _HUFButtonColors _colorsFor(
   HUFThemeColors palette,
   HUFButtonVariant variant,
   bool isDisabled, {
-  bool hasBorder = false,
+  required bool isIconOnly,
 }) {
-  Border? bordered(Color color) => hasBorder
-      ? Border.all(color: color, width: _iconOnlyBorderWidth)
-      : null;
+  Border? outlinedBorder(Color color) {
+    if (variant != HUFButtonVariant.outlined) return null;
+    final width =
+        isIconOnly ? _iconOnlyOutlinedBorderWidth : _labeledOutlinedBorderWidth;
+    return Border.all(color: color, width: width);
+  }
 
   if (isDisabled) {
     return switch (variant) {
-      HUFButtonVariant.outlined ||
-      HUFButtonVariant.ghost =>
-        _HUFButtonColors(
+      HUFButtonVariant.outlined => _HUFButtonColors(
           background: palette.transparent,
           foreground: palette.disabled,
-          border: bordered(palette.disabled),
+          border: outlinedBorder(palette.disabled),
+        ),
+      HUFButtonVariant.ghost => _HUFButtonColors(
+          background: palette.transparent,
+          foreground: palette.disabled,
         ),
       HUFButtonVariant.dangerSoft =>
         _HUFButtonColors(
@@ -332,11 +336,11 @@ _HUFButtonColors _colorsFor(
         foreground: palette.secondaryForeground,
       ),
     HUFButtonVariant.outlined => _HUFButtonColors(
-        background: hasBorder
+        background: isIconOnly
             ? palette.primary.withValues(alpha: 0.1)
             : palette.transparent,
         foreground: palette.primary,
-        border: bordered(palette.primary),
+        border: outlinedBorder(palette.primary),
       ),
     HUFButtonVariant.ghost => _HUFButtonColors(
         background: palette.transparent,

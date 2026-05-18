@@ -78,43 +78,6 @@ class ButtonsShowcasePage extends StatelessWidget {
               ),
             ),
           ],
-          _SectionTitle('Stati'),
-          for (final variant in HUFButtonVariant.values) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: HUFButton(
-                      label: '${_variantLabel(variant)} · disabilitato',
-                      variant: variant,
-                      onPressed: null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: HUFButton(
-                      label: '${_variantLabel(variant)} · loading',
-                      variant: variant,
-                      isLoading: true,
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          for (final variant in HUFButtonVariant.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: HUFButton(
-                label: '${_variantLabel(variant)} · full width',
-                variant: variant,
-                isFullWidth: true,
-                onPressed: () {},
-              ),
-            ),
         ],
       ),
     );

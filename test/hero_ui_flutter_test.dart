@@ -142,6 +142,65 @@ void main() {
     expect(withGlow.length, 2);
   });
 
+  testWidgets('outlined ha bordo, ghost no', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: [
+            HUFButton(
+              label: 'Outlined',
+              variant: HUFButtonVariant.outlined,
+              onPressed: () {},
+            ),
+            HUFButton(
+              label: 'Ghost',
+              variant: HUFButtonVariant.ghost,
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    BoxDecoration decorationFor(String label) {
+      final container = tester.widget<AnimatedContainer>(
+        find.descendant(
+          of: find.widgetWithText(HUFButton, label),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+      return container.decoration! as BoxDecoration;
+    }
+
+    expect(decorationFor('Outlined').border, isNotNull);
+    expect(decorationFor('Ghost').border, isNull);
+  });
+
+  testWidgets('iconOnly usa il border radius del tema', (tester) async {
+    const sharp = HUFBorderRadius.sharp;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFButton.iconOnly(
+          icon: const Icon(Icons.add),
+          onPressed: () {},
+        ),
+        theme: HUFTheme.light(borderRadius: sharp),
+      ),
+    );
+
+    final container = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFButton),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    final decoration = container.decoration! as BoxDecoration;
+    final radius = decoration.borderRadius! as BorderRadius;
+
+    expect(radius.topLeft.x, sharp.md);
+  });
+
   testWidgets('variante danger usa i colori del tema', (tester) async {
     final theme = HUFTheme.light();
 
