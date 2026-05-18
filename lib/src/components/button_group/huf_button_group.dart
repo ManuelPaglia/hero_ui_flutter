@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/huf_theme.dart';
+import '../button/huf_button_size.dart';
+import '../button/huf_button_style.dart';
+import '../button/huf_button_variant.dart';
 import 'huf_button_group_item.dart';
-import 'huf_button_size.dart';
-import 'huf_button_style.dart';
-import 'huf_button_variant.dart';
 
 /// Gruppo di pulsanti affiancati con aspetto di un unico controllo.
 ///

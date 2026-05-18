@@ -1,4 +1,4 @@
-/// Stile visivo di [HUFButton] e [HUFButtonGroup].
+/// Stile visivo di [HUFButton] e dei componenti in [HUFButtonGroup].
 enum HUFButtonVariant {
   primary,
   secondary,
