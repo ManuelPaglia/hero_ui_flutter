@@ -15,6 +15,11 @@ class HUFThemeColors {
     required this.disabled,
     required this.disabledForeground,
     required this.transparent,
+    required this.card,
+    required this.cardSecondary,
+    required this.cardTertiary,
+    required this.cardForeground,
+    required this.cardMutedForeground,
   });
 
   final Color primary;
@@ -29,6 +34,21 @@ class HUFThemeColors {
   final Color disabledForeground;
   final Color transparent;
 
+  /// Sfondo card predefinito.
+  final Color card;
+
+  /// Sfondo card secondario (più tenue).
+  final Color cardSecondary;
+
+  /// Sfondo card terziario (ancora più tenue).
+  final Color cardTertiary;
+
+  /// Testo principale su card.
+  final Color cardForeground;
+
+  /// Testo secondario / sottotitolo su card.
+  final Color cardMutedForeground;
+
   static const HUFThemeColors light = HUFThemeColors(
     primary: Color(0xFF2563EB),
     primaryForeground: Color(0xFFFFFFFF),
@@ -41,6 +61,11 @@ class HUFThemeColors {
     disabled: Color(0xFF94A3B8),
     disabledForeground: Color(0xFFFFFFFF),
     transparent: Colors.transparent,
+    card: Color(0xFFFFFFFF),
+    cardSecondary: Color(0xFFF8FAFC),
+    cardTertiary: Color(0xFFF1F5F9),
+    cardForeground: Color(0xFF0F172A),
+    cardMutedForeground: Color(0xFF64748B),
   );
 
   static const HUFThemeColors dark = HUFThemeColors(
@@ -55,6 +80,11 @@ class HUFThemeColors {
     disabled: Color(0xFF64748B),
     disabledForeground: Color(0xFFCBD5E1),
     transparent: Colors.transparent,
+    card: Color(0xFF1E293B),
+    cardSecondary: Color(0xFF334155),
+    cardTertiary: Color(0xFF475569),
+    cardForeground: Color(0xFFF8FAFC),
+    cardMutedForeground: Color(0xFF94A3B8),
   );
 
   HUFThemeColors copyWith({
@@ -69,6 +99,11 @@ class HUFThemeColors {
     Color? disabled,
     Color? disabledForeground,
     Color? transparent,
+    Color? card,
+    Color? cardSecondary,
+    Color? cardTertiary,
+    Color? cardForeground,
+    Color? cardMutedForeground,
   }) {
     return HUFThemeColors(
       primary: primary ?? this.primary,
@@ -82,6 +117,11 @@ class HUFThemeColors {
       disabled: disabled ?? this.disabled,
       disabledForeground: disabledForeground ?? this.disabledForeground,
       transparent: transparent ?? this.transparent,
+      card: card ?? this.card,
+      cardSecondary: cardSecondary ?? this.cardSecondary,
+      cardTertiary: cardTertiary ?? this.cardTertiary,
+      cardForeground: cardForeground ?? this.cardForeground,
+      cardMutedForeground: cardMutedForeground ?? this.cardMutedForeground,
     );
   }
 
@@ -98,6 +138,12 @@ class HUFThemeColors {
       disabled: Color.lerp(disabled, other.disabled, t)!,
       disabledForeground: Color.lerp(disabledForeground, other.disabledForeground, t)!,
       transparent: Color.lerp(transparent, other.transparent, t)!,
+      card: Color.lerp(card, other.card, t)!,
+      cardSecondary: Color.lerp(cardSecondary, other.cardSecondary, t)!,
+      cardTertiary: Color.lerp(cardTertiary, other.cardTertiary, t)!,
+      cardForeground: Color.lerp(cardForeground, other.cardForeground, t)!,
+      cardMutedForeground:
+          Color.lerp(cardMutedForeground, other.cardMutedForeground, t)!,
     );
   }
 }

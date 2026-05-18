@@ -1270,6 +1270,123 @@ void main() {
     expect(find.text('50'), findsOneWidget);
   });
 
+  testWidgets('HUFCard mostra titolo, sottotitolo e contenuto', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFCard(
+          title: 'Titolo',
+          subtitle: 'Sottotitolo',
+          content: Text('Corpo'),
+        ),
+      ),
+    );
+
+    expect(find.text('Titolo'), findsOneWidget);
+    expect(find.text('Sottotitolo'), findsOneWidget);
+    expect(find.text('Corpo'), findsOneWidget);
+  });
+
+  testWidgets('HUFCard orizzontale dispone immagine e testo in riga', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFCard(
+          orientation: HUFCardOrientation.horizontal,
+          title: 'Orizzontale',
+          image: Container(color: Colors.red, width: 48, height: 48),
+        ),
+      ),
+    );
+
+    expect(find.byType(Row), findsWidgets);
+    expect(find.text('Orizzontale'), findsOneWidget);
+  });
+
+  test('hufCardMetricsFor applica padding e gap fissi anche con preset pill', () {
+    final sharp = hufCardMetricsFor(
+      HUFCardRadiusSize.medium,
+      HUFBorderRadius.sharp,
+    );
+    final pill = hufCardMetricsFor(
+      HUFCardRadiusSize.medium,
+      HUFBorderRadius.pill,
+    );
+
+    expect(sharp.padding, kHufCardPadding);
+    expect(pill.padding, kHufCardPadding);
+    expect(sharp.sectionGap, kHufCardSectionGap);
+    expect(pill.sectionGap, kHufCardSectionGap);
+    expect(pill.horizontalImageExtent, kHufCardHorizontalImageExtent);
+    expect(pill.innerBorderRadius, HUFBorderRadius.rounded.md);
+    expect(
+      hufCardResolveBorderRadius(HUFBorderRadius.pill),
+      HUFBorderRadius.rounded,
+    );
+    expect(
+      hufCardEffectiveOuterRadius(
+        tokenInnerRadius: sharp.innerBorderRadius,
+        inset: kHufCardPadding.top,
+        width: 320,
+      ),
+      sharp.innerBorderRadius + kHufCardPadding.top,
+    );
+  });
+
+  testWidgets('HUFCard con preset pill non esplode in altezza', (tester) async {
+    final huf = HUFTheme.light().copyWith(borderRadius: HUFBorderRadius.pill);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: huf.toThemeData(),
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 320,
+              child: HUFCard(
+                title: 'Pill card',
+                subtitle: 'Sottotitolo',
+                content: const Text('Contenuto'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final height = tester.getSize(find.byType(HUFCard)).height;
+    expect(height, lessThan(300));
+    expect(height, greaterThan(50));
+  });
+
+  testWidgets('HUFCard risolve lo sfondo in base allo stile', (tester) async {
+    const theme = HUFTheme(
+      brightness: Brightness.light,
+      colors: HUFThemeColors.light,
+      borderRadius: HUFBorderRadius.standard,
+      glowSize: HUFGlowSize.none,
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFCard(
+          style: HUFCardStyle.cardSecondary,
+          title: 'Card',
+        ),
+        theme: theme,
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFCard),
+        matching: find.byType(DecoratedBox),
+      ).first,
+    );
+    final decoration = decorated.decoration! as BoxDecoration;
+    expect(decoration.color, HUFThemeColors.light.cardSecondary);
+  });
+
   test('HUFThemeData sovrascrive i colori del tema', () {
     const customPrimary = Color(0xFF7C3AED);
     const data = HUFThemeData(
@@ -1286,6 +1403,11 @@ void main() {
           disabled: Color(0xFF94A3B8),
           disabledForeground: Color(0xFFFFFFFF),
           transparent: Colors.transparent,
+          card: Color(0xFFFFFFFF),
+          cardSecondary: Color(0xFFF8FAFC),
+          cardTertiary: Color(0xFFF1F5F9),
+          cardForeground: Color(0xFF0F172A),
+          cardMutedForeground: Color(0xFF64748B),
         ),
       ),
     );
