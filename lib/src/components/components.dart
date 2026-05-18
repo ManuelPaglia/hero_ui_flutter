@@ -1,4 +1,7 @@
 export 'button/huf_button.dart';
+export 'chip/huf_chip.dart';
+export 'chip/huf_chip_size.dart';
+export 'chip/huf_chip_variant.dart';
 export 'button/huf_button_size.dart';
 export 'button/huf_button_variant.dart';
 export 'button_group/huf_button_group.dart';
@@ -11,3 +14,9 @@ export 'checkbox_group/huf_checkbox_group.dart';
 export 'radio_button/huf_radio_button.dart';
 export 'radio_button/huf_radio_button_size.dart';
 export 'radio_button_group/huf_radio_button_group.dart';
+export 'slider/huf_slider.dart';
+export 'slider/huf_range_slider.dart';
+export 'slider/huf_slider_size.dart';
+export 'switch/huf_switch.dart';
+export 'switch/huf_switch_size.dart';
+export 'switch_group/huf_switch_group.dart';

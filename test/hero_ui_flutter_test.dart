@@ -1081,6 +1081,177 @@ void main() {
     expect(shadow.first.blurRadius, 8);
   });
 
+  testWidgets('HUFChip mostra la label', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFChip(label: 'Bozza'),
+      ),
+    );
+
+    expect(find.text('Bozza'), findsOneWidget);
+  });
+
+  testWidgets('HUFChip è più basso del pulsante alla stessa size', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: [
+            HUFButton(label: 'Btn', size: HUFButtonSize.medium, onPressed: () {}),
+            const HUFChip(label: 'Chip', size: HUFChipSize.medium),
+          ],
+        ),
+      ),
+    );
+
+    final buttonHeight = tester.getSize(find.byType(HUFButton)).height;
+    final chipHeight = tester.getSize(find.byType(HUFChip)).height;
+
+    expect(chipHeight, lessThan(buttonHeight));
+  });
+
+  testWidgets('HUFSwitch risponde al tap', (tester) async {
+    var isOn = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFSwitch(
+              value: isOn,
+              onChanged: (v) => setState(() => isOn = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFSwitch));
+    await tester.pumpAndSettle();
+
+    expect(isOn, isTrue);
+  });
+
+  testWidgets('HUFSwitchGroup gestisce più switch indipendenti', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFSwitchGroup<String>(
+          initialValues: const {'a'},
+          children: const [
+            HUFSwitch(optionValue: 'a', icon: Icon(Icons.check_rounded)),
+            HUFSwitch(optionValue: 'b', icon: Icon(Icons.check_rounded)),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byType(HUFSwitch), findsNWidgets(2));
+
+    await tester.tap(find.byType(HUFSwitch).last);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('HUFSlider mostra label e valore opzionale', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFSlider(
+          label: 'Volume',
+          value: 30,
+          showValue: true,
+          onChanged: _noopDouble,
+        ),
+      ),
+    );
+
+    expect(find.text('Volume'), findsOneWidget);
+    expect(find.text('30'), findsOneWidget);
+  });
+
+  testWidgets('HUFSlider disabilitato non invoca onChanged', (tester) async {
+    var changed = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFSlider(
+          label: 'Volume',
+          value: 30,
+          onChanged: null,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Volume'));
+    await tester.pump();
+
+    expect(changed, isFalse);
+  });
+
+  testWidgets('HUFRangeSlider mostra label e intervallo', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          child: HUFRangeSlider(
+            label: 'Price Range',
+            values: const RangeValues(100, 500),
+            min: 0,
+            max: 1000,
+            showValue: true,
+            valueFormatter: (v) => '${v.start.toInt()}-${v.end.toInt()}',
+            onChanged: _noopRange,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Price Range'), findsOneWidget);
+    expect(find.text('100-500'), findsOneWidget);
+  });
+
+  testWidgets(
+    'HUFSlider mantiene il valore dopo il drag se il parent non aggiorna value',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          HUFSlider(
+            label: 'Volume',
+            value: 10,
+            showValue: true,
+            onChanged: _noopDouble,
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(HUFSlider)),
+      );
+      await gesture.moveBy(const Offset(160, 0));
+      await gesture.up();
+      await tester.pump();
+
+      expect(find.text('10'), findsNothing);
+    },
+  );
+
+  testWidgets('HUFSlider con step mostra valori discreti', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFSlider(
+          label: 'Step',
+          value: 50,
+          min: 0,
+          max: 100,
+          step: 10,
+          showValue: true,
+          onChanged: _noopDouble,
+        ),
+      ),
+    );
+
+    expect(find.text('50'), findsOneWidget);
+  });
+
   test('HUFThemeData sovrascrive i colori del tema', () {
     const customPrimary = Color(0xFF7C3AED);
     const data = HUFThemeData(
@@ -1109,3 +1280,7 @@ void main() {
 void _noop() {}
 
 void _noopBool(bool _) {}
+
+void _noopDouble(double _) {}
+
+void _noopRange(RangeValues _) {}

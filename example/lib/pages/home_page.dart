@@ -3,9 +3,12 @@ import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
+import 'chips_showcase_page.dart';
 import 'checkbox_cards_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
+import 'sliders_showcase_page.dart';
+import 'switches_showcase_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -42,6 +45,20 @@ class HomePage extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 32),
+            HUFButton(
+              label: 'Chip',
+              variant: HUFButtonVariant.ghost,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ChipsShowcasePage(
+                      onToggleTheme: onToggleTheme,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
             HUFButton(
               label: 'Bottoni',
               onPressed: () {
@@ -104,6 +121,34 @@ class HomePage extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => RadioButtonsShowcasePage(
+                      onToggleTheme: onToggleTheme,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            HUFButton(
+              label: 'Slider',
+              variant: HUFButtonVariant.secondary,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => SlidersShowcasePage(
+                      onToggleTheme: onToggleTheme,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            HUFButton(
+              label: 'Switch',
+              variant: HUFButtonVariant.secondary,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => SwitchesShowcasePage(
                       onToggleTheme: onToggleTheme,
                     ),
                   ),
