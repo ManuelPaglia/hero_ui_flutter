@@ -1,8 +1,27 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/huf_theme.dart';
+import '../button/huf_button.dart';
 import 'huf_card_radius_size.dart';
 import 'huf_card_style.dart';
+
+/// Espande un'azione in [HUFCard] a tutta la larghezza disponibile.
+Widget hufCardExpandAction(Widget action) {
+  if (action is HUFButton && !action.isIconOnly && !action.isFullWidth) {
+    return HUFButton(
+      key: action.key,
+      label: action.label,
+      onPressed: action.onPressed,
+      variant: action.variant,
+      size: action.size,
+      isLoading: action.isLoading,
+      isFullWidth: true,
+      icon: action.icon,
+      glowSize: action.glowSize,
+    );
+  }
+  return action;
+}
 
 /// Card composable del design system Hero UI Flutter.
 ///
@@ -287,7 +306,17 @@ class HUFCard extends StatelessWidget {
   }
 
   Widget _buildActions(HUFCardMetrics metrics) {
-    if (actions.length == 1) return actions.first;
+    if (actions.isEmpty) return const SizedBox.shrink();
+
+    if (actions.length == 1) {
+      return Row(
+        children: [
+          Expanded(child: hufCardExpandAction(actions.first)),
+        ],
+      );
+    }
+
+    final gap = metrics.sectionGap * 0.5;
 
     return switch (actionsLayout) {
       HUFCardActionsLayout.stacked => Column(
@@ -295,15 +324,18 @@ class HUFCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (var i = 0; i < actions.length; i++) ...[
-              if (i > 0) SizedBox(height: metrics.sectionGap * 0.5),
-              actions[i],
+              if (i > 0) SizedBox(height: gap),
+              hufCardExpandAction(actions[i]),
             ],
           ],
         ),
-      HUFCardActionsLayout.row => Wrap(
-          spacing: metrics.sectionGap * 0.5,
-          runSpacing: metrics.sectionGap * 0.5,
-          children: actions,
+      HUFCardActionsLayout.row => Row(
+          children: [
+            for (var i = 0; i < actions.length; i++) ...[
+              if (i > 0) SizedBox(width: gap),
+              Expanded(child: hufCardExpandAction(actions[i])),
+            ],
+          ],
         ),
     };
   }

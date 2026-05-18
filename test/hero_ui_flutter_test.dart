@@ -1270,6 +1270,27 @@ void main() {
     expect(find.text('50'), findsOneWidget);
   });
 
+  testWidgets('HUFCard con una action la espande a tutta la larghezza', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 280,
+          child: HUFCard(
+            title: 'Titolo',
+            actions: [
+              HUFButton(label: 'Apri', onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final button = tester.widget<HUFButton>(find.byType(HUFButton));
+    expect(button.isFullWidth, isTrue);
+  });
+
   testWidgets('HUFCard mostra titolo, sottotitolo e contenuto', (tester) async {
     await tester.pumpWidget(
       _wrap(
