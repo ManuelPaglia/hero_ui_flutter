@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'huf_border_radius.dart';
+import 'huf_glow.dart';
 import 'huf_theme_colors.dart';
 import 'huf_theme_data.dart';
 
 export 'huf_border_radius.dart';
+export 'huf_glow.dart';
 export 'huf_theme_colors.dart';
 export 'huf_theme_data.dart';
 
@@ -25,11 +27,13 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
     required this.brightness,
     required this.colors,
     required this.borderRadius,
+    required this.glowSize,
   });
 
   final Brightness brightness;
   final HUFThemeColors colors;
   final HUFBorderRadius borderRadius;
+  final HUFGlowSize glowSize;
 
   bool get isDark => brightness == Brightness.dark;
 
@@ -37,11 +41,13 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
     HUFThemeData data = HUFThemeData.defaults,
     HUFThemeColors? colors,
     HUFBorderRadius? borderRadius,
+    HUFGlowSize? glowSize,
   }) {
     return HUFTheme(
       brightness: Brightness.light,
       colors: colors ?? data.resolveColors(Brightness.light),
       borderRadius: borderRadius ?? data.resolveBorderRadius(Brightness.light),
+      glowSize: glowSize ?? data.resolveGlowSize(Brightness.light),
     );
   }
 
@@ -49,11 +55,13 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
     HUFThemeData data = HUFThemeData.defaults,
     HUFThemeColors? colors,
     HUFBorderRadius? borderRadius,
+    HUFGlowSize? glowSize,
   }) {
     return HUFTheme(
       brightness: Brightness.dark,
       colors: colors ?? data.resolveColors(Brightness.dark),
       borderRadius: borderRadius ?? data.resolveBorderRadius(Brightness.dark),
+      glowSize: glowSize ?? data.resolveGlowSize(Brightness.dark),
     );
   }
 
@@ -63,11 +71,13 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
     required Brightness brightness,
     HUFThemeColors? colors,
     HUFBorderRadius? borderRadius,
+    HUFGlowSize? glowSize,
   }) {
     return HUFTheme(
       brightness: brightness,
       colors: colors ?? data.resolveColors(brightness),
       borderRadius: borderRadius ?? data.resolveBorderRadius(brightness),
+      glowSize: glowSize ?? data.resolveGlowSize(brightness),
     );
   }
 
@@ -94,11 +104,13 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
     Brightness? brightness,
     HUFThemeColors? colors,
     HUFBorderRadius? borderRadius,
+    HUFGlowSize? glowSize,
   }) {
     return HUFTheme(
       brightness: brightness ?? this.brightness,
       colors: colors ?? this.colors,
       borderRadius: borderRadius ?? this.borderRadius,
+      glowSize: glowSize ?? this.glowSize,
     );
   }
 
@@ -109,6 +121,7 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
       brightness: t < 0.5 ? brightness : other.brightness,
       colors: colors.lerp(other.colors, t),
       borderRadius: borderRadius.lerp(other.borderRadius, t),
+      glowSize: t < 0.5 ? glowSize : other.glowSize,
     );
   }
 }

@@ -16,6 +16,7 @@ class HUFButton extends StatefulWidget {
     this.isLoading = false,
     this.isFullWidth = false,
     this.icon,
+    this.glowSize,
   }) : isIconOnly = false;
 
   /// Pulsante quadrato con sola icona.
@@ -26,6 +27,7 @@ class HUFButton extends StatefulWidget {
     this.variant = HUFButtonVariant.primary,
     this.size = HUFButtonSize.medium,
     this.isLoading = false,
+    this.glowSize,
   })  : label = '',
         isFullWidth = false,
         isIconOnly = true;
@@ -39,6 +41,9 @@ class HUFButton extends StatefulWidget {
   final bool isIconOnly;
   final Widget? icon;
 
+  /// Override dell'intensità glow; se null usa [HUFTheme.glowSize].
+  final HUFGlowSize? glowSize;
+
   @override
   State<HUFButton> createState() => _HUFButtonState();
 }
@@ -46,7 +51,6 @@ class HUFButton extends StatefulWidget {
 class _HUFButtonState extends State<HUFButton> {
   static const double _pressedScale = 0.97;
   static const Duration _pressAnimationDuration = Duration(milliseconds: 120);
-  static const double _iconOnlyGlowReserve = 12;
 
   bool _isPressed = false;
 
@@ -60,6 +64,9 @@ class _HUFButtonState extends State<HUFButton> {
   @override
   Widget build(BuildContext context) {
     final theme = context.hufTheme;
+    final glowSize = widget.glowSize ?? theme.glowSize;
+    final glowLayoutPadding = hufGlowLayoutPaddingFor(glowSize);
+    final iconOnlyGlowReserve = hufIconOnlyGlowReserveFor(glowSize);
     final metrics = hufButtonMetricsFor(
       widget.size,
       widget.isIconOnly,
@@ -70,6 +77,7 @@ class _HUFButtonState extends State<HUFButton> {
       widget.variant,
       _isDisabled,
       isIconOnly: widget.isIconOnly,
+      glowSize: glowSize,
     );
 
     final Widget content;
@@ -128,12 +136,12 @@ class _HUFButtonState extends State<HUFButton> {
     if (widget.isIconOnly) {
       button = SizedBox(
         width: metrics.iconOnlySize + 4,
-        height: metrics.iconOnlySize + _iconOnlyGlowReserve,
+        height: metrics.iconOnlySize + iconOnlyGlowReserve,
         child: Center(child: button),
       );
     } else {
       button = Padding(
-        padding: hufButtonGlowLayoutPadding,
+        padding: glowLayoutPadding,
         child: button,
       );
     }

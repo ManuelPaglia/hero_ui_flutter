@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/huf_glow.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_button_size.dart';
 import 'huf_button_variant.dart';
@@ -27,8 +28,7 @@ class HUFButtonMetrics {
   final double iconOnlySize;
 }
 
-/// Padding esterno fisso per la glow shadow: applicato sempre così bottoni e
-/// [HUFButtonGroup] con o senza ombra restano allineati se affiancati.
+/// Padding layout glow predefinito ([HUFGlowSize.medium]).
 const EdgeInsets hufButtonGlowLayoutPadding = EdgeInsets.symmetric(
   vertical: 6,
   horizontal: 2,
@@ -49,19 +49,11 @@ class HUFButtonColors {
   final List<BoxShadow>? boxShadow;
 }
 
-List<BoxShadow> hufButtonGlowShadow(Color color) {
-  return [
-    BoxShadow(
-      color: color.withValues(alpha: 0.38),
-      blurRadius: 12,
-      offset: const Offset(0, 4),
-    ),
-    BoxShadow(
-      color: color.withValues(alpha: 0.22),
-      blurRadius: 22,
-      spreadRadius: 1,
-    ),
-  ];
+List<BoxShadow> hufButtonGlowShadow(
+  Color color, {
+  HUFGlowSize glowSize = HUFGlowSize.medium,
+}) {
+  return hufGlowShadowFor(glowSize, color);
 }
 
 HUFButtonMetrics hufButtonMetricsFor(
@@ -108,6 +100,7 @@ HUFButtonColors hufButtonColorsFor(
   HUFButtonVariant variant,
   bool isDisabled, {
   bool isIconOnly = false,
+  HUFGlowSize glowSize = HUFGlowSize.medium,
 }) {
   Border? outlinedBorder(Color color) {
     if (variant != HUFButtonVariant.outlined) return null;
@@ -146,7 +139,7 @@ HUFButtonColors hufButtonColorsFor(
     HUFButtonVariant.primary => HUFButtonColors(
         background: palette.primary,
         foreground: palette.primaryForeground,
-        boxShadow: hufButtonGlowShadow(palette.primary),
+        boxShadow: hufButtonGlowShadow(palette.primary, glowSize: glowSize),
       ),
     HUFButtonVariant.secondary => HUFButtonColors(
         background: palette.secondary,
@@ -166,7 +159,7 @@ HUFButtonColors hufButtonColorsFor(
     HUFButtonVariant.danger => HUFButtonColors(
         background: palette.danger,
         foreground: palette.dangerForeground,
-        boxShadow: hufButtonGlowShadow(palette.danger),
+        boxShadow: hufButtonGlowShadow(palette.danger, glowSize: glowSize),
       ),
     HUFButtonVariant.dangerSoft => HUFButtonColors(
         background: palette.dangerSoft,

@@ -3,6 +3,7 @@ import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
+import 'checkboxes_showcase_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -59,6 +60,20 @@ class HomePage extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => ButtonGroupsShowcasePage(
+                      onToggleTheme: onToggleTheme,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            HUFButton(
+              label: 'Checkbox',
+              variant: HUFButtonVariant.outlined,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => CheckboxesShowcasePage(
                       onToggleTheme: onToggleTheme,
                     ),
                   ),

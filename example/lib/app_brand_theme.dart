@@ -36,5 +36,6 @@ class AppBrandTheme extends HUFThemeData {
             ),
           ),
           borderRadius: HUFBorderRadius.pill,
+          glowSize: HUFGlowSize.small,
         );
 }

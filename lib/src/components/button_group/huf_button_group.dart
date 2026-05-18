@@ -17,6 +17,7 @@ class HUFButtonGroup extends StatelessWidget {
     this.variant = HUFButtonVariant.primary,
     this.size = HUFButtonSize.medium,
     this.isFullWidth = false,
+    this.glowSize,
   }) : assert(
           items.length >= 2,
           'HUFButtonGroup richiede almeno 2 elementi.',
@@ -27,9 +28,14 @@ class HUFButtonGroup extends StatelessWidget {
   final HUFButtonSize size;
   final bool isFullWidth;
 
+  /// Override dell'intensità glow; se null usa [HUFTheme.glowSize].
+  final HUFGlowSize? glowSize;
+
   @override
   Widget build(BuildContext context) {
     final theme = context.hufTheme;
+    final resolvedGlowSize = glowSize ?? theme.glowSize;
+    final glowLayoutPadding = hufGlowLayoutPaddingFor(resolvedGlowSize);
     final metrics = hufButtonMetricsFor(
       size,
       false,
@@ -40,6 +46,7 @@ class HUFButtonGroup extends StatelessWidget {
       theme.colors,
       variant,
       allDisabled,
+      glowSize: resolvedGlowSize,
     );
 
     final radius = metrics.borderRadius;
@@ -95,7 +102,7 @@ class HUFButtonGroup extends StatelessWidget {
     );
 
     group = Padding(
-      padding: hufButtonGlowLayoutPadding,
+      padding: glowLayoutPadding,
       child: group,
     );
 
