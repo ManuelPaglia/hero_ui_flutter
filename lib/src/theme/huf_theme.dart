@@ -6,6 +6,7 @@ import 'huf_theme_colors.dart';
 import 'huf_theme_data.dart';
 
 export 'huf_border_radius.dart';
+export 'huf_control_colors.dart';
 export 'huf_glow.dart';
 export 'huf_theme_colors.dart';
 export 'huf_theme_data.dart';

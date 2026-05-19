@@ -14,8 +14,12 @@ import 'huf_radio_button_style.dart';
 /// Uso in [HUFRadioButtonGroup]: passa solo [optionValue] (e label, stile);
 /// il gruppo fornisce [value] e [onChanged].
 ///
-/// Per override globali personalizza [HUFThemeData] / [HUFThemeColors]; per
-/// override puntuali passa [activeColor], [dotColor] o [borderColor].
+/// Comportamento uguale per tutti i preset ([HUFThemePreset]):
+/// selezionato → sfondo [HUFThemeColors.card], anello spesso [HUFThemeColors.primary] + glow,
+/// pallino [HUFThemeColors.primaryForeground] sempre visibile;
+/// non selezionato → disco card + bordo [HUFThemeColors.border], senza glow.
+///
+/// Per override puntuali passa [activeColor], [dotColor] o [borderColor].
 class HUFRadioButton extends StatelessWidget {
   const HUFRadioButton({
     super.key,
@@ -69,8 +73,13 @@ class HUFRadioButton extends StatelessWidget {
 
   final String? label;
 
+  /// Bordo e glow quando selezionato. Default: [HUFThemeColors.primary].
   final Color? activeColor;
+
+  /// Pallino interno. Default: [HUFThemeColors.primaryForeground] (come thumb ON).
   final Color? dotColor;
+
+  /// Override del bordo (selezionato o meno a seconda dello stato).
   final Color? borderColor;
 
   bool get _isDisabled => !enabled || onChanged == null;
@@ -118,8 +127,10 @@ class HUFRadioButton extends StatelessWidget {
       borderColor: borderColor,
     );
 
-    final splashColor = colors.activeBorder.withValues(alpha: 0.12);
-    final highlightColor = colors.activeBorder.withValues(alpha: 0.08);
+    final splashColor = (isSelected ? (activeColor ?? theme.colors.primary) : theme.colors.border)
+        .withValues(alpha: 0.12);
+    final highlightColor = (isSelected ? (activeColor ?? theme.colors.primary) : theme.colors.border)
+        .withValues(alpha: 0.08);
 
     final control = Padding(
       padding: glowLayoutPadding,
@@ -130,9 +141,10 @@ class HUFRadioButton extends StatelessWidget {
         height: metrics.size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: colors.backgroundColor,
           border: Border.all(
-            color: isSelected ? colors.activeBorder : colors.inactiveBorder,
-            width: metrics.borderWidth,
+            color: colors.borderColor,
+            width: isSelected ? metrics.selectedBorderWidth : metrics.borderWidth,
           ),
           boxShadow: colors.boxShadow,
         ),

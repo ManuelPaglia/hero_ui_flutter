@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../theme/huf_control_colors.dart';
 import '../../theme/huf_theme.dart';
 import '../switch/huf_switch_style.dart';
 import 'huf_slider_size.dart';
@@ -139,7 +140,7 @@ HUFSliderColors hufSliderColorsFor(
 }) {
   final active = activeColor ?? palette.primary;
   final inactive = inactiveTrackColor ?? palette.secondary;
-  final thumb = thumbColor ?? const Color(0xFFFFFFFF);
+  final thumb = thumbColor ?? hufAccentControlFill(palette);
 
   if (isDisabled) {
     return HUFSliderColors(

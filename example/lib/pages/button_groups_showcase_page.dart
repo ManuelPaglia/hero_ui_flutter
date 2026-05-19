@@ -16,27 +16,29 @@ class ButtonGroupsShowcasePage extends StatelessWidget {
         children: [
           for (final variant in HUFButtonVariant.values) ...[
             ShowcaseSubsectionTitle(showcaseVariantLabel(variant)),
-            for (final size in HUFButtonSize.values) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: HUFButtonGroup(
-                  variant: variant,
-                  size: size,
-                  items: [
-                    HUFButtonGroupItem(
-                      label:
-                          '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
-                      icon: Icon(showcaseIconForVariant(variant)),
-                      onPressed: () {},
-                    ),
-                    HUFButtonGroupItem(
-                      icon: const Icon(Icons.arrow_drop_down),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final size in HUFButtonSize.values)
+                  HUFButtonGroup(
+                    variant: variant,
+                    size: size,
+                    items: [
+                      HUFButtonGroupItem(
+                        label:
+                            '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
+                        icon: Icon(showcaseIconForVariant(variant)),
+                        onPressed: () {},
+                      ),
+                      HUFButtonGroupItem(
+                        icon: const Icon(Icons.arrow_drop_down),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
           ],
           const ShowcaseSubsectionTitle('Solo icone'),

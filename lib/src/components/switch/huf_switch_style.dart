@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../theme/huf_control_colors.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_switch_size.dart';
 
@@ -121,7 +122,8 @@ HUFSwitchColors hufSwitchColorsFor(
   Color? iconColor,
 }) {
   final active = activeColor ?? palette.primary;
-  final thumb = thumbColor ?? const Color(0xFFFFFFFF);
+  final thumb = thumbColor ??
+      (value ? hufAccentControlFill(palette) : hufSwitchOffThumbFill);
   final inactiveTrack = inactiveTrackColor ?? palette.secondary;
 
   if (isDisabled) {

@@ -31,7 +31,7 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('HUFButton senza isFullWidth non occupa tutta la larghezza', (
+  testWidgets('HUFButton senza isFullWidth non espande lo sfondo', (
     tester,
   ) async {
     const parentWidth = 400.0;
@@ -49,9 +49,37 @@ void main() {
       ),
     );
 
-    final buttonWidth = tester.getSize(find.byType(HUFButton)).width;
-    expect(buttonWidth, lessThan(parentWidth));
-    expect(buttonWidth, greaterThan(0));
+    final backgroundWidth = tester.getSize(_buttonBackgroundFinder()).width;
+    expect(backgroundWidth, lessThan(parentWidth));
+    expect(backgroundWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFButton in ListView non espande lo sfondo senza isFullWidth', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          height: 200,
+          child: ListView(
+            children: [
+              HUFButton(
+                label: 'Primary · Medium',
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final backgroundWidth = tester.getSize(_buttonBackgroundFinder()).width;
+    expect(backgroundWidth, lessThan(parentWidth));
+    expect(backgroundWidth, greaterThan(0));
   });
 
   testWidgets('HUFButton con isFullWidth occupa tutta la larghezza', (
@@ -981,6 +1009,108 @@ void main() {
     );
   });
 
+  testWidgets('HUFRadioButton non selezionato usa bordo neutro e sfondo card', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFRadioButton(value: false, onChanged: _noopBool),
+        theme: theme,
+      ),
+    );
+
+    final container = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer).first,
+    );
+    final decoration = container.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
+
+    expect(decoration.color, theme.colors.card);
+    expect(border.top.color, theme.colors.border);
+    expect(decoration.boxShadow, isNull);
+  });
+
+  testWidgets('HUFRadioButton selezionato usa pallino primaryForeground', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFRadioButton(value: true, onChanged: _noopBool),
+        theme: theme,
+      ),
+    );
+
+    final dot = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFRadioButton),
+        matching: find.byType(AnimatedContainer),
+      ).last,
+    );
+    final decoration = dot.decoration! as BoxDecoration;
+
+    expect(decoration.color, theme.colors.primaryForeground);
+  });
+
+  testWidgets('HUFRadioButton selezionato mostra sempre il pallino (tutti i preset)',
+      (tester) async {
+    for (final preset in HUFThemePreset.values) {
+      for (final brightness in Brightness.values) {
+        final theme = brightness == Brightness.light
+            ? HUFTheme.light(data: HUFThemeData(theme: preset))
+            : HUFTheme.dark(data: HUFThemeData(theme: preset));
+
+        await tester.pumpWidget(
+          _wrap(
+            const HUFRadioButton(value: true, onChanged: _noopBool),
+            theme: theme,
+          ),
+        );
+
+        expect(
+          find.descendant(
+            of: find.byType(HUFRadioButton),
+            matching: find.byType(AnimatedContainer),
+          ),
+          findsNWidgets(2),
+          reason: 'preset=$preset brightness=$brightness',
+        );
+      }
+    }
+  });
+
+  testWidgets('HUFRadioButton selezionato usa bordo spesso (tutte le size)',
+      (tester) async {
+    for (final size in HUFRadioButtonSize.values) {
+      final expectedWidth = switch (size) {
+        HUFRadioButtonSize.small => 4.0,
+        HUFRadioButtonSize.medium => 5.0,
+        HUFRadioButtonSize.large => 6.0,
+      };
+
+      await tester.pumpWidget(
+        _wrap(
+          HUFRadioButton(
+            value: true,
+            onChanged: _noopBool,
+            size: size,
+          ),
+        ),
+      );
+
+      final container = tester.widget<AnimatedContainer>(
+        find.byType(AnimatedContainer).first,
+      );
+      final decoration = container.decoration! as BoxDecoration;
+      final border = decoration.border! as Border;
+
+      expect(border.top.width, expectedWidth, reason: 'size=$size');
+    }
+  });
+
   testWidgets('HUFRadioButton rispetta override activeColor', (tester) async {
     const custom = Color(0xFF059669);
 
@@ -1081,7 +1211,9 @@ void main() {
     expect(shadow.first.blurRadius, 8);
   });
 
-  testWidgets('HUFChip non occupa tutta la larghezza del parent', (tester) async {
+  testWidgets('HUFChip non espande lo sfondo a tutta la larghezza del parent', (
+    tester,
+  ) async {
     const parentWidth = 400.0;
 
     await tester.pumpWidget(
@@ -1097,12 +1229,17 @@ void main() {
       ),
     );
 
-    final chipWidth = tester.getSize(find.byType(HUFChip)).width;
-    expect(chipWidth, lessThan(parentWidth));
-    expect(chipWidth, greaterThan(0));
+    final decorationFinder = find.descendant(
+      of: find.byType(HUFChip),
+      matching: find.byType(DecoratedBox),
+    );
+    final decorationWidth = tester.getSize(decorationFinder).width;
+
+    expect(decorationWidth, lessThan(parentWidth));
+    expect(decorationWidth, greaterThan(0));
   });
 
-  testWidgets('HUFButtonGroup non occupa tutta la larghezza del parent', (
+  testWidgets('HUFChip in ListView non espande lo sfondo a tutta la riga', (
     tester,
   ) async {
     const parentWidth = 400.0;
@@ -1111,7 +1248,40 @@ void main() {
       _wrap(
         SizedBox(
           width: parentWidth,
-          child: Column(
+          height: 200,
+          child: ListView(
+            children: const [
+              HUFChip(
+                label: 'Primary · Medium',
+                icon: Icon(Icons.label_outline),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final decorationFinder = find.descendant(
+      of: find.byType(HUFChip),
+      matching: find.byType(DecoratedBox),
+    );
+    final decorationWidth = tester.getSize(decorationFinder).width;
+
+    expect(decorationWidth, lessThan(parentWidth));
+    expect(decorationWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFButtonGroup non espande lo sfondo a tutta la riga', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          height: 200,
+          child: ListView(
             children: [
               HUFButtonGroup(
                 items: [
@@ -1125,9 +1295,17 @@ void main() {
       ),
     );
 
-    final groupWidth = tester.getSize(find.byType(HUFButtonGroup)).width;
-    expect(groupWidth, lessThan(parentWidth));
-    expect(groupWidth, greaterThan(0));
+    final decorationWidth = tester
+        .getSize(
+          find.descendant(
+            of: find.byType(HUFButtonGroup),
+            matching: find.byType(DecoratedBox),
+          ).first,
+        )
+        .width;
+
+    expect(decorationWidth, lessThan(parentWidth));
+    expect(decorationWidth, greaterThan(0));
   });
 
   testWidgets('HUFChip mostra la label', (tester) async {
@@ -1522,3 +1700,10 @@ void _noopBool(bool _) {}
 void _noopDouble(double _) {}
 
 void _noopRange(RangeValues _) {}
+
+Finder _buttonBackgroundFinder() {
+  return find.descendant(
+    of: find.byType(HUFButton),
+    matching: find.byType(AnimatedContainer),
+  );
+}

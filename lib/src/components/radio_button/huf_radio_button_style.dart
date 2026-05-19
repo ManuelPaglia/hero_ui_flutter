@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/huf_control_colors.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_radio_button_size.dart';
 
@@ -9,26 +10,33 @@ class HUFRadioButtonMetrics {
     required this.size,
     required this.dotSize,
     required this.borderWidth,
+    required this.selectedBorderWidth,
     required this.labelGap,
   });
 
   final double size;
   final double dotSize;
   final double borderWidth;
+  final double selectedBorderWidth;
   final double labelGap;
 }
 
-/// Colori risolti per [HUFRadioButton].
+/// Colori risolti per [HUFRadioButton] (identici per ogni [HUFThemePreset]).
 class HUFRadioButtonColors {
   const HUFRadioButtonColors({
-    required this.activeBorder,
-    required this.inactiveBorder,
+    required this.backgroundColor,
+    required this.borderColor,
     required this.dotColor,
     this.boxShadow,
   });
 
-  final Color activeBorder;
-  final Color inactiveBorder;
+  /// Sfondo del cerchio ([HUFThemeColors.card]).
+  final Color backgroundColor;
+
+  /// Bordo: [HUFThemeColors.primary] se selezionato, [HUFThemeColors.border] altrimenti.
+  final Color borderColor;
+
+  /// Pallino interno (stesso token del thumb su accent: [hufAccentControlFill]).
   final Color dotColor;
   final List<BoxShadow>? boxShadow;
 }
@@ -37,20 +45,23 @@ HUFRadioButtonMetrics hufRadioButtonMetricsFor(HUFRadioButtonSize size) {
   return switch (size) {
     HUFRadioButtonSize.small => const HUFRadioButtonMetrics(
         size: 16,
-        dotSize: 8,
+        dotSize: 6,
         borderWidth: 1.5,
+        selectedBorderWidth: 4,
         labelGap: 6,
       ),
     HUFRadioButtonSize.medium => const HUFRadioButtonMetrics(
         size: 20,
-        dotSize: 10,
+        dotSize: 8,
         borderWidth: 1.5,
+        selectedBorderWidth: 5,
         labelGap: 8,
       ),
     HUFRadioButtonSize.large => const HUFRadioButtonMetrics(
         size: 24,
-        dotSize: 12,
+        dotSize: 10,
         borderWidth: 2,
+        selectedBorderWidth: 6,
         labelGap: 10,
       ),
   };
@@ -66,31 +77,29 @@ HUFRadioButtonColors hufRadioButtonColorsFor(
   Color? borderColor,
 }) {
   final active = activeColor ?? palette.primary;
-  final dot = dotColor ?? active;
-  final border = borderColor ?? active;
+  final background = palette.card;
+  final fill = dotColor ?? hufAccentControlFill(palette);
 
   if (isDisabled) {
     return HUFRadioButtonColors(
-      activeBorder: palette.disabled,
-      inactiveBorder: palette.disabled,
+      backgroundColor: background,
+      borderColor: palette.disabled,
       dotColor: palette.disabledForeground,
     );
   }
 
-  final glow = value ? hufGlowShadowFor(glowSize, active) : null;
-
   if (value) {
     return HUFRadioButtonColors(
-      activeBorder: active,
-      inactiveBorder: border,
-      dotColor: dot,
-      boxShadow: glow,
+      backgroundColor: background,
+      borderColor: borderColor ?? active,
+      dotColor: fill,
+      boxShadow: hufGlowShadowFor(glowSize, active),
     );
   }
 
   return HUFRadioButtonColors(
-    activeBorder: active,
-    inactiveBorder: border,
-    dotColor: dot,
+    backgroundColor: background,
+    borderColor: borderColor ?? palette.border,
+    dotColor: fill,
   );
 }

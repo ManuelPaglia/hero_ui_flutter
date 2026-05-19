@@ -16,18 +16,20 @@ class ChipsShowcasePage extends StatelessWidget {
         children: [
           for (final variant in HUFChipVariant.values) ...[
             ShowcaseSubsectionTitle(showcaseChipVariantLabel(variant)),
-            for (final size in HUFChipSize.values) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: HUFChip(
-                  label:
-                      '${showcaseChipVariantLabel(variant)} · ${showcaseChipSizeLabel(size)}',
-                  variant: variant,
-                  size: size,
-                  icon: const Icon(Icons.label_outline),
-                ),
-              ),
-            ],
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final size in HUFChipSize.values)
+                  HUFChip(
+                    label:
+                        '${showcaseChipVariantLabel(variant)} · ${showcaseChipSizeLabel(size)}',
+                    variant: variant,
+                    size: size,
+                    icon: const Icon(Icons.label_outline),
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
           ],
           const ShowcaseSubsectionTitle('Disabled'),

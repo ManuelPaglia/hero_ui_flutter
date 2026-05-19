@@ -76,7 +76,7 @@ class HUFSwitch extends StatelessWidget {
   /// Colore del track quando attivo. Default: [HUFThemeColors.primary].
   final Color? activeColor;
 
-  /// Colore del thumb. Default: bianco.
+  /// Colore del thumb. ON: [HUFThemeColors.primaryForeground], OFF: bianco.
   final Color? thumbColor;
 
   /// Colore del track quando spento. Default: [HUFThemeColors.secondary].

@@ -16,19 +16,21 @@ class ButtonsShowcasePage extends StatelessWidget {
         children: [
           for (final variant in HUFButtonVariant.values) ...[
             ShowcaseSubsectionTitle(showcaseVariantLabel(variant)),
-            for (final size in HUFButtonSize.values) ...[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: HUFButton(
-                  label:
-                      '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
-                  variant: variant,
-                  size: size,
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: () {},
-                ),
-              ),
-            ],
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final size in HUFButtonSize.values)
+                  HUFButton(
+                    label:
+                        '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
+                    variant: variant,
+                    size: size,
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: () {},
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
           ],
           const ShowcaseSubsectionTitle('Icon only'),
@@ -45,6 +47,13 @@ class ButtonsShowcasePage extends StatelessWidget {
                     onPressed: () {},
                   ),
             ],
+          ),
+          const SizedBox(height: 24),
+          const ShowcaseSubsectionTitle('Full width'),
+          HUFButton(
+            label: 'Primary · Full width',
+            isFullWidth: true,
+            onPressed: () {},
           ),
         ],
       ),

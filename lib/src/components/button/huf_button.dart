@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../layout/huf_shrink_wrap_width.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_button_size.dart';
 import 'huf_button_style.dart';
 import 'huf_button_variant.dart';
 
 /// Pulsante personalizzato del design system Hero UI Flutter.
+///
+/// Per default ha larghezza intrinseca ([isFullWidth] è `false`).
+/// Imposta [isFullWidth] a `true` solo quando deve occupare tutta la riga
+/// (es. azioni in [HUFCard]).
 class HUFButton extends StatefulWidget {
   const HUFButton({
     super.key,
@@ -104,7 +109,7 @@ class _HUFButtonState extends State<HUFButton> {
           ? EdgeInsets.zero
           : EdgeInsets.symmetric(horizontal: metrics.horizontalPadding),
       decoration: decoration,
-      child: Center(child: content),
+      child: content,
     );
 
     final scale = !_isDisabled && _isPressed ? _pressedScale : 1.0;
@@ -130,10 +135,12 @@ class _HUFButtonState extends State<HUFButton> {
     );
 
     if (widget.isIconOnly) {
-      return SizedBox(
-        width: metrics.iconOnlySize + 4,
-        height: metrics.iconOnlySize + iconOnlyGlowReserve,
-        child: Center(child: button),
+      return HUFShrinkWrapWidth(
+        child: SizedBox(
+          width: metrics.iconOnlySize + 4,
+          height: metrics.iconOnlySize + iconOnlyGlowReserve,
+          child: Center(child: button),
+        ),
       );
     }
 
@@ -146,7 +153,7 @@ class _HUFButtonState extends State<HUFButton> {
       return SizedBox(width: double.infinity, child: button);
     }
 
-    return IntrinsicWidth(child: button);
+    return HUFShrinkWrapWidth(child: button);
   }
 
   Widget _buildIconOnlyContent(HUFButtonMetrics metrics, HUFButtonColors colors) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../layout/huf_shrink_wrap_width.dart';
 import '../../theme/huf_theme.dart';
 import '../button/huf_button_size.dart';
 import '../button/huf_button_style.dart';
@@ -75,9 +76,9 @@ class HUFButtonGroup extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: glowLayoutPadding,
-      child: IntrinsicWidth(
+    return HUFShrinkWrapWidth(
+      child: Padding(
+        padding: glowLayoutPadding,
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: groupRadius,
