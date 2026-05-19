@@ -1,40 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class SwitchesShowcasePage extends StatefulWidget {
-  const SwitchesShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const SwitchesShowcasePage({super.key});
 
   @override
   State<SwitchesShowcasePage> createState() => _SwitchesShowcasePageState();
 }
 
 class _SwitchesShowcasePageState extends State<SwitchesShowcasePage> {
-  bool _onMedium = true;
-  bool _offMedium = false;
   Set<String> _groupValues = {'wifi', 'bluetooth'};
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Switch'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Switch'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -173,28 +156,6 @@ class _SwitchesShowcasePageState extends State<SwitchesShowcasePage> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: [
-                  HUFSwitch(
-                    value: _onMedium,
-                    onChanged: (v) => setState(() => _onMedium = v),
-                  ),
-                  HUFSwitch(
-                    value: _offMedium,
-                    onChanged: (v) => setState(() => _offMedium = v),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
         ],
       ),
     );

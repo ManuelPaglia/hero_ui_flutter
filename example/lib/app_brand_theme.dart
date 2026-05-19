@@ -7,6 +7,8 @@ class AppBrandTheme extends HUFThemeData {
       : super(
           light: HUFThemePalette(
             colors: HUFThemeColors(
+              background: Color(0xFFF5F3FF),
+              border: Color(0xFFDDD6FE),
               primary: Color(0xFF7C3AED),
               primaryForeground: Color(0xFFFFFFFF),
               secondary: Color(0xFFEDE9FE),
@@ -15,6 +17,10 @@ class AppBrandTheme extends HUFThemeData {
               dangerForeground: Color(0xFFFFFFFF),
               dangerSoft: Color(0xFFFEE2E2),
               dangerSoftForeground: Color(0xFFB91C1C),
+              success: Color(0xFF22C55E),
+              successForeground: Color(0xFFFFFFFF),
+              warning: Color(0xFFF59E0B),
+              warningForeground: Color(0xFF1E1B4B),
               disabled: Color(0xFF94A3B8),
               disabledForeground: Color(0xFFFFFFFF),
               transparent: Color(0x00000000),
@@ -27,6 +33,8 @@ class AppBrandTheme extends HUFThemeData {
           ),
           dark: HUFThemePalette(
             colors: HUFThemeColors(
+              background: Color(0xFF1E1B4B),
+              border: Color(0xFF4C1D95),
               primary: Color(0xFFA78BFA),
               primaryForeground: Color(0xFF1E1B4B),
               secondary: Color(0xFF4C1D95),
@@ -35,6 +43,10 @@ class AppBrandTheme extends HUFThemeData {
               dangerForeground: Color(0xFF1E1B4B),
               dangerSoft: Color(0xFF450A0A),
               dangerSoftForeground: Color(0xFFFECACA),
+              success: Color(0xFF4ADE80),
+              successForeground: Color(0xFF1E1B4B),
+              warning: Color(0xFFFBBF24),
+              warningForeground: Color(0xFF1E1B4B),
               disabled: Color(0xFF64748B),
               disabledForeground: Color(0xFFCBD5E1),
               transparent: Color(0x00000000),
@@ -45,7 +57,7 @@ class AppBrandTheme extends HUFThemeData {
               cardMutedForeground: Color(0xFFC4B5FD),
             ),
           ),
-          borderRadius: HUFBorderRadius.pill,
+          borderRadius: HUFBorderRadius.large,
           glowSize: HUFGlowSize.small,
         );
 }

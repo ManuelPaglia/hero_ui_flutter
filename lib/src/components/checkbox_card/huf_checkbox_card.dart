@@ -230,7 +230,7 @@ class HUFCheckboxCard extends StatelessWidget {
       width: metrics.indicatorSize,
       height: metrics.indicatorSize,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(metrics.indicatorBorderRadius),
         color: isChecked
             ? colors.indicatorCheckedBackground
             : colors.indicatorUncheckedBackground,

@@ -2,75 +2,60 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
-/// Token border radius conmotionati per tutti i componenti Hero UI Flutter.
+/// Token border radius condiviso da tutti i componenti Hero UI Flutter.
+///
+/// Ogni preset espone un unico [value] applicato ovunque (card, bottoni, input, …).
+/// [full] resta disponibile per elementi circolari (es. chip pill).
 @immutable
 class HUFBorderRadius {
   const HUFBorderRadius({
-    required this.sm,
-    required this.md,
-    required this.lg,
-    required this.full,
+    required this.value,
+    this.full = 999,
   });
 
-  final double sm;
-  final double md;
-  final double lg;
+  /// Radius condiviso da tutti i componenti.
+  final double value;
 
   /// Radius pill / circolare (es. chip, badge).
   final double full;
 
-  static const HUFBorderRadius standard = HUFBorderRadius(
-    sm: 8,
-    md: 10,
-    lg: 12,
-    full: 999,
-  );
+  /// Alias per compatibilità con la scala sm / md / lg dei componenti.
+  double get sm => value;
 
-  static const HUFBorderRadius sharp = HUFBorderRadius(
-    sm: 4,
-    md: 6,
-    lg: 8,
-    full: 999,
-  );
+  /// Alias per compatibilità con la scala sm / md / lg dei componenti.
+  double get md => value;
 
-  static const HUFBorderRadius rounded = HUFBorderRadius(
-    sm: 12,
-    md: 16,
-    lg: 20,
-    full: 999,
-  );
+  /// Alias per compatibilità con la scala sm / md / lg dei componenti.
+  double get lg => value;
 
-  static const HUFBorderRadius pill = HUFBorderRadius(
-    sm: 999,
-    md: 999,
-    lg: 999,
-    full: 999,
-  );
+  static const HUFBorderRadius none = HUFBorderRadius(value: 0, full: 0);
 
-  BorderRadius circularSm() => BorderRadius.circular(sm);
-  BorderRadius circularMd() => BorderRadius.circular(md);
-  BorderRadius circularLg() => BorderRadius.circular(lg);
+  static const HUFBorderRadius extraSmall = HUFBorderRadius(value: 2);
+
+  static const HUFBorderRadius small = HUFBorderRadius(value: 4);
+
+  /// Valore predefinito del design system (HeroUI `--field-radius`, 0.75rem).
+  static const HUFBorderRadius medium = HUFBorderRadius(value: 12);
+
+  static const HUFBorderRadius large = HUFBorderRadius(value: 16);
+
+  BorderRadius circular() => BorderRadius.circular(value);
+
   BorderRadius circularFull() => BorderRadius.circular(full);
 
   HUFBorderRadius copyWith({
-    double? sm,
-    double? md,
-    double? lg,
+    double? value,
     double? full,
   }) {
     return HUFBorderRadius(
-      sm: sm ?? this.sm,
-      md: md ?? this.md,
-      lg: lg ?? this.lg,
+      value: value ?? this.value,
       full: full ?? this.full,
     );
   }
 
   HUFBorderRadius lerp(HUFBorderRadius other, double t) {
     return HUFBorderRadius(
-      sm: lerpDouble(sm, other.sm, t)!,
-      md: lerpDouble(md, other.md, t)!,
-      lg: lerpDouble(lg, other.lg, t)!,
+      value: lerpDouble(value, other.value, t)!,
       full: lerpDouble(full, other.full, t)!,
     );
   }

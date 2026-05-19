@@ -228,7 +228,7 @@ void main() {
   });
 
   testWidgets('iconOnly usa il border radius del tema', (tester) async {
-    const sharp = HUFBorderRadius.sharp;
+    const small = HUFBorderRadius.small;
 
     await tester.pumpWidget(
       _wrap(
@@ -236,7 +236,7 @@ void main() {
           icon: const Icon(Icons.add),
           onPressed: () {},
         ),
-        theme: HUFTheme.light(borderRadius: sharp),
+        theme: HUFTheme.light(borderRadius: small),
       ),
     );
 
@@ -249,7 +249,7 @@ void main() {
     final decoration = container.decoration! as BoxDecoration;
     final radius = decoration.borderRadius! as BorderRadius;
 
-    expect(radius.topLeft.x, sharp.md);
+    expect(radius.topLeft.x, small.value);
   });
 
   testWidgets('variante danger usa i colori del tema', (tester) async {
@@ -306,7 +306,7 @@ void main() {
     final dark = HUFTheme.dark();
     final mid = light.lerp(dark, 0.5);
 
-    expect(mid.colors.primary, isNot(light.colors.primary));
+    expect(mid.colors.secondary, isNot(light.colors.secondary));
     expect(mid.borderRadius.md, light.borderRadius.md);
   });
 
@@ -342,7 +342,7 @@ void main() {
   });
 
   testWidgets('HUFButtonGroup applica radius solo agli estremi', (tester) async {
-    const pill = HUFBorderRadius.pill;
+    const rounded = HUFBorderRadius(value: 999);
 
     await tester.pumpWidget(
       _wrap(
@@ -353,7 +353,7 @@ void main() {
             HUFButtonGroupItem(label: 'C', onPressed: () {}),
           ],
         ),
-        theme: HUFTheme.light(borderRadius: pill),
+        theme: HUFTheme.light(borderRadius: rounded),
       ),
     );
 
@@ -361,7 +361,7 @@ void main() {
     expect(inkWells.length, 3);
 
     final firstRadius = inkWells.first.borderRadius!;
-    expect(firstRadius.topLeft.x, pill.md);
+    expect(firstRadius.topLeft.x, rounded.value);
     expect(firstRadius.topRight.x, 0);
 
     final middleRadius = inkWells[1].borderRadius!;
@@ -369,7 +369,7 @@ void main() {
     expect(middleRadius.topRight.x, 0);
 
     final lastRadius = inkWells.last.borderRadius!;
-    expect(lastRadius.topRight.x, pill.md);
+    expect(lastRadius.topRight.x, rounded.value);
     expect(lastRadius.topLeft.x, 0);
   });
 
@@ -486,7 +486,7 @@ void main() {
   });
 
   testWidgets('HUFCheckbox applica border radius del tema', (tester) async {
-    const sharp = HUFBorderRadius.sharp;
+    const small = HUFBorderRadius.small;
 
     await tester.pumpWidget(
       _wrap(
@@ -495,7 +495,7 @@ void main() {
           onChanged: _noopBool,
           size: HUFCheckboxSize.medium,
         ),
-        theme: HUFTheme.light(borderRadius: sharp),
+        theme: HUFTheme.light(borderRadius: small),
       ),
     );
 
@@ -505,7 +505,7 @@ void main() {
     final decoration = container.decoration! as BoxDecoration;
     final radius = decoration.borderRadius! as BorderRadius;
 
-    expect(radius.topLeft.x, sharp.md);
+    expect(radius.topLeft.x, small.value);
   });
 
   testWidgets('HUFCheckbox selezionato ha glow, non selezionato no', (tester) async {
@@ -1081,6 +1081,55 @@ void main() {
     expect(shadow.first.blurRadius, 8);
   });
 
+  testWidgets('HUFChip non occupa tutta la larghezza del parent', (tester) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: Column(
+            children: const [
+              HUFChip(label: 'Bozza'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final chipWidth = tester.getSize(find.byType(HUFChip)).width;
+    expect(chipWidth, lessThan(parentWidth));
+    expect(chipWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFButtonGroup non occupa tutta la larghezza del parent', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: Column(
+            children: [
+              HUFButtonGroup(
+                items: [
+                  HUFButtonGroupItem(label: 'Sinistra', onPressed: () {}),
+                  HUFButtonGroupItem(label: 'Destra', onPressed: () {}),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final groupWidth = tester.getSize(find.byType(HUFButtonGroup)).width;
+    expect(groupWidth, lessThan(parentWidth));
+    expect(groupWidth, greaterThan(0));
+  });
+
   testWidgets('HUFChip mostra la label', (tester) async {
     await tester.pumpWidget(
       _wrap(
@@ -1210,7 +1259,7 @@ void main() {
   });
 
   testWidgets('HUFSlider applica border radius del tema', (tester) async {
-    const sharp = HUFBorderRadius.sharp;
+    const small = HUFBorderRadius.small;
 
     await tester.pumpWidget(
       _wrap(
@@ -1219,12 +1268,12 @@ void main() {
           value: 30,
           onChanged: _noopDouble,
         ),
-        theme: HUFTheme.light(borderRadius: sharp),
+        theme: HUFTheme.light(borderRadius: small),
       ),
     );
 
     final clip = tester.widget<ClipRRect>(find.byType(ClipRRect));
-    expect(clip.borderRadius, BorderRadius.circular(sharp.md));
+    expect(clip.borderRadius, BorderRadius.circular(small.value));
   });
 
   testWidgets(
@@ -1324,38 +1373,34 @@ void main() {
     expect(find.text('Orizzontale'), findsOneWidget);
   });
 
-  test('hufCardMetricsFor applica padding e gap fissi anche con preset pill', () {
-    final sharp = hufCardMetricsFor(
+  test('hufCardMetricsFor applica padding e gap fissi indipendentemente dal preset', () {
+    final small = hufCardMetricsFor(
       HUFCardRadiusSize.medium,
-      HUFBorderRadius.sharp,
+      HUFBorderRadius.small,
     );
-    final pill = hufCardMetricsFor(
+    final large = hufCardMetricsFor(
       HUFCardRadiusSize.medium,
-      HUFBorderRadius.pill,
+      HUFBorderRadius.large,
     );
 
-    expect(sharp.padding, kHufCardPadding);
-    expect(pill.padding, kHufCardPadding);
-    expect(sharp.sectionGap, kHufCardSectionGap);
-    expect(pill.sectionGap, kHufCardSectionGap);
-    expect(pill.horizontalImageExtent, kHufCardHorizontalImageExtent);
-    expect(pill.innerBorderRadius, HUFBorderRadius.rounded.md);
-    expect(
-      hufCardResolveBorderRadius(HUFBorderRadius.pill),
-      HUFBorderRadius.rounded,
-    );
+    expect(small.padding, kHufCardPadding);
+    expect(large.padding, kHufCardPadding);
+    expect(small.sectionGap, kHufCardSectionGap);
+    expect(large.sectionGap, kHufCardSectionGap);
+    expect(large.horizontalImageExtent, kHufCardHorizontalImageExtent);
+    expect(small.borderRadius, HUFBorderRadius.small.value);
+    expect(large.borderRadius, HUFBorderRadius.large.value);
     expect(
       hufCardEffectiveOuterRadius(
-        tokenInnerRadius: sharp.innerBorderRadius,
-        inset: kHufCardPadding.top,
+        borderRadius: small.borderRadius,
         width: 320,
       ),
-      sharp.innerBorderRadius + kHufCardPadding.top,
+      small.borderRadius,
     );
   });
 
-  testWidgets('HUFCard con preset pill non esplode in altezza', (tester) async {
-    final huf = HUFTheme.light().copyWith(borderRadius: HUFBorderRadius.pill);
+  testWidgets('HUFCard mantiene altezza ragionevole con radius grande', (tester) async {
+    final huf = HUFTheme.light().copyWith(borderRadius: HUFBorderRadius.large);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1365,7 +1410,7 @@ void main() {
             child: SizedBox(
               width: 320,
               child: HUFCard(
-                title: 'Pill card',
+                title: 'Large radius card',
                 subtitle: 'Sottotitolo',
                 content: const Text('Contenuto'),
               ),
@@ -1384,7 +1429,7 @@ void main() {
     const theme = HUFTheme(
       brightness: Brightness.light,
       colors: HUFThemeColors.light,
-      borderRadius: HUFBorderRadius.standard,
+      borderRadius: HUFBorderRadius.medium,
       glowSize: HUFGlowSize.none,
     );
 
@@ -1413,6 +1458,8 @@ void main() {
     const data = HUFThemeData(
       light: HUFThemePalette(
         colors: HUFThemeColors(
+          background: Color(0xFFF4F5F6),
+          border: Color(0xFFDDDEDF),
           primary: customPrimary,
           primaryForeground: Color(0xFFFFFFFF),
           secondary: Color(0xFFE2E8F0),
@@ -1421,6 +1468,10 @@ void main() {
           dangerForeground: Color(0xFFFFFFFF),
           dangerSoft: Color(0xFFFEE2E2),
           dangerSoftForeground: Color(0xFFB91C1C),
+          success: Color(0xFF15C964),
+          successForeground: Color(0xFF161917),
+          warning: Color(0xFFF5A523),
+          warningForeground: Color(0xFF1A1815),
           disabled: Color(0xFF94A3B8),
           disabledForeground: Color(0xFFFFFFFF),
           transparent: Colors.transparent,
@@ -1435,6 +1486,32 @@ void main() {
 
     final theme = HUFTheme.light(data: data);
     expect(theme.colors.primary, customPrimary);
+  });
+
+  test('HUFThemeData.theme risolve un preset integrato', () {
+    const data = HUFThemeData(theme: HUFThemePreset.sky);
+    final theme = HUFTheme.light(data: data);
+    expect(theme.colors.primary, const Color(0xFF00CBFF));
+    expect(theme.borderRadius.value, 8);
+  });
+
+  test('HUFThemeData.preset shortcut', () {
+    const data = HUFThemeData.preset(HUFThemePreset.netflix);
+    expect(
+      data.resolveBorderRadius(Brightness.light),
+      HUFBorderRadius.extraSmall,
+    );
+  });
+
+  test('override borderRadius ha priorità sul preset', () {
+    const data = HUFThemeData(
+      theme: HUFThemePreset.sky,
+      borderRadius: HUFBorderRadius.large,
+    );
+    expect(
+      data.resolveBorderRadius(Brightness.light),
+      HUFBorderRadius.large,
+    );
   });
 }
 

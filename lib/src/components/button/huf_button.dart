@@ -107,10 +107,6 @@ class _HUFButtonState extends State<HUFButton> {
       child: Center(child: content),
     );
 
-    if (!widget.isIconOnly && !widget.isFullWidth) {
-      child = IntrinsicWidth(child: child);
-    }
-
     final scale = !_isDisabled && _isPressed ? _pressedScale : 1.0;
 
     Widget button = AnimatedScale(
@@ -134,23 +130,23 @@ class _HUFButtonState extends State<HUFButton> {
     );
 
     if (widget.isIconOnly) {
-      button = SizedBox(
+      return SizedBox(
         width: metrics.iconOnlySize + 4,
         height: metrics.iconOnlySize + iconOnlyGlowReserve,
         child: Center(child: button),
       );
-    } else {
-      button = Padding(
-        padding: glowLayoutPadding,
-        child: button,
-      );
     }
 
-    if (widget.isFullWidth && !widget.isIconOnly) {
+    button = Padding(
+      padding: glowLayoutPadding,
+      child: button,
+    );
+
+    if (widget.isFullWidth) {
       return SizedBox(width: double.infinity, child: button);
     }
 
-    return button;
+    return IntrinsicWidth(child: button);
   }
 
   Widget _buildIconOnlyContent(HUFButtonMetrics metrics, HUFButtonColors colors) {

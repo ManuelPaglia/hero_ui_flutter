@@ -1,78 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class ButtonsShowcasePage extends StatelessWidget {
-  const ButtonsShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const ButtonsShowcasePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bottoni'),
-        actions: [
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Bottoni'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final variant in HUFButtonVariant.values) ...[
-                    ShowcaseSubsectionTitle(showcaseVariantLabel(variant)),
-                    for (final size in HUFButtonSize.values) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: HUFButton(
-                          label:
-                              '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
-                          variant: variant,
-                          size: size,
-                          icon: const Icon(Icons.arrow_forward),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                  ],
-                  ShowcaseSubsectionTitle('Icon only'),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      for (final variant in HUFButtonVariant.values)
-                        for (final size in HUFButtonSize.values)
-                          HUFButton.iconOnly(
-                            icon: Icon(showcaseIconForVariant(variant)),
-                            variant: variant,
-                            size: size,
-                            onPressed: () {},
-                          ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
+          for (final variant in HUFButtonVariant.values) ...[
+            ShowcaseSubsectionTitle(showcaseVariantLabel(variant)),
+            for (final size in HUFButtonSize.values) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: HUFButton(
+                  label:
+                      '${showcaseVariantLabel(variant)} · ${showcaseSizeLabel(size)}',
+                  variant: variant,
+                  size: size,
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () {},
+                ),
               ),
-            ),
+            ],
+            const SizedBox(height: 8),
           ],
+          const ShowcaseSubsectionTitle('Icon only'),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final variant in HUFButtonVariant.values)
+                for (final size in HUFButtonSize.values)
+                  HUFButton.iconOnly(
+                    icon: Icon(showcaseIconForVariant(variant)),
+                    variant: variant,
+                    size: size,
+                    onPressed: () {},
+                  ),
+            ],
+          ),
         ],
       ),
     );

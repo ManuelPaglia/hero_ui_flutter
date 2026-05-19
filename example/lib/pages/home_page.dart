@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
 import 'chips_showcase_page.dart';
@@ -15,120 +16,75 @@ class _HomeShowcaseEntry {
   const _HomeShowcaseEntry({
     required this.title,
     required this.actionLabel,
-    required this.pageBuilder,
+    required this.page,
   });
 
   final String title;
   final String actionLabel;
-  final Widget Function(VoidCallback onToggleTheme) pageBuilder;
+  final Widget page;
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const HomePage({super.key});
 
   static const _entries = [
     _HomeShowcaseEntry(
       title: 'Chip',
       actionLabel: 'Apri',
-      pageBuilder: _chipsPage,
+      page: ChipsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Bottoni',
       actionLabel: 'Apri',
-      pageBuilder: _buttonsPage,
+      page: ButtonsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Button group',
       actionLabel: 'Apri',
-      pageBuilder: _buttonGroupsPage,
+      page: ButtonGroupsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Checkbox',
       actionLabel: 'Apri',
-      pageBuilder: _checkboxesPage,
+      page: CheckboxesShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Card',
       actionLabel: 'Apri',
-      pageBuilder: _cardsPage,
+      page: CardsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Checkbox card',
       actionLabel: 'Apri',
-      pageBuilder: _checkboxCardsPage,
+      page: CheckboxCardsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Radio button',
       actionLabel: 'Apri',
-      pageBuilder: _radioButtonsPage,
+      page: RadioButtonsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Slider',
       actionLabel: 'Apri',
-      pageBuilder: _slidersPage,
+      page: SlidersShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Switch',
       actionLabel: 'Apri',
-      pageBuilder: _switchesPage,
+      page: SwitchesShowcasePage(),
     ),
   ];
 
-  static Widget _chipsPage(VoidCallback onToggleTheme) =>
-      ChipsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _buttonsPage(VoidCallback onToggleTheme) =>
-      ButtonsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _buttonGroupsPage(VoidCallback onToggleTheme) =>
-      ButtonGroupsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _checkboxesPage(VoidCallback onToggleTheme) =>
-      CheckboxesShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _cardsPage(VoidCallback onToggleTheme) =>
-      CardsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _checkboxCardsPage(VoidCallback onToggleTheme) =>
-      CheckboxCardsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _radioButtonsPage(VoidCallback onToggleTheme) =>
-      RadioButtonsShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _slidersPage(VoidCallback onToggleTheme) =>
-      SlidersShowcasePage(onToggleTheme: onToggleTheme);
-
-  static Widget _switchesPage(VoidCallback onToggleTheme) =>
-      SwitchesShowcasePage(onToggleTheme: onToggleTheme);
-
   void _openShowcase(BuildContext context, _HomeShowcaseEntry entry) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => entry.pageBuilder(onToggleTheme),
-      ),
+      MaterialPageRoute<void>(builder: (_) => entry.page),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hero UI Flutter'),
-        actions: [
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Hero UI Flutter'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -182,13 +138,13 @@ class _HomeShowcaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return HUFCard(
       style: HUFCardStyle.card,
-      radiusSize: HUFCardRadiusSize.small,
+      radiusSize: HUFCardRadiusSize.medium,
       title: entry.title,
       actions: [
         HUFButton(
           label: entry.actionLabel,
           variant: HUFButtonVariant.primary,
-          size: HUFButtonSize.small,
+          size: HUFButtonSize.medium,
           onPressed: onOpen,
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 String _usd(double value) {
@@ -9,12 +10,7 @@ String _usd(double value) {
 }
 
 class SlidersShowcasePage extends StatefulWidget {
-  const SlidersShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const SlidersShowcasePage({super.key});
 
   @override
   State<SlidersShowcasePage> createState() => _SlidersShowcasePageState();
@@ -27,19 +23,8 @@ class _SlidersShowcasePageState extends State<SlidersShowcasePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Slider'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Slider'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -187,31 +172,6 @@ class _SlidersShowcasePageState extends State<SlidersShowcasePage> {
             activeColor: const Color(0xFF38BDF8),
             onChanged: (_) {},
           ),
-          const SizedBox(height: 24),
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Column(
-                children: [
-                  HUFSlider(
-                    label: 'Volume',
-                    value: 45,
-                    showValue: true,
-                    onChanged: (_) {},
-                  ),
-                  const SizedBox(height: 16),
-                  HUFRangeSlider(
-                    label: 'Intervallo',
-                    values: const RangeValues(25, 75),
-                    showValue: true,
-                    onChanged: (_) {},
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
         ],
       ),
     );

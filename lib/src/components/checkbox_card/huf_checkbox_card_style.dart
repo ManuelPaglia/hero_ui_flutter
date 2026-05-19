@@ -17,6 +17,7 @@ class HUFCheckboxCardMetrics {
     required this.subtitleFontSize,
     required this.indicatorSize,
     required this.indicatorIconSize,
+    required this.indicatorBorderRadius,
   });
 
   final EdgeInsets padding;
@@ -29,6 +30,9 @@ class HUFCheckboxCardMetrics {
   final double subtitleFontSize;
   final double indicatorSize;
   final double indicatorIconSize;
+
+  /// Radius dell'indicatore checkbox (allineato a [HUFCheckbox]).
+  final double indicatorBorderRadius;
 }
 
 /// Colori risolti per [HUFCheckboxCard].
@@ -60,10 +64,13 @@ HUFCheckboxCardMetrics hufCheckboxCardMetricsFor(
   HUFCheckboxSize size,
   HUFBorderRadius borderRadius,
 ) {
+  final indicatorBorderRadius =
+      hufCheckboxMetricsFor(size, borderRadius).borderRadius;
+
   return switch (size) {
     HUFCheckboxSize.small => HUFCheckboxCardMetrics(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.value,
         iconGap: 12,
         indicatorGap: 12,
         titleSubtitleGap: 2,
@@ -72,10 +79,11 @@ HUFCheckboxCardMetrics hufCheckboxCardMetricsFor(
         subtitleFontSize: 12,
         indicatorSize: 22,
         indicatorIconSize: 14,
+        indicatorBorderRadius: indicatorBorderRadius,
       ),
     HUFCheckboxSize.medium => HUFCheckboxCardMetrics(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.value,
         iconGap: 14,
         indicatorGap: 14,
         titleSubtitleGap: 4,
@@ -84,10 +92,11 @@ HUFCheckboxCardMetrics hufCheckboxCardMetricsFor(
         subtitleFontSize: 13,
         indicatorSize: 26,
         indicatorIconSize: 16,
+        indicatorBorderRadius: indicatorBorderRadius,
       ),
     HUFCheckboxSize.large => HUFCheckboxCardMetrics(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.value,
         iconGap: 16,
         indicatorGap: 16,
         titleSubtitleGap: 4,
@@ -96,6 +105,7 @@ HUFCheckboxCardMetrics hufCheckboxCardMetricsFor(
         subtitleFontSize: 14,
         indicatorSize: 30,
         indicatorIconSize: 18,
+        indicatorBorderRadius: indicatorBorderRadius,
       ),
   };
 }

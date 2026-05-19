@@ -2,37 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 const showcaseRadiusPresets = <String, HUFBorderRadius>{
-  'Standard': HUFBorderRadius.standard,
-  'Sharp': HUFBorderRadius.sharp,
-  'Rounded': HUFBorderRadius.rounded,
-  'Pill': HUFBorderRadius.pill,
+  'None': HUFBorderRadius.none,
+  'Extra small': HUFBorderRadius.extraSmall,
+  'Small': HUFBorderRadius.small,
+  'Medium': HUFBorderRadius.medium,
+  'Large': HUFBorderRadius.large,
 };
-
-class ShowcaseThemeScope extends StatelessWidget {
-  const ShowcaseThemeScope({
-    required this.borderRadius,
-    required this.child,
-    super.key,
-  });
-
-  final HUFBorderRadius borderRadius;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final base = Theme.of(context);
-    final huf = context.hufTheme;
-
-    return Theme(
-      data: base.copyWith(
-        extensions: <ThemeExtension<dynamic>>[
-          huf.copyWith(borderRadius: borderRadius),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
 
 class ShowcaseSectionTitle extends StatelessWidget {
   const ShowcaseSectionTitle(this.text, {super.key});

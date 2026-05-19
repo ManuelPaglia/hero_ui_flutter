@@ -25,10 +25,9 @@ Widget hufCardExpandAction(Widget action) {
 
 /// Card composable del design system Hero UI Flutter.
 ///
-/// La scala visiva è guidata dal [radiusSize] (token sm / md / lg del tema);
-/// il [padding] interno e le spaziature tra sezioni sono fissi ([kHufCardPadding],
-/// [kHufCardSectionGap]). Con preset tema **pill**, card e immagine usano il radius
-/// di [HUFBorderRadius.rounded] (i pulsanti/chip del tema restano pill).
+/// Usa lo stesso token [HUFBorderRadius.value] del tema condiviso da bottoni e altri
+/// componenti. Il [padding] interno e le spaziature tra sezioni sono fissi
+/// ([kHufCardPadding], [kHufCardSectionGap]).
 ///
 /// **Verticale** (dall'alto): immagine → titolo → sottotitolo → contenuto → azioni.
 ///
@@ -54,7 +53,7 @@ class HUFCard extends StatelessWidget {
   final HUFCardOrientation orientation;
   final HUFCardRadiusSize radiusSize;
 
-  /// Widget immagine (es. [Image], [Image.network]). Radius interno concentrico con la card.
+  /// Widget immagine (es. [Image], [Image.network]). Usa lo stesso token radius del tema.
   final Widget? image;
 
   /// Override dell'aspect ratio immagine in layout verticale.
@@ -81,25 +80,13 @@ class HUFCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
-        final inset = metrics.padding.top;
 
         final body = orientation == HUFCardOrientation.vertical
-            ? _buildVertical(
-                metrics,
-                colors,
-                cardWidth: cardWidth,
-                inset: inset,
-              )
-            : _buildHorizontal(
-                metrics,
-                colors,
-                cardWidth: cardWidth,
-                inset: inset,
-              );
+            ? _buildVertical(metrics, colors)
+            : _buildHorizontal(metrics, colors);
 
         final outerRadius = hufCardEffectiveOuterRadius(
-          tokenInnerRadius: metrics.innerBorderRadius,
-          inset: inset,
+          borderRadius: metrics.borderRadius,
           width: cardWidth,
         );
         final borderRadius = BorderRadius.circular(outerRadius);
@@ -108,6 +95,9 @@ class HUFCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.background,
             borderRadius: borderRadius,
+            border: style == HUFCardStyle.transparent
+                ? null
+                : Border.all(color: theme.colors.border),
           ),
           child: Padding(
             padding: metrics.padding,
@@ -131,26 +121,14 @@ class HUFCard extends StatelessWidget {
 
   Widget _buildVertical(
     HUFCardMetrics metrics,
-    HUFCardColors colors, {
-    required double cardWidth,
-    required double inset,
-  }) {
-    final outerRadius = hufCardEffectiveOuterRadius(
-      tokenInnerRadius: metrics.innerBorderRadius,
-      inset: inset,
-      width: cardWidth,
-    );
-
+    HUFCardColors colors,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (image != null) ...[
-          _buildImage(
-            metrics,
-            outerRadius: outerRadius,
-            inset: inset,
-          ),
+          _buildImage(metrics),
           SizedBox(height: metrics.sectionGap),
         ],
         ..._buildTextAndContent(metrics, colors),
@@ -164,16 +142,8 @@ class HUFCard extends StatelessWidget {
 
   Widget _buildHorizontal(
     HUFCardMetrics metrics,
-    HUFCardColors colors, {
-    required double cardWidth,
-    required double inset,
-  }) {
-    final outerRadius = hufCardEffectiveOuterRadius(
-      tokenInnerRadius: metrics.innerBorderRadius,
-      inset: inset,
-      width: cardWidth,
-    );
-
+    HUFCardColors colors,
+  ) {
     final textColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -193,11 +163,7 @@ class HUFCard extends StatelessWidget {
       children: [
         SizedBox(
           width: metrics.horizontalImageExtent,
-          child: _buildImage(
-            metrics,
-            outerRadius: outerRadius,
-            inset: inset,
-          ),
+          child: _buildImage(metrics),
         ),
         SizedBox(width: metrics.sectionGap),
         Expanded(child: textColumn),
@@ -250,26 +216,22 @@ class HUFCard extends StatelessWidget {
   }
 
   Widget _buildImage(
-    HUFCardMetrics metrics, {
-    required double outerRadius,
-    required double inset,
-  }) {
+    HUFCardMetrics metrics,
+  ) {
     final aspectRatio = imageAspectRatio ?? metrics.imageAspectRatio;
 
     final imageChild = LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final height = constraints.maxHeight;
-        final borderRadius = _imageBorderRadius(
-          metrics: metrics,
-          outerRadius: outerRadius,
-          inset: inset,
+        final innerRadius = hufCardEffectiveInnerRadius(
+          borderRadius: metrics.borderRadius,
           width: width,
           height: height,
         );
 
         return ClipRRect(
-          borderRadius: borderRadius,
+          borderRadius: BorderRadius.circular(innerRadius),
           child: image!,
         );
       },
@@ -286,23 +248,6 @@ class HUFCard extends StatelessWidget {
       aspectRatio: 1,
       child: imageChild,
     );
-  }
-
-  BorderRadius _imageBorderRadius({
-    required HUFCardMetrics metrics,
-    required double outerRadius,
-    required double inset,
-    required double width,
-    required double height,
-  }) {
-    final innerRadius = hufCardEffectiveInnerRadius(
-      tokenInnerRadius: metrics.innerBorderRadius,
-      outerRadius: outerRadius,
-      inset: inset,
-      width: width,
-      height: height,
-    );
-    return BorderRadius.circular(innerRadius);
   }
 
   Widget _buildActions(HUFCardMetrics metrics) {

@@ -10,13 +10,13 @@ import 'huf_button_group_item.dart';
 ///
 /// Richiede almeno due [items]. Condividono [variant] e [size] con [HUFButton];
 /// solo il primo e l'ultimo segmento ricevono il border radius esterno del tema.
+/// Il gruppo ha sempre larghezza intrinseca (non espandibile a tutta la riga).
 class HUFButtonGroup extends StatelessWidget {
   const HUFButtonGroup({
     super.key,
     required this.items,
     this.variant = HUFButtonVariant.primary,
     this.size = HUFButtonSize.medium,
-    this.isFullWidth = false,
     this.glowSize,
   }) : assert(
           items.length >= 2,
@@ -26,7 +26,6 @@ class HUFButtonGroup extends StatelessWidget {
   final List<HUFButtonGroupItem> items;
   final HUFButtonVariant variant;
   final HUFButtonSize size;
-  final bool isFullWidth;
 
   /// Override dell'intensità glow; se null usa [HUFTheme.glowSize].
   final HUFGlowSize? glowSize;
@@ -64,53 +63,43 @@ class HUFButtonGroup extends StatelessWidget {
         isLast: isLast,
       );
 
-      Widget segment = _HUFButtonGroupSegment(
-        item: item,
-        metrics: metrics,
-        colors: colors,
-        segmentRadius: segmentRadius,
-        showDivider: !isLast,
-        dividerColor: dividerColor,
+      segments.add(
+        _HUFButtonGroupSegment(
+          item: item,
+          metrics: metrics,
+          colors: colors,
+          segmentRadius: segmentRadius,
+          showDivider: !isLast,
+          dividerColor: dividerColor,
+        ),
       );
-
-      if (isFullWidth) {
-        segment = Expanded(child: segment);
-      }
-
-      segments.add(segment);
     }
 
-    Widget group = DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: groupRadius,
-        border: colors.border,
-        boxShadow: colors.boxShadow,
-      ),
-      child: ClipRRect(
-        borderRadius: groupRadius,
-        child: Material(
-          color: colors.background,
-          child: IntrinsicHeight(
-            child: Row(
-              mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: segments,
+    return Padding(
+      padding: glowLayoutPadding,
+      child: IntrinsicWidth(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: groupRadius,
+            border: colors.border,
+            boxShadow: colors.boxShadow,
+          ),
+          child: ClipRRect(
+            borderRadius: groupRadius,
+            child: Material(
+              color: colors.background,
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: segments,
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
-
-    group = Padding(
-      padding: glowLayoutPadding,
-      child: group,
-    );
-
-    if (isFullWidth) {
-      return SizedBox(width: double.infinity, child: group);
-    }
-
-    return group;
   }
 }
 

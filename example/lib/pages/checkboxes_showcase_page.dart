@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class CheckboxesShowcasePage extends StatefulWidget {
-  const CheckboxesShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const CheckboxesShowcasePage({super.key});
 
   @override
   State<CheckboxesShowcasePage> createState() => _CheckboxesShowcasePageState();
@@ -25,70 +21,48 @@ class _CheckboxesShowcasePageState extends State<CheckboxesShowcasePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Checkbox'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Checkbox'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final size in HUFCheckboxSize.values) ...[
-                    ShowcaseSubsectionTitle(_sizeLabel(size)),
-                    Wrap(
-                      spacing: 24,
-                      runSpacing: 16,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        HUFCheckbox(
-                          value: true,
-                          onChanged: (_) {},
-                          size: size,
-                        ),
-                        HUFCheckbox(
-                          value: false,
-                          onChanged: (_) {},
-                          size: size,
-                        ),
-                        HUFCheckbox(
-                          value: true,
-                          onChanged: null,
-                          size: size,
-                        ),
-                        HUFCheckbox(
-                          value: false,
-                          onChanged: null,
-                          size: size,
-                        ),
-                        HUFCheckbox(
-                          value: true,
-                          onChanged: (_) {},
-                          size: size,
-                          label: 'Con etichetta',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  const SizedBox(height: 8),
-                ],
-              ),
+          const ShowcaseSectionTitle('Dimensioni'),
+          for (final size in HUFCheckboxSize.values) ...[
+            ShowcaseSubsectionTitle(_sizeLabel(size)),
+            Wrap(
+              spacing: 24,
+              runSpacing: 16,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                HUFCheckbox(
+                  value: true,
+                  onChanged: (_) {},
+                  size: size,
+                ),
+                HUFCheckbox(
+                  value: false,
+                  onChanged: (_) {},
+                  size: size,
+                ),
+                HUFCheckbox(
+                  value: true,
+                  onChanged: null,
+                  size: size,
+                ),
+                HUFCheckbox(
+                  value: false,
+                  onChanged: null,
+                  size: size,
+                ),
+                HUFCheckbox(
+                  value: true,
+                  onChanged: (_) {},
+                  size: size,
+                  label: 'Con etichetta',
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
           ],
           const ShowcaseSectionTitle('Glow'),
           for (final glowSize in HUFGlowSize.values) ...[

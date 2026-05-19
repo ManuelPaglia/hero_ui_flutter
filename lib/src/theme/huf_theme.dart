@@ -9,6 +9,9 @@ export 'huf_border_radius.dart';
 export 'huf_glow.dart';
 export 'huf_theme_colors.dart';
 export 'huf_theme_data.dart';
+export 'huf_theme_palette.dart';
+export 'huf_theme_preset.dart';
+export 'presets/huf_theme_presets.dart';
 
 /// Tema Hero UI Flutter: colori, border radius e supporto light/dark.
 ///
@@ -89,11 +92,35 @@ class HUFTheme extends ThemeExtension<HUFTheme> {
   /// [ThemeData] Material con estensione HUF già collegata.
   ThemeData toThemeData({ThemeData? base}) {
     final seed = base ?? ThemeData(useMaterial3: true, brightness: brightness);
+    final scheme = ColorScheme(
+      brightness: brightness,
+      primary: colors.primary,
+      onPrimary: colors.primaryForeground,
+      secondary: colors.secondary,
+      onSecondary: colors.secondaryForeground,
+      error: colors.danger,
+      onError: colors.dangerForeground,
+      surface: colors.card,
+      onSurface: colors.cardForeground,
+    );
+    final textTheme = seed.textTheme.apply(
+      bodyColor: colors.cardForeground,
+      displayColor: colors.cardForeground,
+    );
+
     return seed.copyWith(
       brightness: brightness,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: colors.primary,
-        brightness: brightness,
+      scaffoldBackgroundColor: colors.background,
+      colorScheme: scheme,
+      textTheme: textTheme,
+      iconTheme: IconThemeData(color: colors.cardForeground),
+      dividerColor: colors.border,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.background,
+        foregroundColor: colors.cardForeground,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: colors.transparent,
       ),
       extensions: <ThemeExtension<dynamic>>[this],
     );

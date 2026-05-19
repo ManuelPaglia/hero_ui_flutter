@@ -1,70 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class CardsShowcasePage extends StatelessWidget {
-  const CardsShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const CardsShowcasePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Card'),
-        actions: [
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Card'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final style in HUFCardStyle.values) ...[
-                    ShowcaseSubsectionTitle(_styleLabel(style)),
-                    HUFCard(
-                      style: style,
-                      title: 'Titolo card',
-                      subtitle: 'Sottotitolo descrittivo',
-                      image: _sampleImage(),
-                      content: Text(
-                        'Contenuto libero della card con testo di esempio.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      actions: [
-                        HUFButton(
-                          label: 'Azione',
-                          variant: HUFButtonVariant.primary,
-                          onPressed: () {},
-                        ),
-                        HUFButton(
-                          label: 'Secondaria',
-                          variant: HUFButtonVariant.secondary,
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ],
+          for (final style in HUFCardStyle.values) ...[
+            ShowcaseSubsectionTitle(_styleLabel(style)),
+            HUFCard(
+              style: style,
+              title: 'Titolo card',
+              subtitle: 'Sottotitolo descrittivo',
+              image: _sampleImage(),
+              content: Text(
+                'Contenuto libero della card con testo di esempio.',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
+              actions: [
+                HUFButton(
+                  label: 'Azione',
+                  variant: HUFButtonVariant.primary,
+                  onPressed: () {},
+                ),
+                HUFButton(
+                  label: 'Secondaria',
+                  variant: HUFButtonVariant.secondary,
+                  onPressed: () {},
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
           ],
           const ShowcaseSectionTitle('Orientamento orizzontale'),
           HUFCard(
@@ -100,18 +74,6 @@ class CardsShowcasePage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          const ShowcaseSectionTitle('Scala radius'),
-          for (final size in HUFCardRadiusSize.values) ...[
-            ShowcaseSubsectionTitle(_radiusSizeLabel(size)),
-            HUFCard(
-              radiusSize: size,
-              style: HUFCardStyle.cardTertiary,
-              title: 'Radius ${_radiusSizeLabel(size)}',
-              subtitle: 'Padding proporzionale al border radius',
-            ),
-            const SizedBox(height: 12),
-          ],
         ],
       ),
     );
@@ -135,14 +97,6 @@ class CardsShowcasePage extends StatelessWidget {
       HUFCardStyle.card => 'Card (default)',
       HUFCardStyle.cardSecondary => 'Card secondary',
       HUFCardStyle.cardTertiary => 'Card tertiary',
-    };
-  }
-
-  String _radiusSizeLabel(HUFCardRadiusSize size) {
-    return switch (size) {
-      HUFCardRadiusSize.small => 'Small',
-      HUFCardRadiusSize.medium => 'Medium',
-      HUFCardRadiusSize.large => 'Large',
     };
   }
 }

@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class RadioButtonsShowcasePage extends StatefulWidget {
-  const RadioButtonsShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const RadioButtonsShowcasePage({super.key});
 
   @override
   State<RadioButtonsShowcasePage> createState() => _RadioButtonsShowcasePageState();
@@ -25,19 +21,8 @@ class _RadioButtonsShowcasePageState extends State<RadioButtonsShowcasePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Radio button'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Radio button'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

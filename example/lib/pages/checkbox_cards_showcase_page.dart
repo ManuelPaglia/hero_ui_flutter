@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
+import '../example_app_scope.dart';
 import 'showcase_shared.dart';
 
 class CheckboxCardsShowcasePage extends StatefulWidget {
-  const CheckboxCardsShowcasePage({
-    required this.onToggleTheme,
-    super.key,
-  });
-
-  final VoidCallback onToggleTheme;
+  const CheckboxCardsShowcasePage({super.key});
 
   @override
   State<CheckboxCardsShowcasePage> createState() => _CheckboxCardsShowcasePageState();
@@ -24,64 +20,43 @@ class _CheckboxCardsShowcasePageState extends State<CheckboxCardsShowcasePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Checkbox card'),
-        actions: [
-          IconButton(
-            onPressed: widget.onToggleTheme,
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Light mode' : 'Dark mode',
-          ),
-        ],
-      ),
+      appBar: const ShowcaseAppBar(title: 'Checkbox card'),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          for (final radiusEntry in showcaseRadiusPresets.entries) ...[
-            ShowcaseSectionTitle('Radius · ${radiusEntry.key}'),
-            ShowcaseThemeScope(
-              borderRadius: radiusEntry.value,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  HUFCheckboxCard(
-                    value: true,
-                    onChanged: (_) {},
-                    title: 'Selezionata',
-                    subtitle: 'Stato selezionato',
-                    icon: const Icon(Icons.mail_outline_rounded),
-                  ),
-                  const SizedBox(height: 12),
-                  HUFCheckboxCard(
-                    value: false,
-                    onChanged: (_) {},
-                    title: 'Non selezionata',
-                    subtitle: 'Stato non selezionato',
-                    icon: const Icon(Icons.sms_outlined),
-                  ),
-                  const SizedBox(height: 12),
-                  HUFCheckboxCard(
-                    value: true,
-                    onChanged: null,
-                    title: 'Disabilitata selezionata',
-                    subtitle: 'Stato disabilitato',
-                    icon: const Icon(Icons.notifications_outlined),
-                  ),
-                  const SizedBox(height: 12),
-                  HUFCheckboxCard(
-                    value: false,
-                    onChanged: null,
-                    title: 'Disabilitata',
-                    icon: const Icon(Icons.notifications_off_outlined),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ],
+          const ShowcaseSectionTitle('Stati'),
+          HUFCheckboxCard(
+            value: true,
+            onChanged: (_) {},
+            title: 'Selezionata',
+            subtitle: 'Stato selezionato',
+            icon: const Icon(Icons.mail_outline_rounded),
+          ),
+          const SizedBox(height: 12),
+          HUFCheckboxCard(
+            value: false,
+            onChanged: (_) {},
+            title: 'Non selezionata',
+            subtitle: 'Stato non selezionato',
+            icon: const Icon(Icons.sms_outlined),
+          ),
+          const SizedBox(height: 12),
+          HUFCheckboxCard(
+            value: true,
+            onChanged: null,
+            title: 'Disabilitata selezionata',
+            subtitle: 'Stato disabilitato',
+            icon: const Icon(Icons.notifications_outlined),
+          ),
+          const SizedBox(height: 12),
+          HUFCheckboxCard(
+            value: false,
+            onChanged: null,
+            title: 'Disabilitata',
+            icon: const Icon(Icons.notifications_off_outlined),
+          ),
+          const SizedBox(height: 24),
           const ShowcaseSectionTitle('Checkbox card group'),
           const ShowcaseSubsectionTitle('Notification preferences'),
           Text(

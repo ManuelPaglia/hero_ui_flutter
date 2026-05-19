@@ -1,57 +1,52 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'huf_border_radius.dart';
 import 'huf_glow.dart';
 import 'huf_theme_colors.dart';
-
-/// Override per una singola modalità (light o dark).
-@immutable
-class HUFThemePalette {
-  const HUFThemePalette({
-    this.colors,
-    this.borderRadius,
-    this.glowSize,
-  });
-
-  final HUFThemeColors? colors;
-  final HUFBorderRadius? borderRadius;
-  final HUFGlowSize? glowSize;
-}
+import 'huf_theme_palette.dart';
+import 'huf_theme_preset.dart';
+import 'presets/huf_theme_presets.dart';
 
 /// Configurazione completa del tema Hero UI Flutter.
 ///
-/// Passa un'istanza (anche tramite sottoclasse) a [HUFTheme.light] o [HUFTheme.dark]:
+/// Usa un preset built-in con [theme] oppure override manuali:
 ///
 /// ```dart
-/// class BrandTheme extends HUFThemeData {
-///   const BrandTheme() : super(
-///     light: HUFThemePalette(
-///       colors: HUFThemeColors(
-///         primary: Color(0xFF7C3AED),
-///         // ... tutti i token richiesti
-///       ),
-///     ),
-///   );
-/// }
+/// MaterialApp(
+///   theme: HUFTheme.light(
+///     data: const HUFThemeData(theme: HUFThemePreset.sky),
+///   ).toThemeData(),
+///   darkTheme: HUFTheme.dark(
+///     data: const HUFThemeData(theme: HUFThemePreset.sky),
+///   ).toThemeData(),
+/// );
+/// ```
 ///
-/// void main() {
-///   const themeData = BrandTheme();
-///   runApp(MyApp(themeData: themeData));
-/// }
+/// Override puntuali (es. solo il radius):
+///
+/// ```dart
+/// const HUFThemeData(
+///   theme: HUFThemePreset.coinbase,
+///   borderRadius: HUFBorderRadius.large,
+/// );
 /// ```
 @immutable
 class HUFThemeData {
   const HUFThemeData({
+    this.theme,
     this.light,
     this.dark,
     this.borderRadius,
     this.glowSize,
   });
 
-  /// Palette dedicata alla modalità chiara.
+  /// Preset HeroUI integrato nel package ([HUFThemePreset.sky], [HUFThemePreset.spotify], …).
+  final HUFThemePreset? theme;
+
+  /// Palette dedicata alla modalità chiara (sovrascrive il preset).
   final HUFThemePalette? light;
 
-  /// Palette dedicata alla modalità scura.
+  /// Palette dedicata alla modalità scura (sovrascrive il preset).
   final HUFThemePalette? dark;
 
   /// Border radius conmotionato per entrambe le modalità (se non sovrascritto per palette).
@@ -60,11 +55,16 @@ class HUFThemeData {
   /// Intensità glow per entrambe le modalità (se non sovrascritto per palette).
   final HUFGlowSize? glowSize;
 
-  /// Valori predefiniti del design system (nessun override).
-  static const HUFThemeData defaults = HUFThemeData();
+  /// Valori predefiniti del design system (equivale a [HUFThemePreset.defaultTheme]).
+  static const HUFThemeData defaults =
+      HUFThemeData(theme: HUFThemePreset.defaultTheme);
+
+  /// Shortcut per un preset senza altri override.
+  const HUFThemeData.preset(HUFThemePreset preset) : this(theme: preset);
 
   /// Stessi override per light e dark.
   factory HUFThemeData.shared({
+    HUFThemePreset? theme,
     HUFThemeColors? colors,
     HUFBorderRadius? borderRadius,
     HUFGlowSize? glowSize,
@@ -73,6 +73,7 @@ class HUFThemeData {
         ? HUFThemePalette(colors: colors, glowSize: glowSize)
         : null;
     return HUFThemeData(
+      theme: theme,
       light: palette,
       dark: palette,
       borderRadius: borderRadius,
@@ -80,20 +81,40 @@ class HUFThemeData {
     );
   }
 
+  HUFThemePresetBundle get _bundle =>
+      theme != null ? HUFThemePresets.forPreset(theme!) : HUFThemePresets.defaultTheme;
+
+  HUFThemePalette? _palette(Brightness brightness) {
+    final explicit =
+        brightness == Brightness.dark ? dark : light;
+    if (explicit != null) return explicit;
+    return brightness == Brightness.dark ? _bundle.dark : _bundle.light;
+  }
+
   HUFThemeColors resolveColors(Brightness brightness) {
-    final palette = brightness == Brightness.dark ? dark : light;
+    final palette = _palette(brightness);
     final base =
         brightness == Brightness.dark ? HUFThemeColors.dark : HUFThemeColors.light;
     return palette?.colors ?? base;
   }
 
   HUFBorderRadius resolveBorderRadius(Brightness brightness) {
-    final palette = brightness == Brightness.dark ? dark : light;
-    return palette?.borderRadius ?? borderRadius ?? HUFBorderRadius.standard;
+    final palette = _palette(brightness);
+    return palette?.borderRadius ??
+        borderRadius ??
+        _bundle.borderRadius ??
+        HUFBorderRadius.medium;
   }
 
   HUFGlowSize resolveGlowSize(Brightness brightness) {
-    final palette = brightness == Brightness.dark ? dark : light;
-    return palette?.glowSize ?? glowSize ?? HUFGlowSize.medium;
+    final palette = _palette(brightness);
+    return palette?.glowSize ?? glowSize ?? _bundle.glowSize ?? HUFGlowSize.medium;
   }
+}
+
+/// Risolve un preset in [HUFThemeData] pronto per [HUFTheme].
+extension HUFThemePresetData on HUFThemePreset {
+  HUFThemeData get data => HUFThemeData(theme: this);
+
+  HUFThemePresetBundle get bundle => HUFThemePresets.forPreset(this);
 }
