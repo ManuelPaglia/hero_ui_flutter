@@ -1,3 +1,6 @@
+export 'accordion/huf_accordion.dart';
+export 'accordion/huf_accordion_style.dart';
+export 'accordion/huf_accordion_variant.dart';
 export 'alert/huf_alert.dart';
 export 'alert/huf_alert_color.dart';
 export 'alert/huf_alert_position.dart';

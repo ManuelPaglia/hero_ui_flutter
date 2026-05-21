@@ -2111,6 +2111,158 @@ void main() {
     await tester.pump();
     expect(find.text('Overlay alert'), findsNothing);
   });
+
+  testWidgets('HUFAccordionItem standalone si espande al tap', (tester) async {
+    await tester.pumpWidget(
+      _wrap(const _StandaloneAccordionTest()),
+    );
+
+    expect(find.text('Risposta FAQ'), findsNothing);
+
+    await tester.tap(find.text('Domanda FAQ'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Risposta FAQ'), findsOneWidget);
+  });
+
+  testWidgets('HUFAccordion allowMultiple mantiene più item aperti', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAccordion<String>(
+          allowMultiple: true,
+          initialExpanded: const {'a'},
+          children: const [
+            HUFAccordionItem(
+              optionValue: 'a',
+              title: 'Primo',
+              content: Text('Contenuto primo'),
+            ),
+            HUFAccordionItem(
+              optionValue: 'b',
+              title: 'Secondo',
+              content: Text('Contenuto secondo'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Contenuto primo'), findsOneWidget);
+    expect(find.text('Contenuto secondo'), findsNothing);
+
+    await tester.tap(find.text('Secondo'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Contenuto primo'), findsOneWidget);
+    expect(find.text('Contenuto secondo'), findsOneWidget);
+  });
+
+  testWidgets('HUFAccordion allowMultiple false chiude il precedente', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAccordion<String>(
+          allowMultiple: false,
+          initialExpanded: const {'a'},
+          children: const [
+            HUFAccordionItem(
+              optionValue: 'a',
+              title: 'Primo',
+              content: Text('Contenuto primo'),
+            ),
+            HUFAccordionItem(
+              optionValue: 'b',
+              title: 'Secondo',
+              content: Text('Contenuto secondo'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Contenuto primo'), findsOneWidget);
+
+    await tester.tap(find.text('Secondo'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Contenuto primo'), findsNothing);
+    expect(find.text('Contenuto secondo'), findsOneWidget);
+  });
+
+  testWidgets('HUFAccordion card usa sfondo card e radius del tema', (
+    tester,
+  ) async {
+    const customRadius = 20.0;
+    final theme = HUFTheme.light().copyWith(
+      borderRadius: const HUFBorderRadius(value: customRadius),
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFAccordion<String>(
+          variant: HUFAccordionVariant.card,
+          children: const [
+            HUFAccordionItem(
+              optionValue: 'a',
+              title: 'Item card',
+              content: Text('Contenuto'),
+            ),
+          ],
+        ),
+        theme: theme,
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFAccordion<String>),
+        matching: find.byType(DecoratedBox).first,
+      ),
+    );
+
+    expect(
+      (decorated.decoration as BoxDecoration).color,
+      theme.colors.card,
+    );
+    expect(
+      (decorated.decoration as BoxDecoration).borderRadius,
+      BorderRadius.circular(customRadius),
+    );
+  });
+
+  testWidgets('HUFAccordion ghost non avvolge in card decorata', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAccordion<String>(
+          variant: HUFAccordionVariant.ghost,
+          children: const [
+            HUFAccordionItem(
+              optionValue: 'a',
+              title: 'Item ghost',
+              content: Text('Contenuto ghost'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byType(HUFAccordion<String>), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(HUFAccordion<String>),
+        matching: find.byType(DecoratedBox),
+      ),
+      findsNothing,
+    );
+  });
 }
 
 void _noop() {}
@@ -2149,5 +2301,26 @@ Finder _alertDecoratedBoxFinder() {
     of: find.byType(HUFAlert),
     matching: find.byType(DecoratedBox),
   );
+}
+
+class _StandaloneAccordionTest extends StatefulWidget {
+  const _StandaloneAccordionTest();
+
+  @override
+  State<_StandaloneAccordionTest> createState() => _StandaloneAccordionTestState();
+}
+
+class _StandaloneAccordionTestState extends State<_StandaloneAccordionTest> {
+  var _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return HUFAccordionItem(
+      title: 'Domanda FAQ',
+      isExpanded: _expanded,
+      onExpansionChanged: (value) => setState(() => _expanded = value),
+      content: const Text('Risposta FAQ'),
+    );
+  }
 }
 

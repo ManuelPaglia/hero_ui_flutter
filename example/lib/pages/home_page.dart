@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import '../example_app_scope.dart';
+import 'accordion_showcase_page.dart';
 import 'alerts_showcase_page.dart';
 import 'avatars_showcase_page.dart';
 import 'button_groups_showcase_page.dart';
@@ -30,6 +31,11 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   static const _entries = [
+    _HomeShowcaseEntry(
+      title: 'Accordion',
+      actionLabel: 'Apri',
+      page: AccordionShowcasePage(),
+    ),
     _HomeShowcaseEntry(
       title: 'Alert',
       actionLabel: 'Apri',
