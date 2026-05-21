@@ -2236,6 +2236,75 @@ void main() {
     );
   });
 
+  testWidgets('HUFButton con popover apre il contenuto al tap', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFButton(
+          label: 'Apri menu',
+          popover: HUFButtonPopover(
+            child: HUFPopoverContent(
+              title: 'Titolo popover',
+              description: 'Descrizione',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Titolo popover'), findsNothing);
+
+    await tester.tap(find.text('Apri menu'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Titolo popover'), findsOneWidget);
+    expect(find.text('Descrizione'), findsOneWidget);
+  });
+
+  testWidgets('HUFButton.iconOnly con popover apre il contenuto', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFButton.iconOnly(
+          icon: const Icon(Icons.more_horiz),
+          popover: const HUFButtonPopover(
+            child: HUFPopoverContent(title: 'Azioni'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.more_horiz));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Azioni'), findsOneWidget);
+  });
+
+  testWidgets('HUFButton con popover non invoca onPressed', (tester) async {
+    var pressed = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFButton(
+          label: 'Popover',
+          onPressed: () => pressed = true,
+          popover: const HUFButtonPopover(
+            child: HUFPopoverContent(title: 'Menu'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Popover'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(pressed, isFalse);
+    expect(find.text('Menu'), findsOneWidget);
+  });
+
   testWidgets('HUFAccordion ghost non avvolge in card decorata', (
     tester,
   ) async {

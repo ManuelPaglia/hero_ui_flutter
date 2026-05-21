@@ -16,17 +16,16 @@ class PopoverShowcasePage extends StatelessWidget {
         children: [
           const ShowcaseSubsectionTitle('Base'),
           Center(
-            child: HUFPopover(
-              triggerBuilder: (context, toggle, isOpen) => HUFButton(
-                label: 'Click me',
-                variant: HUFButtonVariant.primary,
-                size: HUFButtonSize.medium,
-                onPressed: toggle,
-              ),
-              child: const HUFPopoverContent(
-                title: 'Popover Title',
-                description:
-                    'This is the popover content. You can put any content here.',
+            child: HUFButton(
+              label: 'Click me',
+              variant: HUFButtonVariant.primary,
+              size: HUFButtonSize.medium,
+              popover: const HUFButtonPopover(
+                child: HUFPopoverContent(
+                  title: 'Popover Title',
+                  description:
+                      'This is the popover content. You can put any content here.',
+                ),
               ),
             ),
           ),
@@ -37,31 +36,29 @@ class PopoverShowcasePage extends StatelessWidget {
             runSpacing: 12,
             alignment: WrapAlignment.center,
             children: [
-              HUFPopover(
-                showArrow: true,
-                triggerBuilder: (context, toggle, isOpen) => HUFButton(
-                  label: 'With Arrow',
-                  variant: HUFButtonVariant.outlined,
-                  size: HUFButtonSize.medium,
-                  onPressed: toggle,
-                ),
-                child: const HUFPopoverContent(
-                  title: 'Popover with Arrow',
-                  description:
-                      'The arrow shows which element triggered the popover.',
+              HUFButton(
+                label: 'With Arrow',
+                variant: HUFButtonVariant.outlined,
+                size: HUFButtonSize.medium,
+                popover: const HUFButtonPopover(
+                  showArrow: true,
+                  child: HUFPopoverContent(
+                    title: 'Popover with Arrow',
+                    description:
+                        'The arrow shows which element triggered the popover.',
+                  ),
                 ),
               ),
-              HUFPopover(
-                showArrow: true,
-                triggerBuilder: (context, toggle, isOpen) => HUFButton.iconOnly(
-                  icon: const Icon(Icons.more_horiz),
-                  variant: HUFButtonVariant.secondary,
-                  size: HUFButtonSize.medium,
-                  onPressed: toggle,
-                ),
-                child: const HUFPopoverContent(
-                  title: 'Actions',
-                  description: 'Menu contestuale con freccia.',
+              HUFButton.iconOnly(
+                icon: const Icon(Icons.more_horiz),
+                variant: HUFButtonVariant.secondary,
+                size: HUFButtonSize.medium,
+                popover: const HUFButtonPopover(
+                  showArrow: true,
+                  child: HUFPopoverContent(
+                    title: 'Actions',
+                    description: 'Menu contestuale con freccia.',
+                  ),
                 ),
               ),
             ],
@@ -139,59 +136,18 @@ class PopoverShowcasePage extends StatelessWidget {
           const SizedBox(height: 32),
           const ShowcaseSubsectionTitle('Profilo (contenuto custom)'),
           Center(
-            child: HUFPopover(
-              showArrow: true,
-              triggerBuilder: (context, toggle, isOpen) => Material(
-                color: context.hufTheme.colors.transparent,
-                child: InkWell(
-                  onTap: toggle,
-                  borderRadius: BorderRadius.circular(
-                    context.hufTheme.borderRadius.full,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        HUFAvatar(
-                          size: HUFAvatarSize.small,
-                          initials: 'SJ',
-                          color: HUFAvatarColor.accent,
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Sarah Johnson',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: context.hufTheme.colors.cardForeground,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                            Text(
-                              '@sarahj',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context
-                                    .hufTheme.colors.cardMutedForeground,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            child: HUFButton(
+              label: 'Sarah Johnson',
+              icon: HUFAvatar(
+                size: HUFAvatarSize.small,
+                initials: 'SJ',
+                color: HUFAvatarColor.accent,
               ),
-              child: const _ProfilePopoverContent(),
+              variant: HUFButtonVariant.ghost,
+              popover: const HUFButtonPopover(
+                showArrow: true,
+                child: _ProfilePopoverContent(),
+              ),
             ),
           ),
         ],
@@ -211,17 +167,16 @@ class _PlacementPopover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HUFPopover(
-      placement: placement,
-      showArrow: true,
-      triggerBuilder: (context, toggle, isOpen) => HUFButton(
-        label: label,
-        variant: HUFButtonVariant.secondary,
-        size: HUFButtonSize.small,
-        onPressed: toggle,
-      ),
-      child: HUFPopoverContent(
-        title: '$label placement',
+    return HUFButton(
+      label: label,
+      variant: HUFButtonVariant.secondary,
+      size: HUFButtonSize.small,
+      popover: HUFButtonPopover(
+        placement: placement,
+        showArrow: true,
+        child: HUFPopoverContent(
+          title: '$label placement',
+        ),
       ),
     );
   }

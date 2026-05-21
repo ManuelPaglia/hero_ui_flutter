@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../layout/huf_shrink_wrap_width.dart';
 import '../../theme/huf_theme.dart';
+import '../popover/huf_popover.dart';
+import 'huf_button_popover.dart';
 import 'huf_button_size.dart';
 import 'huf_button_style.dart';
 import 'huf_button_variant.dart';
@@ -11,6 +13,9 @@ import 'huf_button_variant.dart';
 /// Per default ha larghezza intrinseca ([isFullWidth] è `false`).
 /// Imposta [isFullWidth] a `true` solo quando deve occupare tutta la riga
 /// (es. azioni in [HUFCard]).
+///
+/// Con [popover] impostato, il tap apre o chiude il popover ancorato al
+/// pulsante; [onPressed] non viene invocato.
 class HUFButton extends StatefulWidget {
   const HUFButton({
     super.key,
@@ -22,6 +27,7 @@ class HUFButton extends StatefulWidget {
     this.isFullWidth = false,
     this.icon,
     this.glowSize,
+    this.popover,
   }) : isIconOnly = false;
 
   /// Pulsante quadrato con sola icona.
@@ -33,6 +39,7 @@ class HUFButton extends StatefulWidget {
     this.size = HUFButtonSize.medium,
     this.isLoading = false,
     this.glowSize,
+    this.popover,
   })  : label = '',
         isFullWidth = false,
         isIconOnly = true;
@@ -49,6 +56,9 @@ class HUFButton extends StatefulWidget {
   /// Override dell'intensità glow; se null usa [HUFTheme.glowSize].
   final HUFGlowSize? glowSize;
 
+  /// Popover ancorato al pulsante; se non null il tap gestisce apertura/chiusura.
+  final HUFButtonPopover? popover;
+
   @override
   State<HUFButton> createState() => _HUFButtonState();
 }
@@ -59,7 +69,8 @@ class _HUFButtonState extends State<HUFButton> {
 
   bool _isPressed = false;
 
-  bool get _isDisabled => widget.onPressed == null || widget.isLoading;
+  bool _isDisabledFor(VoidCallback? onPressed) =>
+      onPressed == null || widget.isLoading;
 
   void _setPressed(bool value) {
     if (_isPressed == value) return;
@@ -68,6 +79,26 @@ class _HUFButtonState extends State<HUFButton> {
 
   @override
   Widget build(BuildContext context) {
+    final popover = widget.popover;
+    if (popover != null) {
+      return HUFPopover(
+        placement: popover.placement,
+        showArrow: popover.showArrow,
+        offset: popover.offset,
+        isOpen: popover.isOpen,
+        onOpenChanged: popover.onOpenChanged,
+        initialOpen: popover.initialOpen,
+        closeOnTapOutside: popover.closeOnTapOutside,
+        triggerBuilder: (context, toggle, isOpen) =>
+            _buildButton(onPressed: toggle),
+        child: popover.child,
+      );
+    }
+
+    return _buildButton(onPressed: widget.onPressed);
+  }
+
+  Widget _buildButton({required VoidCallback? onPressed}) {
     final theme = context.hufTheme;
     final glowSize = widget.glowSize ?? theme.glowSize;
     final glowLayoutPadding = hufGlowLayoutPaddingFor(glowSize);
@@ -80,7 +111,7 @@ class _HUFButtonState extends State<HUFButton> {
     final colors = hufButtonColorsFor(
       theme.colors,
       widget.variant,
-      _isDisabled,
+      _isDisabledFor(onPressed),
       isIconOnly: widget.isIconOnly,
       glowSize: glowSize,
     );
@@ -112,7 +143,8 @@ class _HUFButtonState extends State<HUFButton> {
       child: content,
     );
 
-    final scale = !_isDisabled && _isPressed ? _pressedScale : 1.0;
+    final isDisabled = _isDisabledFor(onPressed);
+    final scale = !isDisabled && _isPressed ? _pressedScale : 1.0;
 
     Widget button = AnimatedScale(
       scale: scale,
@@ -122,10 +154,10 @@ class _HUFButtonState extends State<HUFButton> {
       child: Material(
         color: theme.colors.transparent,
         child: InkWell(
-          onTap: _isDisabled ? null : widget.onPressed,
-          onTapDown: _isDisabled ? null : (_) => _setPressed(true),
-          onTapUp: _isDisabled ? null : (_) => _setPressed(false),
-          onTapCancel: _isDisabled ? null : () => _setPressed(false),
+          onTap: isDisabled ? null : onPressed,
+          onTapDown: isDisabled ? null : (_) => _setPressed(true),
+          onTapUp: isDisabled ? null : (_) => _setPressed(false),
+          onTapCancel: isDisabled ? null : () => _setPressed(false),
           borderRadius: borderRadius,
           splashColor: colors.foreground.withValues(alpha: 0.12),
           highlightColor: colors.foreground.withValues(alpha: 0.08),

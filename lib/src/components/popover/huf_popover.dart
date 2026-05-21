@@ -5,9 +5,7 @@ import '../../theme/huf_theme.dart';
 import 'huf_popover_placement.dart';
 import 'huf_popover_style.dart';
 
-/// Builder del trigger di [HUFPopover].
-///
-/// [toggle] apre o chiude il popover; [isOpen] indica lo stato corrente.
+/// Builder del trigger di [HUFPopover] (uso interno da [HUFButton] con [HUFButtonPopover]).
 typedef HUFPopoverTriggerBuilder = Widget Function(
   BuildContext context,
   VoidCallback toggle,
@@ -96,6 +94,7 @@ class HUFPopoverContent extends StatelessWidget {
 
 /// Popover ancorato a un trigger, attivato al tap.
 ///
+/// Non usare direttamente: imposta [HUFButton.popover] con [HUFButtonPopover].
 /// Usa lo stesso token [HUFBorderRadius.value] e i colori card del tema.
 /// Con [placement] predefinito [HUFPopoverPlacement.bottom]: se non c'è spazio
 /// sufficiente nel viewport, il popover viene mostrato dalla parte opposta

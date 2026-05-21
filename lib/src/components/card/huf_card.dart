@@ -18,6 +18,7 @@ Widget hufCardExpandAction(Widget action) {
       isFullWidth: true,
       icon: action.icon,
       glowSize: action.glowSize,
+      popover: action.popover,
     );
   }
   return action;
