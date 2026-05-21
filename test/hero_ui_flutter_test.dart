@@ -2332,6 +2332,76 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets('HUFSeparator orizzontale usa il colore border del tema light', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          width: 200,
+          child: HUFSeparator(),
+        ),
+        theme: HUFTheme.light(),
+      ),
+    );
+
+    final box = tester.widget<ColoredBox>(
+      find.descendant(
+        of: find.byType(HUFSeparator),
+        matching: find.byType(ColoredBox),
+      ),
+    );
+    expect(box.color, HUFThemeColors.light.border);
+    expect(tester.getSize(find.byType(HUFSeparator)).height, kHufSeparatorThickness);
+  });
+
+  testWidgets('HUFSeparator verticale si adatta all\'altezza del genitore', (
+    tester,
+  ) async {
+    const parentHeight = 20.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          height: parentHeight,
+          child: Row(
+            children: [
+              HUFSeparator(orientation: HUFSeparatorOrientation.vertical),
+            ],
+          ),
+        ),
+        theme: HUFTheme.dark(),
+      ),
+    );
+
+    final box = tester.widget<ColoredBox>(
+      find.descendant(
+        of: find.byType(HUFSeparator),
+        matching: find.byType(ColoredBox),
+      ),
+    );
+    expect(box.color, HUFThemeColors.dark.border);
+    expect(tester.getSize(find.byType(HUFSeparator)).height, parentHeight);
+    expect(tester.getSize(find.byType(HUFSeparator)).width, kHufSeparatorThickness);
+  });
+
+  testWidgets('HUFSeparator varianti risolvono colori distinti', (tester) async {
+    final palette = HUFThemeColors.light;
+
+    expect(
+      hufSeparatorColorFor(palette, HUFSeparatorVariant.defaultVariant),
+      palette.border,
+    );
+    expect(
+      hufSeparatorColorFor(palette, HUFSeparatorVariant.secondary),
+      isNot(palette.border),
+    );
+    expect(
+      hufSeparatorColorFor(palette, HUFSeparatorVariant.tertiary),
+      isNot(palette.border),
+    );
+  });
 }
 
 void _noop() {}

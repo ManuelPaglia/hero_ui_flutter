@@ -13,6 +13,7 @@ import 'checkbox_cards_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'popover_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
+import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switches_showcase_page.dart';
 
@@ -86,6 +87,11 @@ class HomePage extends StatelessWidget {
       title: 'Radio button',
       actionLabel: 'Apri',
       page: RadioButtonsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Separator',
+      actionLabel: 'Apri',
+      page: SeparatorsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Slider',
