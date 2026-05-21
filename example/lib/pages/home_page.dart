@@ -13,6 +13,7 @@ import 'checkbox_cards_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'popover_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
+import 'select_showcase_page.dart';
 import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switches_showcase_page.dart';
@@ -89,6 +90,11 @@ class HomePage extends StatelessWidget {
       page: RadioButtonsShowcasePage(),
     ),
     _HomeShowcaseEntry(
+      title: 'Select',
+      actionLabel: 'Apri',
+      page: SelectShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
       title: 'Separator',
       actionLabel: 'Apri',
       page: SeparatorsShowcasePage(),
@@ -114,7 +120,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ShowcaseAppBar(title: 'Hero UI Flutter'),
+      appBar: const ShowcaseAppBar(title: ''),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

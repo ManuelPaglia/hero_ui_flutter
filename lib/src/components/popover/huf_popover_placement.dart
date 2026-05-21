@@ -13,6 +13,27 @@ enum HUFPopoverPlacement {
   end,
 }
 
+/// Lato del popover su cui disegnare la freccia che punta verso il trigger.
+enum HUFPopoverArrowEdge {
+  top,
+  bottom,
+  left,
+  right,
+}
+
+/// Lato del popover su cui disegnare la freccia, dal [HUFPopoverPlacement] risolto
+/// (allineato a `_popoverTopLeftFor`, incluso il fallback viewport).
+HUFPopoverArrowEdge hufPopoverArrowEdgeForPlacement(
+  HUFPopoverPlacement placement,
+) {
+  return switch (placement) {
+    HUFPopoverPlacement.bottom => HUFPopoverArrowEdge.top,
+    HUFPopoverPlacement.top => HUFPopoverArrowEdge.bottom,
+    HUFPopoverPlacement.start => HUFPopoverArrowEdge.right,
+    HUFPopoverPlacement.end => HUFPopoverArrowEdge.left,
+  };
+}
+
 /// Restituisce la posizione opposta per il fallback su overflow viewport.
 HUFPopoverPlacement hufPopoverFlipPlacement(HUFPopoverPlacement placement) {
   return switch (placement) {

@@ -146,6 +146,7 @@ class HUFPopover extends StatefulWidget {
 
 class _HUFPopoverState extends State<HUFPopover> {
   final _triggerKey = GlobalKey();
+  final Object _tapRegionGroup = Object();
   OverlayEntry? _overlayEntry;
   int _overlayGeneration = 0;
 
@@ -219,15 +220,46 @@ class _HUFPopoverState extends State<HUFPopover> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_open || generation != _overlayGeneration) return;
 
+      final triggerBox =
+          _triggerKey.currentContext?.findRenderObject() as RenderBox?;
       final overlay = Overlay.maybeOf(context, rootOverlay: true);
       if (overlay == null) return;
+
+      final gap = _gapFor(context);
+      Offset? initialPosition;
+      final overlayBox =
+          overlay.context.findRenderObject() as RenderBox?;
+      if (triggerBox != null &&
+          triggerBox.hasSize &&
+          overlayBox != null &&
+          overlayBox.hasSize) {
+        final mediaQuery = MediaQuery.of(context);
+        final viewport = Rect.fromLTWH(
+          mediaQuery.padding.left,
+          mediaQuery.padding.top,
+          mediaQuery.size.width - mediaQuery.padding.horizontal,
+          mediaQuery.size.height - mediaQuery.padding.vertical,
+        );
+        final triggerRect =
+            triggerBox.localToGlobal(Offset.zero) & triggerBox.size;
+        final globalTopLeft = _popoverTopLeftFor(
+          triggerRect: triggerRect,
+          popoverSize: Size.zero,
+          placement: widget.placement,
+          gap: gap,
+          viewport: viewport,
+        );
+        initialPosition = overlayBox.globalToLocal(globalTopLeft);
+      }
 
       _overlayEntry = OverlayEntry(
         builder: (overlayContext) => _HUFPopoverOverlay(
           triggerKey: _triggerKey,
+          tapRegionGroup: _tapRegionGroup,
           requestedPlacement: widget.placement,
           showArrow: widget.showArrow,
-          gap: _gapFor(context),
+          gap: gap,
+          initialPosition: initialPosition,
           closeOnTapOutside: widget.closeOnTapOutside,
           onTapOutside: _close,
           child: widget.child,
@@ -253,7 +285,10 @@ class _HUFPopoverState extends State<HUFPopover> {
   Widget build(BuildContext context) {
     return KeyedSubtree(
       key: _triggerKey,
-      child: widget.triggerBuilder(context, _toggle, _open),
+      child: TapRegion(
+        groupId: _tapRegionGroup,
+        child: widget.triggerBuilder(context, _toggle, _open),
+      ),
     );
   }
 }
@@ -261,18 +296,22 @@ class _HUFPopoverState extends State<HUFPopover> {
 class _HUFPopoverOverlay extends StatefulWidget {
   const _HUFPopoverOverlay({
     required this.triggerKey,
+    required this.tapRegionGroup,
     required this.requestedPlacement,
     required this.showArrow,
     required this.gap,
+    required this.initialPosition,
     required this.closeOnTapOutside,
     required this.onTapOutside,
     required this.child,
   });
 
   final GlobalKey triggerKey;
+  final Object tapRegionGroup;
   final HUFPopoverPlacement requestedPlacement;
   final bool showArrow;
   final double gap;
+  final Offset? initialPosition;
   final bool closeOnTapOutside;
   final VoidCallback onTapOutside;
   final Widget child;
@@ -281,18 +320,40 @@ class _HUFPopoverOverlay extends StatefulWidget {
   State<_HUFPopoverOverlay> createState() => _HUFPopoverOverlayState();
 }
 
-class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
+class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
+    with SingleTickerProviderStateMixin {
   final _popoverKey = GlobalKey();
   Offset? _position;
   HUFPopoverPlacement? _resolvedPlacement;
   int _layoutAttempts = 0;
+  bool _positionFinalized = false;
 
   static const _maxLayoutAttempts = 30;
+  static const _entranceDuration = Duration(milliseconds: 160);
+
+  late final AnimationController _entranceController;
+  late final Animation<double> _entranceAnimation;
 
   @override
   void initState() {
     super.initState();
+    _position = widget.initialPosition;
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: _entranceDuration,
+    );
+    _entranceAnimation = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
   }
 
   @override
@@ -301,9 +362,26 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
     if (oldWidget.requestedPlacement != widget.requestedPlacement) {
       _resolvedPlacement = null;
       _position = null;
+      _positionFinalized = false;
       _layoutAttempts = 0;
+      _entranceController.reset();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
+  }
+
+  Alignment _scaleAlignmentFor(HUFPopoverPlacement placement) {
+    return switch (placement) {
+      HUFPopoverPlacement.bottom => Alignment.topCenter,
+      HUFPopoverPlacement.top => Alignment.bottomCenter,
+      HUFPopoverPlacement.start => Alignment.centerRight,
+      HUFPopoverPlacement.end => Alignment.centerLeft,
+    };
+  }
+
+  void _scheduleLayoutRetry() {
+    if (_layoutAttempts++ < _maxLayoutAttempts) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
+    }
   }
 
   void _updatePosition() {
@@ -315,24 +393,13 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
     final popoverBox =
         _popoverKey.currentContext?.findRenderObject() as RenderBox?;
 
-    if (triggerBox == null || !triggerBox.hasSize) {
-      if (_layoutAttempts++ < _maxLayoutAttempts) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
-      }
-      return;
-    }
-
     if (overlayBox == null ||
         !overlayBox.hasSize ||
-        popoverBox == null ||
-        !popoverBox.hasSize) {
-      if (_layoutAttempts++ < _maxLayoutAttempts) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
-      }
+        triggerBox == null ||
+        !triggerBox.hasSize) {
+      _scheduleLayoutRetry();
       return;
     }
-
-    _layoutAttempts = 0;
 
     final mediaQuery = MediaQuery.of(context);
     final viewport = Rect.fromLTWH(
@@ -344,8 +411,27 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
 
     final triggerGlobal = triggerBox.localToGlobal(Offset.zero);
     final triggerRect = triggerGlobal & triggerBox.size;
-    final popoverSize = popoverBox.size;
+    final placement = _resolvedPlacement ?? widget.requestedPlacement;
 
+    if (popoverBox == null || !popoverBox.hasSize) {
+      final provisionalGlobal = _popoverTopLeftFor(
+        triggerRect: triggerRect,
+        popoverSize: Size.zero,
+        placement: placement,
+        gap: widget.gap,
+        viewport: viewport,
+      );
+      final local = overlayBox.globalToLocal(provisionalGlobal);
+      if (_position != local) {
+        setState(() => _position = local);
+      }
+      _scheduleLayoutRetry();
+      return;
+    }
+
+    _layoutAttempts = 0;
+
+    final popoverSize = popoverBox.size;
     final resolved = _resolvePlacementFor(
       requested: widget.requestedPlacement,
       triggerRect: triggerRect,
@@ -363,12 +449,19 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
     );
 
     final localTopLeft = overlayBox.globalToLocal(globalTopLeft);
+    final shouldAnimate = !_positionFinalized;
 
-    if (resolved != _resolvedPlacement || _position != localTopLeft) {
+    if (resolved != _resolvedPlacement ||
+        _position != localTopLeft ||
+        shouldAnimate) {
       setState(() {
         _resolvedPlacement = resolved;
         _position = localTopLeft;
+        _positionFinalized = true;
       });
+      if (shouldAnimate) {
+        _entranceController.forward(from: 0);
+      }
     }
   }
 
@@ -379,52 +472,61 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay> {
     final colors = hufPopoverColorsFor(theme.colors);
     final placement = _resolvedPlacement ?? widget.requestedPlacement;
 
+    final arrowEdge = widget.showArrow && _positionFinalized
+        ? hufPopoverArrowEdgeForPlacement(placement)
+        : null;
+
     final surface = _HUFPopoverSurface(
       key: _popoverKey,
       metrics: metrics,
       colors: colors,
-      placement: placement,
-      showArrow: widget.showArrow,
+      arrowEdge: arrowEdge,
       child: widget.child,
+    );
+
+    final popover = HUFShrinkWrapWidth(
+      alignment: AlignmentDirectional.centerStart,
+      child: UnconstrainedBox(
+        alignment: AlignmentDirectional.centerStart,
+        constrainedAxis: Axis.horizontal,
+        clipBehavior: Clip.none,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: metrics.maxWidth),
+          child: surface,
+        ),
+      ),
     );
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (widget.closeOnTapOutside)
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: widget.onTapOutside,
-            ),
-          ),
-        Positioned(
-          left: _position?.dx ?? 0,
-          top: _position?.dy ?? 0,
-          child: IgnorePointer(
-            ignoring: _position == null,
+        if (_position != null)
+          Positioned(
+            left: _position!.dx,
+            top: _position!.dy,
             child: TapRegion(
+              groupId: widget.tapRegionGroup,
               onTapOutside: (_) {
                 if (widget.closeOnTapOutside) widget.onTapOutside();
               },
-              child: Opacity(
-                opacity: _position != null ? 1 : 0,
-                child: HUFShrinkWrapWidth(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: UnconstrainedBox(
-                    alignment: AlignmentDirectional.centerStart,
-                    constrainedAxis: Axis.horizontal,
-                    clipBehavior: Clip.none,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: metrics.maxWidth),
-                      child: surface,
-                    ),
+              child: FadeTransition(
+                opacity: _entranceAnimation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.96, end: 1).animate(
+                    _entranceAnimation,
                   ),
+                  alignment: _scaleAlignmentFor(placement),
+                  child: popover,
                 ),
               ),
             ),
+          )
+        else
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(opacity: 0, child: popover),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -435,15 +537,13 @@ class _HUFPopoverSurface extends StatelessWidget {
     super.key,
     required this.metrics,
     required this.colors,
-    required this.placement,
-    required this.showArrow,
+    required this.arrowEdge,
     required this.child,
   });
 
   final HUFPopoverMetrics metrics;
   final HUFPopoverColors colors;
-  final HUFPopoverPlacement placement;
-  final bool showArrow;
+  final HUFPopoverArrowEdge? arrowEdge;
   final Widget child;
 
   @override
@@ -468,14 +568,15 @@ class _HUFPopoverSurface extends StatelessWidget {
       ),
     );
 
-    if (!showArrow) return card;
+    final edge = arrowEdge;
+    if (edge == null) return card;
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
         card,
         _HUFPopoverArrow(
-          placement: placement,
+          edge: edge,
           fillColor: colors.background,
           borderColor: colors.border,
           size: metrics.arrowSize,
@@ -487,13 +588,13 @@ class _HUFPopoverSurface extends StatelessWidget {
 
 class _HUFPopoverArrow extends StatelessWidget {
   const _HUFPopoverArrow({
-    required this.placement,
+    required this.edge,
     required this.fillColor,
     required this.borderColor,
     required this.size,
   });
 
-  final HUFPopoverPlacement placement;
+  final HUFPopoverArrowEdge edge;
   final Color fillColor;
   final Color borderColor;
   final double size;
@@ -505,46 +606,40 @@ class _HUFPopoverArrow extends StatelessWidget {
       painter: _HUFPopoverArrowPainter(
         fillColor: fillColor,
         borderColor: borderColor,
-        pointsUp: _pointsUp,
+        pointsUp: edge == HUFPopoverArrowEdge.top,
       ),
     );
 
+    final rotated = switch (edge) {
+      HUFPopoverArrowEdge.top || HUFPopoverArrowEdge.bottom => arrow,
+      HUFPopoverArrowEdge.left => RotatedBox(quarterTurns: 3, child: arrow),
+      HUFPopoverArrowEdge.right => RotatedBox(quarterTurns: 1, child: arrow),
+    };
+
     return Positioned(
-      top: switch (placement) {
-        HUFPopoverPlacement.bottom => -size + 1,
-        HUFPopoverPlacement.start || HUFPopoverPlacement.end => 0,
+      top: switch (edge) {
+        HUFPopoverArrowEdge.top => -size + 1,
+        HUFPopoverArrowEdge.left || HUFPopoverArrowEdge.right => 0,
         _ => null,
       },
-      bottom: switch (placement) {
-        HUFPopoverPlacement.top => -size + 1,
-        HUFPopoverPlacement.start || HUFPopoverPlacement.end => 0,
+      bottom: switch (edge) {
+        HUFPopoverArrowEdge.bottom => -size + 1,
+        HUFPopoverArrowEdge.left || HUFPopoverArrowEdge.right => 0,
         _ => null,
       },
-      left: switch (placement) {
-        HUFPopoverPlacement.bottom || HUFPopoverPlacement.top => 0,
-        HUFPopoverPlacement.end => -size + 1,
+      left: switch (edge) {
+        HUFPopoverArrowEdge.left => -size + 1,
+        HUFPopoverArrowEdge.top || HUFPopoverArrowEdge.bottom => 0,
         _ => null,
       },
-      right: switch (placement) {
-        HUFPopoverPlacement.bottom || HUFPopoverPlacement.top => 0,
-        HUFPopoverPlacement.start => -size + 1,
+      right: switch (edge) {
+        HUFPopoverArrowEdge.right => -size + 1,
+        HUFPopoverArrowEdge.top || HUFPopoverArrowEdge.bottom => 0,
         _ => null,
       },
-      child: switch (placement) {
-        HUFPopoverPlacement.bottom || HUFPopoverPlacement.top => Center(
-            child: arrow,
-          ),
-        HUFPopoverPlacement.start || HUFPopoverPlacement.end => Center(
-            child: RotatedBox(
-              quarterTurns: placement == HUFPopoverPlacement.start ? 1 : 3,
-              child: arrow,
-            ),
-          ),
-      },
+      child: Center(child: rotated),
     );
   }
-
-  bool get _pointsUp => placement == HUFPopoverPlacement.bottom;
 }
 
 class _HUFPopoverArrowPainter extends CustomPainter {

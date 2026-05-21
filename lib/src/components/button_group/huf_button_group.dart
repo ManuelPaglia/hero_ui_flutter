@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../layout/huf_shrink_wrap_width.dart';
 import '../../theme/huf_theme.dart';
+import '../button/huf_button_press_scale.dart';
 import '../button/huf_button_size.dart';
 import '../button/huf_button_style.dart';
 import '../button/huf_button_variant.dart';
@@ -125,12 +126,8 @@ class _HUFButtonGroupSegment extends StatefulWidget {
   State<_HUFButtonGroupSegment> createState() => _HUFButtonGroupSegmentState();
 }
 
-class _HUFButtonGroupSegmentState extends State<_HUFButtonGroupSegment> {
-  static const double _pressedScale = 0.97;
-  static const Duration _pressAnimationDuration = Duration(milliseconds: 120);
-
-  bool _isPressed = false;
-
+class _HUFButtonGroupSegmentState extends State<_HUFButtonGroupSegment>
+    with HUFButtonPressScaleMixin {
   bool get _isDisabled => widget.item.onPressed == null;
 
   Color get _foreground {
@@ -140,9 +137,10 @@ class _HUFButtonGroupSegmentState extends State<_HUFButtonGroupSegment> {
     return widget.colors.foreground;
   }
 
-  void _setPressed(bool value) {
-    if (_isPressed == value) return;
-    setState(() => _isPressed = value);
+  @override
+  void dispose() {
+    disposeHufButtonPressScale();
+    super.dispose();
   }
 
   @override
@@ -180,38 +178,40 @@ class _HUFButtonGroupSegmentState extends State<_HUFButtonGroupSegment> {
       ],
     );
 
-    final scale = !_isDisabled && _isPressed ? _pressedScale : 1.0;
+    final scale = pressScaleFor(!_isDisabled);
 
     return AnimatedScale(
       scale: scale,
-      duration: _pressAnimationDuration,
+      duration: HUFButtonPressScaleMixin.pressAnimationDuration,
       curve: Curves.easeOut,
       alignment: Alignment.center,
-      child: Material(
-        color: widget.colors.background,
-        child: InkWell(
-          onTap: _isDisabled ? null : widget.item.onPressed,
-          onTapDown: _isDisabled ? null : (_) => _setPressed(true),
-          onTapUp: _isDisabled ? null : (_) => _setPressed(false),
-          onTapCancel: _isDisabled ? null : () => _setPressed(false),
-          borderRadius: widget.segmentRadius,
-          splashColor: _foreground.withValues(alpha: 0.12),
-          highlightColor: _foreground.withValues(alpha: 0.08),
-          child: Container(
-            height: metrics.height,
-            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: widget.showDivider
-                  ? Border(
-                      right: BorderSide(
-                        color: widget.dividerColor,
-                        width: 1,
-                      ),
-                    )
-                  : null,
+      child: Listener(
+        onPointerDown: _isDisabled ? null : (_) => handleHufButtonPressStart(),
+        onPointerUp: _isDisabled ? null : (_) => handleHufButtonPressEnd(),
+        onPointerCancel: _isDisabled ? null : (_) => handleHufButtonPressEnd(),
+        child: Material(
+          color: widget.colors.background,
+          child: InkWell(
+            onTap: _isDisabled ? null : widget.item.onPressed,
+            borderRadius: widget.segmentRadius,
+            splashColor: _foreground.withValues(alpha: 0.12),
+            highlightColor: _foreground.withValues(alpha: 0.08),
+            child: Container(
+              height: metrics.height,
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: widget.showDivider
+                    ? Border(
+                        right: BorderSide(
+                          color: widget.dividerColor,
+                          width: 1,
+                        ),
+                      )
+                    : null,
+              ),
+              child: content,
             ),
-            child: content,
           ),
         ),
       ),

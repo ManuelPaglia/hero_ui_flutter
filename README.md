@@ -33,6 +33,8 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFSlider](#hufslider)
   - [HUFRangeSlider](#hufrangeslider)
   - [HUFPopover](#hufpopover)
+  - [HUFSelect](#hufselect)
+  - [HUFSeparator](#hufseparator)
 - [Roadmap componenti](#roadmap-componenti)
 - [App di esempio](#app-di-esempio)
 - [Licenza](#licenza)
@@ -990,7 +992,7 @@ HUFRangeSlider(
 
 ### HUFPopover
 
-Pannello contestuale che si apre al tap su un [HUFButton](#hufbutton), passando `popover: HUFButtonPopover(...)`. Il popover è posizionato rispetto al pulsante (`bottom` di default) e, se non c’è spazio nel viewport, si capovolge automaticamente (es. `bottom` → `top`).
+Pannello contestuale che si apre al tap su un [HUFButton](#hufbutton), passando `popover: HUFButtonPopover(...)`. Il popover è posizionato rispetto al pulsante (`bottom` di default) e, se non c’è spazio nel viewport, si capovolge automaticamente (es. `bottom` → `top`). All’apertura usa la stessa animazione fade/scale di [HUFSelect](#hufselect), direttamente in posizione (senza scatto dall’angolo dello schermo).
 
 **Base** — titolo e descrizione con `HUFPopoverContent`:
 
@@ -1084,7 +1086,7 @@ class _MenuState extends State<Menu> {
 }
 ```
 
-Con `popover` impostato, il tap gestisce solo apertura/chiusura; usa `onPressed` per azioni dirette quando il popover è `null`.
+Con `popover` impostato, il tap gestisce solo apertura/chiusura (un secondo tap sul pulsante chiude il pannello); usa `onPressed` per azioni dirette quando il popover è `null`.
 
 | Proprietà (`HUFButtonPopover`) | Tipo                  | Default  | Descrizione                        |
 | ----------------------------- | --------------------- | -------- | ---------------------------------- |
@@ -1098,6 +1100,138 @@ Con `popover` impostato, il tap gestisce solo apertura/chiusura; usa `onPressed`
 | `closeOnTapOutside`           | `bool`                | `true`   | Chiude al tap fuori                |
 
 **`HUFPopoverContent`:** `title`, `description`, `child` (widget aggiuntivo sotto titolo/descrizione).
+
+---
+
+### HUFSelect
+
+Select con menu a comparsa, allineato al design HeroUI. Supporta selezione singola o multipla, sezioni con intestazione e [HUFSeparator](#hufseparator), voci con `leading`/`subtitle` (es. avatar + email) e `itemBuilder` custom. Colori e border radius seguono [HUFTheme](#sistema-di-temi); il menu si apre con animazione fade/scale nella posizione finale e, se non c’è spazio, si capovolge (`top` ↔ `bottom`). Un secondo tap sul trigger chiude il menu.
+
+**Singola** — elenco piatto:
+
+```dart
+HUFSelect<String>(
+  label: 'State',
+  placeholder: 'Select one',
+  isFullWidth: true,
+  items: const [
+    HUFSelectItem(value: 'fl', label: 'Florida'),
+    HUFSelectItem(value: 'ca', label: 'California'),
+  ],
+  value: selected,
+  onChanged: (v) => setState(() => selected = v),
+)
+```
+
+**Sezioni** — intestazioni e separatori tra gruppi:
+
+```dart
+HUFSelect<String>(
+  label: 'Country',
+  placeholder: 'Select a country',
+  isFullWidth: true,
+  sections: [
+    const HUFSelectSection(
+      header: 'North America',
+      items: [
+        HUFSelectItem(value: 'us', label: 'United States'),
+        HUFSelectItem(value: 'ca', label: 'Canada'),
+      ],
+    ),
+    const HUFSelectSection(
+      header: 'Europe',
+      showSeparatorBefore: true,
+      items: [
+        HUFSelectItem(value: 'fr', label: 'France'),
+        HUFSelectItem(value: 'de', label: 'Germany'),
+      ],
+    ),
+  ],
+  value: selected,
+  onChanged: (v) => setState(() => selected = v),
+)
+```
+
+**Multipla** — checkmark sulle voci, testo nel trigger con separatori configurabili:
+
+```dart
+HUFSelect<String>(
+  label: 'Countries',
+  multiSelect: true,
+  closeOnSelect: false,
+  placement: HUFSelectPlacement.top,
+  values: selected,
+  onMultiChanged: (v) => setState(() => selected = v),
+  items: countries,
+)
+```
+
+**Voce custom** — `itemBuilder` o `leading` + `subtitle` sulle voci:
+
+```dart
+HUFSelectItem(
+  value: user.id,
+  label: user.name,
+  subtitle: user.email,
+  leading: HUFAvatar(initials: user.initials, size: HUFAvatarSize.small),
+)
+```
+
+| Proprietà | Tipo | Default | Descrizione |
+| --------- | ---- | ------- | ----------- |
+| `label` | `String?` | — | Label sopra il trigger |
+| `placeholder` | `String` | `'Select one'` | Testo se nessuna selezione |
+| `items` | `List<HUFSelectItem<T>>?` | — | Elenco piatto (o usa `sections`) |
+| `sections` | `List<HUFSelectSection<T>>?` | — | Gruppi con header opzionale |
+| `value` | `T?` | — | Valore (singola) |
+| `values` | `Set<T>?` | — | Valori (multipla) |
+| `onChanged` | `ValueChanged<T?>?` | — | Callback singola |
+| `onMultiChanged` | `ValueChanged<Set<T>>?` | — | Callback multipla |
+| `multiSelect` | `bool` | `false` | Selezione multipla |
+| `isFullWidth` | `bool` | `false` | Larghezza piena del genitore |
+| `placement` | `HUFSelectPlacement` | `bottom` | `top` · `bottom` (con flip automatico) |
+| `closeOnSelect` | `bool` | `!multiSelect` | Chiude il menu dopo la selezione |
+| `itemBuilder` | `HUFSelectItemBuilder<T>?` | — | Layout voce custom |
+| `displayStringForValue` | `String Function(T)?` | — | Testo nel trigger per valore |
+| `isOpen` / `onOpenChanged` | — | — | Stato aperto controllato |
+| `menuOffset` | `double?` | auto | Gap tra trigger e menu |
+
+**`HUFSelectItem`:** `value`, `label`, `subtitle`, `leading`, `enabled`. **`HUFSelectSection`:** `header`, `items`, `showSeparatorBefore`.
+
+---
+
+### HUFSeparator
+
+Linea divisoria orizzontale o verticale tra blocchi di contenuto. Il colore deriva dal tema (`border`, `secondary`, `tertiary`).
+
+**Orizzontale** — larghezza piena del genitore:
+
+```dart
+const HUFSeparator()
+// oppure esplicito:
+const HUFSeparator(orientation: HUFSeparatorOrientation.horizontal)
+```
+
+**Verticale** — in una `Row` con altezza definita (es. link di navigazione):
+
+```dart
+Row(
+  children: [
+    Text('Blog'),
+    const SizedBox(width: 16),
+    const HUFSeparator(orientation: HUFSeparatorOrientation.vertical),
+    const SizedBox(width: 16),
+    Text('Docs'),
+  ],
+)
+```
+
+| Proprietà | Tipo | Default | Descrizione |
+| --------- | ---- | ------- | ----------- |
+| `orientation` | `HUFSeparatorOrientation` | `horizontal` | `horizontal` · `vertical` |
+| `variant` | `HUFSeparatorVariant` | `defaultVariant` | Intensità colore (`default` · `secondary` · `tertiary`) |
+
+Usato anche nelle sezioni di [HUFSelect](#hufselect) (`showSeparatorBefore` su `HUFSelectSection`).
 
 ---
 
@@ -1125,6 +1259,8 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Switch** — `HUFSwitch`
 - **Switch Group** — `HUFSwitchGroup`
 - **Popover** — `HUFButtonPopover`, `HUFPopoverContent` (via `HUFButton.popover`)
+- **Select** — `HUFSelect`, `HUFSelectItem`, `HUFSelectSection`
+- **Separator** — `HUFSeparator` (orizzontale e verticale)
 
 ### Da implementare
 
@@ -1147,9 +1283,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Listbox Item**
 - **Meter / Progress Bar**
 - **Scroll Shadow**
-- **Select**
-- **Separator** (horizontal)
-- **Separator** (vertical)
 - **Skeleton**
 - **Table**
 - **Tabs**
@@ -1166,7 +1299,9 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Popover, Radio Button, Slider, Switch.
+Pagine showcase disponibili: Accordion, Alert, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Popover, Radio Button, Select, Separator, Slider, Switch.
+
+L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 
 ---
 

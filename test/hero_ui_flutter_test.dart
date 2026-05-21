@@ -2282,6 +2282,25 @@ void main() {
     expect(find.text('Azioni'), findsOneWidget);
   });
 
+  test('hufPopoverArrowEdgeForPlacement segue il placement risolto', () {
+    expect(
+      hufPopoverArrowEdgeForPlacement(HUFPopoverPlacement.bottom),
+      HUFPopoverArrowEdge.top,
+    );
+    expect(
+      hufPopoverArrowEdgeForPlacement(HUFPopoverPlacement.top),
+      HUFPopoverArrowEdge.bottom,
+    );
+    expect(
+      hufPopoverArrowEdgeForPlacement(HUFPopoverPlacement.start),
+      HUFPopoverArrowEdge.right,
+    );
+    expect(
+      hufPopoverArrowEdgeForPlacement(HUFPopoverPlacement.end),
+      HUFPopoverArrowEdge.left,
+    );
+  });
+
   testWidgets('HUFButton con popover non invoca onPressed', (tester) async {
     var pressed = false;
 
@@ -2401,6 +2420,171 @@ void main() {
       hufSeparatorColorFor(palette, HUFSeparatorVariant.tertiary),
       isNot(palette.border),
     );
+  });
+
+  testWidgets('HUFSelect apre il menu e seleziona una voce', (tester) async {
+    String? selected;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFSelect<String>(
+              label: 'State',
+              placeholder: 'Select one',
+              items: const [
+                HUFSelectItem(value: 'fl', label: 'Florida'),
+                HUFSelectItem(value: 'ca', label: 'California'),
+              ],
+              value: selected,
+              onChanged: (v) => setState(() => selected = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Select one'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Florida'), findsOneWidget);
+
+    await tester.tap(find.text('Florida'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(selected, 'fl');
+    expect(find.text('Florida'), findsOneWidget);
+  });
+
+  testWidgets('HUFSelect senza isFullWidth non espande in ListView', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: ListView(
+            children: [
+              HUFSelect<String>(
+                placeholder: 'Compatto',
+                items: const [HUFSelectItem(value: 'a', label: 'A')],
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final triggerFinder = find.descendant(
+      of: find.byType(HUFSelect<String>),
+      matching: find.byType(Ink),
+    );
+    final triggerWidth = tester.getSize(triggerFinder.first).width;
+    expect(triggerWidth, lessThan(parentWidth));
+    expect(triggerWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFSelect applica border radius del tema', (tester) async {
+    const large = HUFBorderRadius.large;
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFSelect<String>(
+          placeholder: 'Pick',
+          items: [HUFSelectItem(value: 'a', label: 'A')],
+        ),
+        theme: HUFTheme.light(borderRadius: large),
+      ),
+    );
+
+    final triggerInk = tester.widget<Ink>(
+      find.descendant(
+        of: find.byType(HUFSelect<String>),
+        matching: find.byType(Ink),
+      ).first,
+    );
+    final decoration = triggerInk.decoration! as BoxDecoration;
+    final radius = decoration.borderRadius! as BorderRadius;
+
+    expect(radius.topLeft.x, large.value);
+  });
+
+  testWidgets('HUFSelect multipla aggiorna subito il menu aperto', (tester) async {
+    var values = <String>{};
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFSelect<String>(
+              placeholder: 'Countries',
+              multiSelect: true,
+              closeOnSelect: false,
+              values: values,
+              onMultiChanged: (v) => setState(() => values = v),
+              items: const [
+                HUFSelectItem(value: 'es', label: 'Spain'),
+                HUFSelectItem(value: 'nz', label: 'New Zealand'),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Countries'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await tester.tap(find.text('New Zealand'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+
+    await tester.tap(find.text('New Zealand').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byIcon(Icons.check_rounded), findsNothing);
+  });
+
+  testWidgets('HUFSelect multipla aggiorna values', (tester) async {
+    var values = <String>{'es'};
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFSelect<String>(
+              placeholder: 'Countries',
+              multiSelect: true,
+              values: values,
+              onMultiChanged: (v) => setState(() => values = v),
+              items: const [
+                HUFSelectItem(value: 'es', label: 'Spain'),
+                HUFSelectItem(value: 'nz', label: 'New Zealand'),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Spain'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await tester.tap(find.text('New Zealand'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(values, containsAll(['es', 'nz']));
   });
 }
 
