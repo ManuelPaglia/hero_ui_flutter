@@ -11,6 +11,7 @@ import 'chips_showcase_page.dart';
 import 'cards_showcase_page.dart';
 import 'checkbox_cards_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
+import 'popover_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switches_showcase_page.dart';
@@ -75,6 +76,11 @@ class HomePage extends StatelessWidget {
       title: 'Checkbox card',
       actionLabel: 'Apri',
       page: CheckboxCardsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Popover',
+      actionLabel: 'Apri',
+      page: PopoverShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Radio button',
