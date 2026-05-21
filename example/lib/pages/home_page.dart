@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import '../example_app_scope.dart';
+import 'avatars_showcase_page.dart';
 import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
 import 'chips_showcase_page.dart';
@@ -28,6 +29,11 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   static const _entries = [
+    _HomeShowcaseEntry(
+      title: 'Avatar',
+      actionLabel: 'Apri',
+      page: AvatarsShowcasePage(),
+    ),
     _HomeShowcaseEntry(
       title: 'Chip',
       actionLabel: 'Apri',

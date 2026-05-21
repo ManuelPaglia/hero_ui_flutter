@@ -1691,6 +1691,289 @@ void main() {
       HUFBorderRadius.large,
     );
   });
+
+  testWidgets('HUFAvatar mostra le iniziali normalizzate', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(initials: 'ag'),
+      ),
+    );
+
+    expect(find.text('AG'), findsOneWidget);
+  });
+
+  testWidgets('HUFAvatar rispetta le dimensioni per size', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          size: HUFAvatarSize.large,
+        ),
+      ),
+    );
+
+    final size = tester.getSize(_avatarDecoratedBoxFinder());
+    expect(size.width, 48);
+    expect(size.height, 48);
+  });
+
+  testWidgets('HUFAvatar variant default usa secondary e primary', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(initials: 'AG'),
+        theme: theme,
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFAvatar),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    final decoration = decorated.decoration! as BoxDecoration;
+
+    expect(decoration.color, theme.colors.secondary);
+  });
+
+  testWidgets('HUFAvatar accetta colori personalizzati', (tester) async {
+    const bg = Color(0xFF1E3A5F);
+    const fg = Color(0xFF60A5FA);
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          backgroundColor: bg,
+          foregroundColor: fg,
+        ),
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFAvatar),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    final decoration = decorated.decoration! as BoxDecoration;
+
+    expect(decoration.color, bg);
+    expect(
+      tester.widget<Text>(find.text('AG')).style?.color,
+      fg,
+    );
+  });
+
+  testWidgets('HUFAvatarGroup con max mostra contatore overflow', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAvatarGroup(
+          max: 4,
+          children: const [
+            HUFAvatar(initials: 'A1'),
+            HUFAvatar(initials: 'A2'),
+            HUFAvatar(initials: 'A3'),
+            HUFAvatar(initials: 'A4'),
+            HUFAvatar(initials: 'A5'),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('A1'), findsOneWidget);
+    expect(find.text('A2'), findsOneWidget);
+    expect(find.text('A3'), findsOneWidget);
+    expect(find.text('A4'), findsNothing);
+    expect(find.text('A5'), findsNothing);
+    expect(find.text('+2'), findsOneWidget);
+  });
+
+  testWidgets('HUFAvatarGroup senza max mostra tutti gli avatar', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAvatarGroup(
+          children: const [
+            HUFAvatar(initials: 'A1'),
+            HUFAvatar(initials: 'A2'),
+            HUFAvatar(initials: 'A3'),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('A1'), findsOneWidget);
+    expect(find.text('A2'), findsOneWidget);
+    expect(find.text('A3'), findsOneWidget);
+    expect(find.textContaining('+'), findsNothing);
+  });
+
+  testWidgets('HUFAvatar applica border radius del tema', (tester) async {
+    const small = HUFBorderRadius.small;
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          size: HUFAvatarSize.medium,
+        ),
+        theme: HUFTheme.light(borderRadius: small),
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(_avatarDecoratedBoxFinder());
+    final decoration = decorated.decoration! as BoxDecoration;
+    final radius = decoration.borderRadius! as BorderRadius;
+
+    expect(radius.topLeft.x, small.value);
+  });
+
+  testWidgets('HUFAvatar con badge numerico mostra il conteggio', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          badge: HUFAvatarBadge.count(5),
+        ),
+      ),
+    );
+
+    expect(find.text('5'), findsOneWidget);
+  });
+
+  testWidgets('HUFAvatar con badge dot non mostra testo aggiuntivo', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          badge: HUFAvatarBadge.dot(),
+        ),
+      ),
+    );
+
+    expect(find.text('AG'), findsOneWidget);
+    expect(find.byType(Text), findsOneWidget);
+  });
+
+  testWidgets('HUFAvatar badge default usa success del tema', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAvatar(
+          initials: 'AG',
+          badge: HUFAvatarBadge.dot(),
+        ),
+        theme: theme,
+      ),
+    );
+
+    final badges = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFAvatar),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).toList();
+
+    expect(badges.length, greaterThan(1));
+    final badgeDecoration = badges.last.decoration! as BoxDecoration;
+    expect(badgeDecoration.color, theme.colors.success);
+  });
+
+  testWidgets('HUFAvatar badge new e old mostrano etichetta', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: const [
+            HUFAvatar(initials: 'AG', badge: HUFAvatarBadge.newLabel),
+            HUFAvatar(initials: 'AG', badge: HUFAvatarBadge.oldLabel),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('New'), findsOneWidget);
+    expect(find.text('Old'), findsOneWidget);
+  });
+
+  testWidgets('HUFAvatar con immagine non espande in ListView', (tester) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          height: 200,
+          child: ListView(
+            children: const [
+              HUFAvatar(
+                image: NetworkImage(
+                  'https://example.com/avatar.jpg',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(_avatarDecoratedBoxFinder()).width, 40);
+    expect(tester.getSize(_avatarDecoratedBoxFinder()).height, 40);
+  });
+
+  testWidgets('HUFAvatar badge dot e count hanno la stessa dimensione', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        Row(
+          children: const [
+            HUFAvatar(initials: 'AG', badge: HUFAvatarBadge.dot()),
+            HUFAvatar(initials: 'AG', badge: HUFAvatarBadge.count(5)),
+          ],
+        ),
+      ),
+    );
+
+    final badges = tester.widgetList<SizedBox>(
+      find.descendant(
+        of: find.byType(HUFAvatar),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is SizedBox && widget.width == widget.height,
+        ),
+      ),
+    ).where((box) => box.width != null && box.width! <= 24).toList();
+
+    expect(badges.length, greaterThanOrEqualTo(2));
+    expect(badges.first.width, badges.last.width);
+    expect(badges.first.height, badges.last.height);
+  });
+
+  testWidgets('HUFAvatar badge icon mostra l\'icona', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAvatar(
+          initials: 'AG',
+          badge: HUFAvatarBadge.icon(
+            Icon(Icons.check_rounded),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+  });
+
+  test('HUFAvatarGroup richiede almeno un avatar', () {
+    expect(
+      () => HUFAvatarGroup(children: []),
+      throwsAssertionError,
+    );
+  });
 }
 
 void _noop() {}
@@ -1705,5 +1988,12 @@ Finder _buttonBackgroundFinder() {
   return find.descendant(
     of: find.byType(HUFButton),
     matching: find.byType(AnimatedContainer),
+  );
+}
+
+Finder _avatarDecoratedBoxFinder() {
+  return find.descendant(
+    of: find.byType(HUFAvatar),
+    matching: find.byType(DecoratedBox),
   );
 }

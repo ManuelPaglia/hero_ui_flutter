@@ -1,3 +1,11 @@
+export 'avatar/huf_avatar.dart';
+export 'avatar/huf_avatar_badge.dart';
+export 'avatar/huf_avatar_badge_color.dart';
+export 'avatar/huf_avatar_badge_placement.dart';
+export 'avatar/huf_avatar_color.dart';
+export 'avatar/huf_avatar_group.dart';
+export 'avatar/huf_avatar_size.dart';
+export 'avatar/huf_avatar_variant.dart';
 export 'button/huf_button.dart';
 export 'chip/huf_chip.dart';
 export 'chip/huf_chip_size.dart';
