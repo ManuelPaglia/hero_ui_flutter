@@ -1974,6 +1974,143 @@ void main() {
       throwsAssertionError,
     );
   });
+
+  testWidgets('HUFAlert mostra titolo e descrizione', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlert(
+          title: 'Titolo alert',
+          description: 'Descrizione secondaria',
+          icon: Icon(Icons.info_outline),
+        ),
+      ),
+    );
+
+    expect(find.text('Titolo alert'), findsOneWidget);
+    expect(find.text('Descrizione secondaria'), findsOneWidget);
+  });
+
+  testWidgets('HUFAlert usa card del tema per lo sfondo', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlert(title: 'Test'),
+        theme: theme,
+      ),
+    );
+
+    final decorated = tester.widget<DecoratedBox>(_alertDecoratedBoxFinder());
+    final decoration = decorated.decoration! as BoxDecoration;
+    expect(decoration.color, theme.colors.card);
+  });
+
+  testWidgets('HUFAlert accent usa colore semantico per il titolo', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlert(
+          title: 'Errore',
+          color: HUFAlertColor.danger,
+        ),
+        theme: theme,
+      ),
+    );
+
+    final title = tester.widget<Text>(find.text('Errore'));
+    expect(title.style?.color, theme.colors.danger);
+  });
+
+  testWidgets('HUFAlert con showCloseButton mostra icona close', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAlert(
+          title: 'Chiudibile',
+          showCloseButton: true,
+          onDismiss: () {},
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.close), findsOneWidget);
+  });
+
+  testWidgets('HUFAlert in ListView non occupa tutta la larghezza', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: ListView(
+            children: const [
+              HUFAlert(
+                title: 'Titolo compatto',
+                description: 'Breve',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final alertWidth = tester.getSize(_alertDecoratedBoxFinder()).width;
+    expect(alertWidth, lessThan(parentWidth));
+    expect(alertWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFAlert action mostra label azione', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlert(
+          title: 'Aggiornamento',
+          action: HUFAlertAction(label: 'Refresh'),
+        ),
+      ),
+    );
+
+    expect(find.text('Refresh'), findsOneWidget);
+    expect(find.byIcon(Icons.close), findsNothing);
+  });
+
+  testWidgets('hufShowAlert e hufDismissAlert gestiscono overlay', (
+    tester,
+  ) async {
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(
+      _wrapWithAlertOverlay(
+        Builder(
+          builder: (context) {
+            capturedContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    final id = hufShowAlert(
+      capturedContext,
+      options: HUFShowAlertOptions(
+        title: 'Overlay alert',
+        showCloseButton: true,
+      ),
+    );
+
+    await tester.pump();
+    expect(find.text('Overlay alert'), findsOneWidget);
+
+    hufDismissAlert(capturedContext, id);
+    await tester.pump();
+    expect(find.text('Overlay alert'), findsNothing);
+  });
 }
 
 void _noop() {}
@@ -1997,3 +2134,20 @@ Finder _avatarDecoratedBoxFinder() {
     matching: find.byType(DecoratedBox),
   );
 }
+
+Widget _wrapWithAlertOverlay(Widget child, {HUFTheme? theme}) {
+  final huf = theme ?? HUFTheme.light();
+  return MaterialApp(
+    theme: huf.toThemeData(),
+    builder: (context, appChild) => HUFAlertOverlay(child: appChild!),
+    home: Scaffold(body: child),
+  );
+}
+
+Finder _alertDecoratedBoxFinder() {
+  return find.descendant(
+    of: find.byType(HUFAlert),
+    matching: find.byType(DecoratedBox),
+  );
+}
+

@@ -1,3 +1,7 @@
+export 'alert/huf_alert.dart';
+export 'alert/huf_alert_color.dart';
+export 'alert/huf_alert_position.dart';
+export 'alert/huf_alert_size.dart';
 export 'avatar/huf_avatar.dart';
 export 'avatar/huf_avatar_badge.dart';
 export 'avatar/huf_avatar_badge_color.dart';

@@ -65,6 +65,7 @@ class _HeroUIExampleAppState extends State<HeroUIExampleApp> {
         themeMode: _themeMode,
         theme: _buildTheme(Brightness.light),
         darkTheme: _buildTheme(Brightness.dark),
+        builder: (context, child) => HUFAlertOverlay(child: child!),
         home: const HomePage(),
       ),
     );
