@@ -2268,6 +2268,228 @@ void main() {
     expect(find.text('Billing'), findsOneWidget);
   });
 
+  testWidgets('HUFDrawerPanel impila content e usa card del tema', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.left,
+          onClose: () {},
+          content: const [
+            Text('Voce 1'),
+            Text('Voce 2'),
+          ],
+        ),
+        theme: theme,
+      ),
+    );
+
+    expect(find.text('Voce 1'), findsOneWidget);
+    expect(find.text('Voce 2'), findsOneWidget);
+
+    final decorated = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFDrawerPanel),
+        matching: find.byType(DecoratedBox),
+      ),
+    ).firstWhere(
+      (box) =>
+          (box.decoration as BoxDecoration?)?.color == theme.colors.card,
+    );
+    expect(
+      (decorated.decoration! as BoxDecoration).color,
+      theme.colors.card,
+    );
+  });
+
+  testWidgets('HUFDrawerPanel full width mostra pulsante close', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.left,
+          isFullWidth: true,
+          showCloseButton: true,
+          onClose: _noop,
+          content: [Text('Full')],
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.close), findsOneWidget);
+  });
+
+  testWidgets('HUFDrawerPanel bottom default usa altezza dal contenuto', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.bottom,
+          onClose: _noop,
+          content: [Text('Compatto')],
+        ),
+      ),
+    );
+
+    final fixedHeightBox = find.descendant(
+      of: find.byType(HUFDrawerPanel),
+      matching: find.byWidgetPredicate(
+        (w) => w is SizedBox && w.height != null && w.height! > 100,
+      ),
+    );
+    expect(fixedHeightBox, findsNothing);
+    expect(find.text('Compatto'), findsOneWidget);
+  });
+
+  testWidgets('HUFDrawerPanel bottom rispetta height fissa', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.bottom,
+          height: 280,
+          onClose: _noop,
+          content: [Text('Fisso')],
+        ),
+      ),
+    );
+
+    final panel = tester.widget<SizedBox>(
+      find.descendant(
+        of: find.byType(HUFDrawerPanel),
+        matching: find.byWidgetPredicate(
+          (w) => w is SizedBox && w.height == 280,
+        ),
+      ),
+    );
+    expect(panel.height, 280);
+  });
+
+  testWidgets('HUFDrawerPanel rispetta width personalizzata', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.left,
+          width: 240,
+          onClose: _noop,
+          content: [Text('Fisso')],
+        ),
+      ),
+    );
+
+    final panel = tester.widget<SizedBox>(
+      find.descendant(
+        of: find.byType(HUFDrawerPanel),
+        matching: find.byWidgetPredicate(
+          (w) => w is SizedBox && w.width == 240,
+        ),
+      ),
+    );
+    expect(panel.width, 240);
+  });
+
+  testWidgets('HUFDrawerPanel classico non mostra close', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFDrawerPanel(
+          openFrom: HUFDrawerOpenFrom.left,
+          onClose: _noop,
+          content: [Text('Parziale')],
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.close), findsNothing);
+  });
+
+  testWidgets('HUFDrawer in Stack chiude al tap overlay', (tester) async {
+    var isOpen = true;
+    var didClose = false;
+
+    await tester.binding.setSurfaceSize(const Size(800, 600));
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return Stack(
+              children: [
+                const SizedBox.expand(),
+                HUFDrawer(
+                  isOpen: isOpen,
+                  width: 280,
+                  onClose: () {
+                    didClose = true;
+                    setState(() => isOpen = false);
+                  },
+                  content: const [Text('Drawer aperto')],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Drawer aperto'), findsOneWidget);
+
+    await tester.tapAt(const Offset(600, 300));
+    await tester.pump();
+
+    expect(didClose, isTrue);
+
+    await tester.pumpAndSettle();
+    expect(find.text('Drawer aperto'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('hufShowDrawer apre e chiude con tap overlay', (tester) async {
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(
+      _wrap(
+        Builder(
+          builder: (context) {
+            capturedContext = context;
+            return HUFButton(
+              label: 'Apri drawer',
+              onPressed: () {
+                hufShowDrawer(
+                  context,
+                  options: const HUFShowDrawerOptions(
+                    content: [Text('Drawer modale')],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Apri drawer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Drawer modale'), findsOneWidget);
+
+    final barrier = find.byType(ModalBarrier);
+    expect(barrier, findsWidgets);
+
+    await tester.tap(barrier.first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Drawer modale'), findsNothing);
+    expect(capturedContext.mounted, isTrue);
+  });
+
   testWidgets('hufShowToast e hufDismissToast gestiscono overlay', (
     tester,
   ) async {

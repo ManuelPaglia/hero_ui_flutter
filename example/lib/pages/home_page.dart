@@ -11,6 +11,7 @@ import 'buttons_showcase_page.dart';
 import 'chips_showcase_page.dart';
 import 'cards_showcase_page.dart';
 import 'checkbox_cards_showcase_page.dart';
+import 'drawers_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'input_showcase_page.dart';
 import 'popover_showcase_page.dart';
@@ -126,6 +127,11 @@ class HomePage extends StatelessWidget {
       title: 'Toast',
       actionLabel: 'Apri',
       page: ToastsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Drawer',
+      actionLabel: 'Apri',
+      page: DrawersShowcasePage(),
     ),
   ];
 

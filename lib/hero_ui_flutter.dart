@@ -6,3 +6,4 @@ export 'src/theme/huf_theme.dart';
 export 'src/utils/huf_alert_utils.dart';
 export 'src/utils/huf_alert_dialog_utils.dart';
 export 'src/utils/huf_toast_utils.dart';
+export 'src/utils/huf_drawer_utils.dart';

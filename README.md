@@ -23,6 +23,7 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFAlert](#hufalert)
   - [HUFAlertDialog](#hufalertdialog)
   - [HUFToast](#huftoast)
+  - [HUFDrawer](#hufdrawer)
   - [HUFAvatar](#hufavatar)
   - [HUFCheckbox](#hufcheckbox)
   - [HUFCheckboxGroup](#hufcheckboxgroup)
@@ -716,6 +717,56 @@ context.dismissHufToast(id);
 | `onDismissed`         | `VoidCallback?`    | —                | Dopo rimozione dall'overlay                           |
 
 Le altre proprietà corrispondono a [HUFToast].
+
+---
+
+### HUFDrawer
+
+Pannello laterale o dal basso con sfondo [HUFThemeColors.card]. [content] è una lista di widget impilati in colonna.
+
+- **Classico** (`isFullWidth: false`): overlay scuro; tap fuori dal pannello chiude.
+- **Full width** (`isFullWidth: true`): larghezza/altezza piena; chiusura solo con pulsante icon-only (X) in alto a destra.
+- **Dal basso (default)**: larghezza piena, altezza dal contenuto (tetto ~55% schermo).
+- **Dal basso + `height`**: altezza fissa in px.
+- **Dal basso + `isFullWidth`**: schermo intero, solo X.
+
+```dart
+// Imperativo
+context.showHufDrawer(
+  options: HUFShowDrawerOptions(
+    openFrom: HUFDrawerOpenFrom.left,
+    width: 320, // larghezza fissa (solo se isFullWidth è false)
+    content: [
+      Text('Menu'),
+      HUFButton(label: 'Profilo', onPressed: () {}),
+    ],
+  ),
+);
+
+// In Stack
+Stack(
+  children: [
+    body,
+    HUFDrawer(
+      isOpen: isOpen,
+      onClose: () => setState(() => isOpen = false),
+      openFrom: HUFDrawerOpenFrom.right,
+      content: [...],
+    ),
+  ],
+);
+```
+
+| Proprietà       | Tipo                 | Default  | Descrizione                                      |
+| --------------- | -------------------- | -------- | ------------------------------------------------ |
+| `isOpen`        | `bool`               | —        | Visibilità ([HUFDrawer] in Stack)                  |
+| `onClose`       | `VoidCallback`       | —        | Callback chiusura                                |
+| `openFrom`      | `HUFDrawerOpenFrom`  | `left`   | `left` · `right` · `bottom`                      |
+| `isFullWidth`   | `bool`               | `false`  | Pannello a tutto schermo + pulsante X            |
+| `content`       | `List<Widget>`       | `[]`     | Contenuto impilato verticalmente                 |
+| `width`         | `double?`            | `null`   | Larghezza fissa laterale (`left`/`right`); ignorata se `isFullWidth` |
+| `height`        | `double?`            | `null`   | Altezza fissa (`bottom`); se `null` dal basso segue il contenuto     |
+| `barrierColor`  | `Color?`             | scrim    | Colore overlay                                   |
 
 ---
 
@@ -1475,6 +1526,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Alert** — `HUFAlert`, `HUFAlertOverlay`, `hufShowAlert`
 - **Alert Dialog** — `HUFAlertDialog`, `hufShowAlertDialog`
 - **Toast** — `HUFToast`, `HUFToastOverlay`, `hufShowToast`
+- **Drawer** — `HUFDrawer`, `HUFDrawerPanel`, `hufShowDrawer`
 - **Avatar** — `HUFAvatar`, `HUFAvatarGroup`
 - **Button** — `HUFButton`
 - **Button Group** — `HUFButtonGroup`
@@ -1500,7 +1552,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Calendar**
 - **Datepicker** (single)
 - **Datepicker** (range)
-- **Drawer**
 - **Listbox**
 - **Listbox Item**
 - **Meter / Progress Bar**
@@ -1520,7 +1571,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch, Toast.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Radio Button, Select, Separator, Slider, Switch, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 
