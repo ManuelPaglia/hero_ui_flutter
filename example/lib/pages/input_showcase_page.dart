@@ -18,6 +18,8 @@ class _InputShowcasePageState extends State<InputShowcasePage> {
   final _telController = TextEditingController(text: '3331234567');
   final _otpController = TextEditingController();
   final _searchController = TextEditingController();
+  final _widthController = TextEditingController(text: '1041');
+  final _opacityController = TextEditingController(text: '80');
 
   @override
   void dispose() {
@@ -27,6 +29,8 @@ class _InputShowcasePageState extends State<InputShowcasePage> {
     _telController.dispose();
     _otpController.dispose();
     _searchController.dispose();
+    _widthController.dispose();
+    _opacityController.dispose();
     super.dispose();
   }
 
@@ -113,6 +117,30 @@ class _InputShowcasePageState extends State<InputShowcasePage> {
             type: HUFInputType.otp,
             otpLength: 6,
             icon: Icon(Icons.sms_outlined),
+          ),
+          const SizedBox(height: 24),
+          const ShowcaseSubsectionTitle('Number · stepper − / + · suffisso px'),
+          HUFInput(
+            label: 'Width',
+            controller: _widthController,
+            type: HUFInputType.number,
+            numberSuffix: 'px',
+            min: 0,
+            max: 9999,
+            clear: true,
+          ),
+          const SizedBox(height: 24),
+          const ShowcaseSubsectionTitle('Number · full width · suffisso %'),
+          HUFInput(
+            label: 'Opacità',
+            controller: _opacityController,
+            type: HUFInputType.number,
+            numberSuffix: '%',
+            min: 0,
+            max: 100,
+            step: 5,
+            clear: true,
+            isFullWidth: true,
           ),
           const SizedBox(height: 24),
           const ShowcaseSubsectionTitle('Search · icona leading custom'),

@@ -14,4 +14,7 @@ enum HUFInputType {
 
   /// Telefono con prefisso fisso e sole cifre.
   tel,
+
+  /// Numero con pulsanti − / + e suffisso opzionale (es. `px`, `%`).
+  number,
 }

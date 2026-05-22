@@ -1109,7 +1109,7 @@ Con `popover` impostato, il tap gestisce solo apertura/chiusura (un secondo tap 
 
 Campo di testo con label opzionale sopra, `hintText` interno e bordo **primary** in focus (pill-shaped tramite [HUFTheme.borderRadius](#sistema-di-temi)). È la base visiva condivisa con il trigger di [HUFSelect](#hufselect).
 
-Il parametro `type` (`HUFInputType`) definisce il comportamento (`text`, `email`, `password`, `otp`, `tel`). Tap fuori dal campo rimuove il focus.
+Il parametro `type` (`HUFInputType`) definisce il comportamento (`text`, `email`, `password`, `otp`, `tel`, `number`). Tap fuori dal campo rimuove il focus.
 
 ```dart
 HUFInput(
@@ -1133,8 +1133,21 @@ HUFInput(
 | `password` | Testo mascherato; icona occhio a destra per mostrare/nascondere |
 | `tel` | Prefisso fisso (`telPrefix`) + sole cifre nel campo |
 | `otp` | Celle separate (quadrate, stessa altezza del campo); `otpLength` configurabile; focus automatico sulla cella successiva; `isFullWidth` ignorato |
+| `number` | Stepper con pulsanti − / +; `numberSuffix` attaccato al valore (es. `px`); senza icona leading; `min` / `max` / `step` opzionali |
 
 ```dart
+// Numero con suffisso e stepper
+HUFInput(
+  label: 'Width',
+  controller: widthController,
+  type: HUFInputType.number,
+  numberSuffix: 'px',
+  min: 0,
+  max: 9999,
+  step: 1,
+  clear: true,
+)
+
 // OTP / PIN
 HUFInput(
   label: 'Enter PIN',
@@ -1171,6 +1184,10 @@ HUFInput(
 | `clear` | `bool` | `false` | Icona × a destra per svuotare il valore |
 | `otpLength` | `int` | `4` | Numero di celle OTP |
 | `telPrefix` | `String` | `'+39'` | Prefisso mostrato per `tel` |
+| `numberSuffix` | `String?` | — | Suffisso unità dopo il valore (es. `px`, `%`) per `number` |
+| `min` | `int?` | — | Valore minimo per `number` |
+| `max` | `int?` | — | Valore massimo per `number` |
+| `step` | `int` | `1` | Incremento dei pulsanti ± per `number` |
 | `obscureText` | `bool` | `false` | Testo nascosto (ignorato se `type` è `password`) |
 | `autofocus` | `bool` | `false` | Focus automatico |
 | `suffix` | `Widget?` | — | Widget a destra (es. freccia select) |
@@ -1359,18 +1376,9 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 
 - **Alert Dialog**
 - **Calendar**
-- **Combobox** (single select)
-- **Combobox** (multiple select)
 - **Datepicker** (single)
 - **Datepicker** (range)
 - **Drawer**
-- **Dropdown**
-- **Input — number**
-- **Input — email**
-- **Input — password**
-- **Input — search**
-- **Input — tel**
-- **Input — OTP**
 - **Listbox**
 - **Listbox Item**
 - **Meter / Progress Bar**

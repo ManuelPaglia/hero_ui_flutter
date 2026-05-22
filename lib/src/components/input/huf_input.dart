@@ -9,7 +9,7 @@ import 'huf_input_type.dart';
 
 /// Campo di testo del design system Hero UI Flutter.
 ///
-/// Supporta [HUFInputType] (`text`, `email`, `password`, `otp`, `tel`),
+/// Supporta [HUFInputType] (`text`, `email`, `password`, `otp`, `tel`, `number`),
 /// icona leading ([icon]), pulsante clear ([clear]) e perdita focus al tap esterno.
 ///
 /// Usato anche come shell del trigger di [HUFSelect] (anche in modalità ricerca).
@@ -33,6 +33,10 @@ class HUFInput extends StatefulWidget {
     this.clear = false,
     this.otpLength = 4,
     this.telPrefix = '+39',
+    this.numberSuffix,
+    this.min,
+    this.max,
+    this.step = 1,
     this.keyboardType,
     this.textInputAction,
     this.maxLines = 1,
@@ -67,6 +71,7 @@ class HUFInput extends StatefulWidget {
 
   /// Icona a sinistra: `false` (default) nessuna icona; `true` icona predefinita
   /// per il [type]; [Widget] o [IconData] per un'icona custom.
+  /// Ignorata quando [type] è [HUFInputType.number].
   final Object? icon;
 
   /// Mostra l'icona × a destra per svuotare il valore quando non è vuoto.
@@ -77,6 +82,18 @@ class HUFInput extends StatefulWidget {
 
   /// Prefisso telefonico fisso a sinistra (solo [HUFInputType.tel]).
   final String telPrefix;
+
+  /// Suffisso unità mostrato dopo il valore (solo [HUFInputType.number], es. `px`, `%`).
+  final String? numberSuffix;
+
+  /// Valore minimo (solo [HUFInputType.number]).
+  final int? min;
+
+  /// Valore massimo (solo [HUFInputType.number]).
+  final int? max;
+
+  /// Incremento/decremento con i pulsanti ± (solo [HUFInputType.number]).
+  final int step;
 
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
@@ -174,7 +191,9 @@ class _HUFInputState extends State<HUFInput> {
   }
 
   void _handleTextChange() {
-    if (widget.clear || widget.type == HUFInputType.password) {
+    if (widget.clear ||
+        widget.type == HUFInputType.password ||
+        widget.type == HUFInputType.number) {
       setState(() {});
     }
   }
@@ -238,9 +257,11 @@ class _HUFInputState extends State<HUFInput> {
             width: _effectiveFullWidth ? double.infinity : null,
             height: metrics.height,
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: metrics.horizontalPadding,
-              ),
+              padding: widget.type == HUFInputType.number
+                  ? EdgeInsets.zero
+                  : EdgeInsets.symmetric(
+                      horizontal: metrics.horizontalPadding,
+                    ),
               child: _buildFieldRow(textColor, metrics, colors),
             ),
           ),
@@ -262,7 +283,9 @@ class _HUFInputState extends State<HUFInput> {
       content = field;
     } else {
       content = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: _effectiveFullWidth
+            ? CrossAxisAlignment.stretch
+            : CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -291,6 +314,10 @@ class _HUFInputState extends State<HUFInput> {
     HUFFieldMetrics metrics,
     HUFFieldColors colors,
   ) {
+    if (widget.type == HUFInputType.number) {
+      return _buildNumberStepperRow(textColor, metrics, colors);
+    }
+
     final leading = _resolveLeadingIcon(metrics, colors);
     final trailing = _buildTrailingActions(metrics, colors);
 
@@ -344,6 +371,10 @@ class _HUFInputState extends State<HUFInput> {
     HUFFieldMetrics metrics,
     HUFFieldColors colors,
   ) {
+    if (widget.type == HUFInputType.number) {
+      return null;
+    }
+
     final icon = widget.icon;
     if (icon == false || icon == null) {
       return null;
@@ -384,7 +415,212 @@ class _HUFInputState extends State<HUFInput> {
       HUFInputType.password => Icons.lock_outline_rounded,
       HUFInputType.tel => Icons.phone_outlined,
       HUFInputType.otp => Icons.pin_outlined,
+      HUFInputType.number => Icons.numbers_rounded,
     };
+  }
+
+  Widget _buildNumberStepperRow(
+    Color textColor,
+    HUFFieldMetrics metrics,
+    HUFFieldColors colors,
+  ) {
+    final canInteract = widget.enabled && !widget.readOnly;
+    final iconColor =
+        widget.enabled ? colors.foreground : colors.disabledForeground;
+    final divider = Container(
+      width: 1,
+      height: metrics.height * 0.45,
+      color: colors.border.withValues(alpha: 0.6),
+    );
+
+    final showClear = widget.clear && canInteract && _textController.text.isNotEmpty;
+    final center = _buildNumberCenter(
+      textColor: textColor,
+      metrics: metrics,
+      colors: colors,
+      showClear: showClear,
+    );
+
+    final row = Row(
+      mainAxisSize:
+          _effectiveFullWidth ? MainAxisSize.max : MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _NumberStepButton(
+          icon: Icons.remove_rounded,
+          metrics: metrics,
+          color: iconColor,
+          enabled: canInteract,
+          onPressed: _decrementNumber,
+        ),
+        divider,
+        if (_effectiveFullWidth)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: center,
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: center,
+          ),
+        divider,
+        _NumberStepButton(
+          icon: Icons.add_rounded,
+          metrics: metrics,
+          color: iconColor,
+          enabled: canInteract,
+          onPressed: _incrementNumber,
+        ),
+        if (widget.suffix != null) ...[
+          divider,
+          Padding(
+            padding: EdgeInsets.only(right: metrics.horizontalPadding / 2),
+            child: IconTheme(
+              data: IconThemeData(
+                color: iconColor,
+                size: metrics.iconSize,
+              ),
+              child: widget.suffix!,
+            ),
+          ),
+        ],
+      ],
+    );
+
+    if (_effectiveFullWidth) return row;
+    return IntrinsicWidth(child: row);
+  }
+
+  Widget _buildNumberCenter({
+    required Color textColor,
+    required HUFFieldMetrics metrics,
+    required HUFFieldColors colors,
+    required bool showClear,
+  }) {
+    final valueGroup = _buildNumberValueGroup(textColor, metrics, colors);
+
+    return SizedBox(
+      height: metrics.height,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (_effectiveFullWidth)
+            Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: valueGroup,
+              ),
+            )
+          else
+            valueGroup,
+          if (showClear)
+            _InputIconButton(
+              icon: Icons.close_rounded,
+              metrics: metrics,
+              colors: colors,
+              enabled: widget.enabled,
+              onPressed: _clearValue,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberValueGroup(
+    Color textColor,
+    HUFFieldMetrics metrics,
+    HUFFieldColors colors,
+  ) {
+    final suffixStyle = hufFieldTextStyle(
+      fontSize: metrics.fontSize,
+      color: textColor,
+      fontWeight: FontWeight.w500,
+    );
+
+    return IntrinsicWidth(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IntrinsicWidth(
+            child: TextField(
+              controller: _textController,
+              focusNode: _focusNode,
+              enabled: widget.enabled,
+              readOnly: widget.readOnly,
+              autofocus: widget.autofocus,
+              keyboardType: widget.keyboardType ?? TextInputType.number,
+              textInputAction: widget.textInputAction,
+              textAlign: TextAlign.right,
+              inputFormatters: [
+                HUFDigitsOnlyInputFormatter(),
+                ...?widget.inputFormatters,
+              ],
+              onChanged: widget.onChanged,
+              onSubmitted: widget.onSubmitted,
+              style: hufFieldTextStyle(
+                fontSize: metrics.fontSize,
+                color: textColor,
+              ),
+              cursorColor: colors.foreground,
+              decoration: InputDecoration(
+                isDense: true,
+                isCollapsed: true,
+                border: InputBorder.none,
+                hintText: widget.hintText,
+                hintStyle: hufFieldTextStyle(
+                  fontSize: metrics.fontSize,
+                  color: colors.hint,
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          if (widget.numberSuffix != null)
+            Text(
+              widget.numberSuffix!,
+              style: suffixStyle,
+            ),
+        ],
+      ),
+    );
+  }
+
+  int? _parseNumberValue() {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return null;
+    return int.tryParse(text);
+  }
+
+  void _incrementNumber() {
+    final current = _parseNumberValue() ?? 0;
+    var next = current + widget.step;
+    if (widget.max != null && next > widget.max!) {
+      next = widget.max!;
+    }
+    _setNumberValue(next);
+  }
+
+  void _decrementNumber() {
+    final current = _parseNumberValue() ?? 0;
+    var next = current - widget.step;
+    if (widget.min != null && next < widget.min!) {
+      next = widget.min!;
+    }
+    _setNumberValue(next);
+  }
+
+  void _setNumberValue(int value) {
+    final text = value.toString();
+    _textController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    widget.onChanged?.call(text);
+    setState(() {});
   }
 
   List<Widget> _buildTrailingActions(
@@ -489,6 +725,7 @@ class _HUFInputState extends State<HUFInput> {
       HUFInputType.email => TextInputType.emailAddress,
       HUFInputType.tel => TextInputType.phone,
       HUFInputType.password => TextInputType.visiblePassword,
+      HUFInputType.number => TextInputType.number,
       _ => TextInputType.text,
     };
   }
@@ -497,6 +734,7 @@ class _HUFInputState extends State<HUFInput> {
     return switch (type) {
       HUFInputType.email => [HUFEmailInputFormatter()],
       HUFInputType.tel => [HUFDigitsOnlyInputFormatter()],
+      HUFInputType.number => [HUFDigitsOnlyInputFormatter()],
       _ => null,
     };
   }
@@ -522,6 +760,39 @@ class _HUFInputState extends State<HUFInput> {
     );
 
     return _wrapWithLabel(row, metrics, colors);
+  }
+}
+
+class _NumberStepButton extends StatelessWidget {
+  const _NumberStepButton({
+    required this.icon,
+    required this.metrics,
+    required this.color,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final HUFFieldMetrics metrics;
+  final Color color;
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: enabled ? onPressed : null,
+      icon: Icon(icon),
+      iconSize: metrics.iconSize,
+      color: color,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      constraints: BoxConstraints(
+        minWidth: metrics.height,
+        minHeight: metrics.height,
+      ),
+      visualDensity: VisualDensity.compact,
+      splashRadius: metrics.iconSize,
+    );
   }
 }
 

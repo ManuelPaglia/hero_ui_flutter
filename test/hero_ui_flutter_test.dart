@@ -2852,6 +2852,82 @@ void main() {
     expect(tester.widget<TextField>(fields.at(1)).focusNode?.hasFocus, isTrue);
   });
 
+  testWidgets('HUFInput number senza isFullWidth non espande il contenitore', (
+    tester,
+  ) async {
+    const parentWidth = 400.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: parentWidth,
+          child: const HUFInput(
+            label: 'Width',
+            type: HUFInputType.number,
+            numberSuffix: 'px',
+          ),
+        ),
+      ),
+    );
+
+    final shellWidth = tester.getSize(
+      find.descendant(
+        of: find.byType(HUFInput),
+        matching: find.byType(AnimatedContainer),
+      ),
+    ).width;
+
+    expect(shellWidth, lessThan(parentWidth));
+    expect(shellWidth, greaterThan(0));
+  });
+
+  testWidgets('HUFInput number incrementa e decrementa', (tester) async {
+    final controller = TextEditingController(text: '10');
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFInput(
+          type: HUFInputType.number,
+          controller: controller,
+          min: 0,
+          max: 20,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump();
+
+    expect(controller.text, '11');
+
+    await tester.tap(find.byIcon(Icons.remove_rounded));
+    await tester.pump();
+
+    expect(controller.text, '10');
+  });
+
+  testWidgets('HUFInput number mostra suffisso e clear', (tester) async {
+    final controller = TextEditingController(text: '42');
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFInput(
+          type: HUFInputType.number,
+          controller: controller,
+          numberSuffix: 'px',
+          clear: true,
+        ),
+      ),
+    );
+
+    expect(find.text('px'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pump();
+
+    expect(controller.text, isEmpty);
+  });
+
   testWidgets('HUFInput clear svuota il valore', (tester) async {
     final controller = TextEditingController(text: 'test');
 
