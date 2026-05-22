@@ -2214,6 +2214,102 @@ void main() {
     expect(actionRow.children.whereType<Expanded>().length, 2);
   });
 
+  testWidgets('HUFToast richiede titolo e mostra descrizione', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFToast(
+          title: 'Titolo toast',
+          description: 'Sottotitolo',
+          icon: Icon(Icons.check),
+        ),
+      ),
+    );
+
+    expect(find.text('Titolo toast'), findsOneWidget);
+    expect(find.text('Sottotitolo'), findsOneWidget);
+  });
+
+  testWidgets('HUFToast success colora titolo e icona', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFToast(
+          title: 'OK',
+          icon: Icon(Icons.check),
+          color: HUFAlertColor.success,
+        ),
+        theme: theme,
+      ),
+    );
+
+    final title = tester.widget<Text>(find.text('OK'));
+    expect(title.style?.color, theme.colors.success);
+
+    final iconTheme = tester.widget<IconTheme>(
+      find.descendant(
+        of: find.byType(HUFToast),
+        matching: find.byType(IconTheme),
+      ),
+    );
+    expect(iconTheme.data.color, theme.colors.success);
+  });
+
+  testWidgets('HUFToast action mostra label', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFToast(
+          title: 'Upgrade',
+          action: HUFToastAction(label: 'Billing'),
+        ),
+      ),
+    );
+
+    expect(find.text('Billing'), findsOneWidget);
+  });
+
+  testWidgets('hufShowToast e hufDismissToast gestiscono overlay', (
+    tester,
+  ) async {
+    late BuildContext capturedContext;
+    late String toastId;
+
+    await tester.pumpWidget(
+      _wrapWithToastOverlay(
+        Builder(
+          builder: (context) {
+            capturedContext = context;
+            return HUFButton(
+              label: 'Mostra',
+              onPressed: () {
+                toastId = hufShowToast(
+                  context,
+                  options: const HUFShowToastOptions(
+                    title: 'Toast overlay',
+                    durationSeconds: 60,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Mostra'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Toast overlay'), findsOneWidget);
+
+    hufDismissToast(capturedContext, toastId);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 220));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Toast overlay'), findsNothing);
+  });
+
   testWidgets('hufShowAlertDialog mostra overlay e chiude con X', (
     tester,
   ) async {
@@ -3225,6 +3321,15 @@ Widget _wrapWithAlertOverlay(Widget child, {HUFTheme? theme}) {
   return MaterialApp(
     theme: huf.toThemeData(),
     builder: (context, appChild) => HUFAlertOverlay(child: appChild!),
+    home: Scaffold(body: child),
+  );
+}
+
+Widget _wrapWithToastOverlay(Widget child, {HUFTheme? theme}) {
+  final huf = theme ?? HUFTheme.light();
+  return MaterialApp(
+    theme: huf.toThemeData(),
+    builder: (context, appChild) => HUFToastOverlay(child: appChild!),
     home: Scaffold(body: child),
   );
 }

@@ -19,6 +19,7 @@ import 'select_showcase_page.dart';
 import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switches_showcase_page.dart';
+import 'toasts_showcase_page.dart';
 
 class _HomeShowcaseEntry {
   const _HomeShowcaseEntry({
@@ -120,6 +121,11 @@ class HomePage extends StatelessWidget {
       title: 'Switch',
       actionLabel: 'Apri',
       page: SwitchesShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Toast',
+      actionLabel: 'Apri',
+      page: ToastsShowcasePage(),
     ),
   ];
 

@@ -7,6 +7,8 @@ export 'alert/huf_alert_position.dart';
 export 'alert/huf_alert_size.dart';
 export 'alert_dialog/huf_alert_dialog.dart';
 export 'alert_dialog/huf_alert_dialog_position.dart';
+export 'toast/huf_toast.dart';
+export 'toast/huf_toast_position.dart';
 export 'avatar/huf_avatar.dart';
 export 'avatar/huf_avatar_badge.dart';
 export 'avatar/huf_avatar_badge_color.dart';

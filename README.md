@@ -22,6 +22,7 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFAccordion](#hufaccordion)
   - [HUFAlert](#hufalert)
   - [HUFAlertDialog](#hufalertdialog)
+  - [HUFToast](#huftoast)
   - [HUFAvatar](#hufavatar)
   - [HUFCheckbox](#hufcheckbox)
   - [HUFCheckboxGroup](#hufcheckboxgroup)
@@ -652,6 +653,69 @@ await context.showHufAlertDialog(
 | `onDismissed`               | `VoidCallback?`          | —          | Dopo chiusura (X o pop)              |
 
 Le altre proprietà corrispondono a [HUFAlertDialog]. È possibile passare un `HUFAlertDialog` già costruito al posto di `options`.
+
+---
+
+### HUFToast
+
+Toast orizzontale a pill con [title] obbligatorio, [description] opzionale, icona opzionale e azione pill opzionale. Sfondo e descrizione seguono [HUFTheme]; con un [HUFAlertColor] semantico, icona e titolo usano quel colore (l'azione pill usa lo stesso accento come sfondo).
+
+```dart
+context.showHufToast(
+  options: HUFShowToastOptions(
+    position: HUFToastPosition.bottomCenter,
+    durationSeconds: 5,
+    icon: const Icon(Icons.check_circle_outline),
+    color: HUFAlertColor.success,
+    title: 'You have upgraded your plan',
+    description: 'You can continue using HeroUI Chat',
+    action: HUFToastAction(label: 'Billing', onPressed: () {}),
+  ),
+);
+```
+
+| Proprietà       | Tipo              | Default        | Descrizione                                      |
+| --------------- | ----------------- | -------------- | ------------------------------------------------ |
+| `title`         | `String`          | —              | Titolo (obbligatorio)                            |
+| `leading`       | `Widget?`         | `null`         | Widget a sinistra; priorità su `icon`            |
+| `icon`          | `Widget?`         | `null`         | Icona di stato                                   |
+| `isLoading`     | `bool`            | `false`        | Spinner al posto dell'icona                      |
+| `description`   | `String?`         | `null`         | Testo sotto il titolo                            |
+| `action`        | `HUFToastAction?` | `null`         | Pulsante pill a destra                           |
+| `trailing`      | `Widget?`         | `null`         | Trailing custom; priorità su `action`            |
+| `color`         | `HUFAlertColor`   | `defaultColor` | Colore semantico per icona e titolo              |
+
+#### Toast in overlay
+
+Avvolgi l'app con `HUFToastOverlay` e usa `hufShowToast` o `showHufToast`:
+
+```dart
+MaterialApp(
+  builder: (context, child) => HUFToastOverlay(
+    child: HUFAlertOverlay(child: child!),
+  ),
+);
+
+final id = context.showHufToast(
+  options: HUFShowToastOptions(
+    position: HUFToastPosition.topCenter,
+    durationSeconds: 4,
+    title: 'Salvato',
+    color: HUFAlertColor.success,
+  ),
+);
+
+context.dismissHufToast(id);
+```
+
+| `HUFShowToastOptions` | Tipo               | Default          | Descrizione                                           |
+| --------------------- | ------------------ | ---------------- | ----------------------------------------------------- |
+| `position`            | `HUFToastPosition` | `bottomCenter`   | `topCenter` (slide dall'alto) · `bottomCenter` (dal basso) |
+| `durationSeconds`     | `double?`          | `null`           | Secondi prima della scomparsa con fade; `null` = persistente |
+| `margin`              | `EdgeInsets`       | `16`             | Margine dal bordo sicuro                              |
+| `onDismissed`         | `VoidCallback?`    | —                | Dopo rimozione dall'overlay                           |
+
+Le altre proprietà corrispondono a [HUFToast].
 
 ---
 
@@ -1410,6 +1474,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Accordion** — `HUFAccordion`, `HUFAccordionItem`
 - **Alert** — `HUFAlert`, `HUFAlertOverlay`, `hufShowAlert`
 - **Alert Dialog** — `HUFAlertDialog`, `hufShowAlertDialog`
+- **Toast** — `HUFToast`, `HUFToastOverlay`, `hufShowToast`
 - **Avatar** — `HUFAvatar`, `HUFAvatarGroup`
 - **Button** — `HUFButton`
 - **Button Group** — `HUFButtonGroup`
@@ -1443,7 +1508,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Skeleton**
 - **Table**
 - **Tabs**
-- **Toast**
 
 ---
 
@@ -1456,7 +1520,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 
