@@ -3,6 +3,7 @@ import 'package:hero_ui_flutter/hero_ui_flutter.dart';
 
 import '../example_app_scope.dart';
 import 'accordion_showcase_page.dart';
+import 'alert_dialogs_showcase_page.dart';
 import 'alerts_showcase_page.dart';
 import 'avatars_showcase_page.dart';
 import 'button_groups_showcase_page.dart';
@@ -44,6 +45,11 @@ class HomePage extends StatelessWidget {
       title: 'Alert',
       actionLabel: 'Apri',
       page: AlertsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Alert Dialog',
+      actionLabel: 'Apri',
+      page: AlertDialogsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Avatar',

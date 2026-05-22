@@ -2080,6 +2080,180 @@ void main() {
     expect(find.byIcon(Icons.close), findsNothing);
   });
 
+  testWidgets('HUFAlertDialog mostra titolo e pulsante chiusura', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlertDialog(
+          title: 'Conferma',
+          description: 'Messaggio',
+          onDismiss: _noop,
+        ),
+      ),
+    );
+
+    expect(find.text('Conferma'), findsOneWidget);
+    expect(find.text('Messaggio'), findsOneWidget);
+    expect(find.byIcon(Icons.close), findsOneWidget);
+  });
+
+  testWidgets('HUFAlertDialog usa card del tema per lo sfondo', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlertDialog(
+          title: 'Test',
+          onDismiss: _noop,
+        ),
+        theme: theme,
+      ),
+    );
+
+    final decorated = tester.widgetList<DecoratedBox>(
+      _alertDialogSurfaceFinder(),
+    ).firstWhere(
+      (box) =>
+          (box.decoration as BoxDecoration?)?.color == theme.colors.card,
+    );
+    final decoration = decorated.decoration! as BoxDecoration;
+    expect(decoration.color, theme.colors.card);
+  });
+
+  testWidgets('HUFAlertDialog danger colora icona di stato', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFAlertDialog(
+          title: 'Elimina',
+          icon: Icon(Icons.error_outline),
+          color: HUFAlertColor.danger,
+          onDismiss: _noop,
+        ),
+        theme: theme,
+      ),
+    );
+
+    final iconTheme = tester.widget<IconTheme>(
+      find.descendant(
+        of: find.byType(HUFAlertDialog),
+        matching: find.byType(IconTheme),
+      ).first,
+    );
+    expect(iconTheme.data.color, theme.colors.danger);
+  });
+
+  testWidgets('HUFAlertDialog allinea azioni a destra senza full width', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAlertDialog(
+          title: 'Azioni',
+          onDismiss: () {},
+          actions: [
+            HUFButton(label: 'A', onPressed: () {}),
+            HUFButton(label: 'B', onPressed: () {}),
+          ],
+        ),
+      ),
+    );
+
+    final row = tester.widget<Row>(
+      find.descendant(
+        of: find.byType(HUFAlertDialog),
+        matching: find.byWidgetPredicate(
+          (w) => w is Row && w.mainAxisAlignment == MainAxisAlignment.end,
+        ),
+      ),
+    );
+    expect(row.mainAxisAlignment, MainAxisAlignment.end);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('HUFAlertDialog due azioni full width usano Expanded', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFAlertDialog(
+          title: 'Full',
+          onDismiss: () {},
+          actions: [
+            HUFButton(
+              label: 'Uno',
+              isFullWidth: true,
+              onPressed: () {},
+            ),
+            HUFButton(
+              label: 'Due',
+              isFullWidth: true,
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final actionRow = tester.widget<Row>(
+      find.descendant(
+        of: find.byType(HUFAlertDialog),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Row &&
+              w.children.length == 3 &&
+              w.children.any((c) => c is Expanded),
+        ),
+      ),
+    );
+    expect(actionRow.children.whereType<Expanded>().length, 2);
+  });
+
+  testWidgets('hufShowAlertDialog mostra overlay e chiude con X', (
+    tester,
+  ) async {
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(
+      _wrap(
+        Builder(
+          builder: (context) {
+            capturedContext = context;
+            return HUFButton(
+              label: 'Apri',
+              onPressed: () {
+                hufShowAlertDialog(
+                  context,
+                  options: const HUFShowAlertDialogOptions(
+                    title: 'Modale',
+                    description: 'Contenuto',
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Apri'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modale'), findsOneWidget);
+    expect(find.byType(ModalBarrier), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modale'), findsNothing);
+    expect(capturedContext.mounted, isTrue);
+  });
+
   testWidgets('hufShowAlert e hufDismissAlert gestiscono overlay', (
     tester,
   ) async {
@@ -3059,6 +3233,17 @@ Finder _alertDecoratedBoxFinder() {
   return find.descendant(
     of: find.byType(HUFAlert),
     matching: find.byType(DecoratedBox),
+  );
+}
+
+Finder _alertDialogSurfaceFinder() {
+  return find.descendant(
+    of: find.byType(HUFAlertDialog),
+    matching: find.byWidgetPredicate(
+      (w) =>
+          w is DecoratedBox &&
+          (w.decoration as BoxDecoration?)?.color != null,
+    ),
   );
 }
 

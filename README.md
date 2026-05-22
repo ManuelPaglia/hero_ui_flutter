@@ -21,6 +21,7 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFCard](#hufcard)
   - [HUFAccordion](#hufaccordion)
   - [HUFAlert](#hufalert)
+  - [HUFAlertDialog](#hufalertdialog)
   - [HUFAvatar](#hufavatar)
   - [HUFCheckbox](#hufcheckbox)
   - [HUFCheckboxGroup](#hufcheckboxgroup)
@@ -595,6 +596,62 @@ context.dismissAllHufAlerts();
 
 
 Le altre proprietà di `HUFShowAlertOptions` corrispondono a quelle di `HUFAlert`.
+
+---
+
+### HUFAlertDialog
+
+Dialog modale con icona di stato, titolo, descrizione o contenuto custom, overlay scuro e pulsante di chiusura icon-only obbligatorio. Colori di superficie e testo seguono [HUFTheme]; l'icona usa il colore semantico [HUFAlertColor]. Le azioni nel footer sono opzionali (max 2) e vanno passate esplicitamente come [HUFButton] o altri widget.
+
+```dart
+await context.showHufAlertDialog(
+  options: HUFShowAlertDialogOptions(
+    icon: const Icon(Icons.error_outline),
+    color: HUFAlertColor.danger,
+    title: 'Delete project permanently?',
+    description: 'This action cannot be undone.',
+    actions: [
+      HUFButton(
+        label: 'Cancel',
+        variant: HUFButtonVariant.secondary,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      HUFButton(
+        label: 'Delete Project',
+        variant: HUFButtonVariant.danger,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+    ],
+  ),
+);
+```
+
+| Proprietà       | Tipo                | Default        | Descrizione                                                                 |
+| --------------- | ------------------- | -------------- | --------------------------------------------------------------------------- |
+| `leading`       | `Widget?`           | `null`         | Widget in alto a sinistra; priorità su `icon`                               |
+| `icon`          | `Widget?`           | `null`         | Icona di stato nel cerchio semitrasparente                                  |
+| `isLoading`     | `bool`              | `false`        | Spinner al posto dell'icona                                                 |
+| `title`         | `String?`           | `null`         | Titolo                                                                      |
+| `description`   | `String?`           | `null`         | Testo descrittivo                                                           |
+| `content`       | `Widget?`           | `null`         | Contenuto custom sotto il titolo                                            |
+| `actions`       | `List<Widget>`      | `[]`           | Fino a 2 azioni (es. [HUFButton]); nessun default                           |
+| `onDismiss`     | `VoidCallback`      | —              | Callback del pulsante chiusura (obbligatorio)                               |
+| `color`         | `HUFAlertColor`     | `defaultColor` | Colore semantico dell'icona di stato                                        |
+
+**Layout azioni:** senza [HUFButton.isFullWidth] sono allineate a destra; una sola azione full-width occupa tutta la riga; due azioni full-width si dividono il 50% ciascuna.
+
+#### Mostrare il dialog modale
+
+`hufShowAlertDialog` / `showHufAlertDialog` usano overlay scuro e fade (~200 ms). Posizione predefinita: centro; override con `position`: `center` · `top` · `bottom`.
+
+| `HUFShowAlertDialogOptions` | Tipo                     | Default    | Descrizione                          |
+| --------------------------- | ------------------------ | ---------- | ------------------------------------ |
+| `position`                  | `HUFAlertDialogPosition` | `center`   | `center` · `top` · `bottom`          |
+| `barrierDismissible`        | `bool`                   | `false`    | Tap sull'overlay per chiudere        |
+| `barrierColor`              | `Color?`                 | scrim scuro| Colore overlay                       |
+| `onDismissed`               | `VoidCallback?`          | —          | Dopo chiusura (X o pop)              |
+
+Le altre proprietà corrispondono a [HUFAlertDialog]. È possibile passare un `HUFAlertDialog` già costruito al posto di `options`.
 
 ---
 
@@ -1352,6 +1409,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 
 - **Accordion** — `HUFAccordion`, `HUFAccordionItem`
 - **Alert** — `HUFAlert`, `HUFAlertOverlay`, `hufShowAlert`
+- **Alert Dialog** — `HUFAlertDialog`, `hufShowAlertDialog`
 - **Avatar** — `HUFAvatar`, `HUFAvatarGroup`
 - **Button** — `HUFButton`
 - **Button Group** — `HUFButtonGroup`
@@ -1374,7 +1432,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 
 ### Da implementare
 
-- **Alert Dialog**
 - **Calendar**
 - **Datepicker** (single)
 - **Datepicker** (range)
@@ -1399,7 +1456,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 
