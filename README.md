@@ -33,6 +33,7 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFSlider](#hufslider)
   - [HUFRangeSlider](#hufrangeslider)
   - [HUFPopover](#hufpopover)
+  - [HUFInput](#hufinput)
   - [HUFSelect](#hufselect)
   - [HUFSeparator](#hufseparator)
 - [Roadmap componenti](#roadmap-componenti)
@@ -1092,6 +1093,7 @@ Con `popover` impostato, il tap gestisce solo apertura/chiusura (un secondo tap 
 | ----------------------------- | --------------------- | -------- | ---------------------------------- |
 | `child`                       | `Widget`              | —        | Contenuto del popover              |
 | `placement`                   | `HUFPopoverPlacement` | `bottom` | `top` · `bottom` · `start` · `end` |
+| `align`                       | `HUFPopoverAlign`     | `center` | `left` · `center` · `right`        |
 | `showArrow`                   | `bool`                | `false`  | Freccia verso il pulsante          |
 | `offset`                      | `double?`             | auto     | Gap tra pulsante e popover         |
 | `isOpen`                      | `bool?`               | —        | Stato controllato                  |
@@ -1103,16 +1105,90 @@ Con `popover` impostato, il tap gestisce solo apertura/chiusura (un secondo tap 
 
 ---
 
+### HUFInput
+
+Campo di testo con label opzionale sopra, `hintText` interno e bordo **primary** in focus (pill-shaped tramite [HUFTheme.borderRadius](#sistema-di-temi)). È la base visiva condivisa con il trigger di [HUFSelect](#hufselect).
+
+Il parametro `type` (`HUFInputType`) definisce il comportamento (`text`, `email`, `password`, `otp`, `tel`). Tap fuori dal campo rimuove il focus.
+
+```dart
+HUFInput(
+  label: 'Email',
+  hintText: 'nome@esempio.it',
+  controller: emailController,
+  type: HUFInputType.email,
+  icon: true,
+  clear: true,
+  isFullWidth: true,
+  onChanged: (value) => debugPrint(value),
+)
+```
+
+**Tipi**
+
+| `type` | Comportamento |
+| ------ | ------------- |
+| `text` | Testo libero (default) |
+| `email` | Solo caratteri validi per un indirizzo email |
+| `password` | Testo mascherato; icona occhio a destra per mostrare/nascondere |
+| `tel` | Prefisso fisso (`telPrefix`) + sole cifre nel campo |
+| `otp` | Celle separate (quadrate, stessa altezza del campo); `otpLength` configurabile; focus automatico sulla cella successiva; `isFullWidth` ignorato |
+
+```dart
+// OTP / PIN
+HUFInput(
+  label: 'Enter PIN',
+  type: HUFInputType.otp,
+  otpLength: 4,
+  controller: otpController,
+  icon: true,
+  clear: true,
+)
+
+// Telefono con prefisso
+HUFInput(
+  label: 'Telefono',
+  type: HUFInputType.tel,
+  telPrefix: '+39',
+  icon: Icons.phone_outlined,
+  isFullWidth: true,
+)
+```
+
+| Proprietà | Tipo | Default | Descrizione |
+| --------- | ---- | ------- | ----------- |
+| `label` | `String?` | — | Label sopra il campo |
+| `hintText` | `String?` | — | Placeholder interno |
+| `type` | `HUFInputType` | `text` | Tipo di input |
+| `controller` | `TextEditingController?` | — | Testo controllato (OTP: stringa concatenata delle celle) |
+| `focusNode` | `FocusNode?` | — | Focus esterno (OTP: prima cella) |
+| `onChanged` | `ValueChanged<String>?` | — | Callback al cambio testo |
+| `onSubmitted` | `ValueChanged<String>?` | — | Invio tastiera / OTP completo |
+| `enabled` | `bool` | `true` | Abilita/disabilita |
+| `readOnly` | `bool` | `false` | Solo lettura (es. trigger select) |
+| `isFullWidth` | `bool` | `false` | Larghezza piena del genitore (ignorato per `otp`) |
+| `icon` | `Object?` | `false` | `false`: nessuna icona; `true`: icona predefinita per il `type`; `Widget` / `IconData`: icona custom a sinistra |
+| `clear` | `bool` | `false` | Icona × a destra per svuotare il valore |
+| `otpLength` | `int` | `4` | Numero di celle OTP |
+| `telPrefix` | `String` | `'+39'` | Prefisso mostrato per `tel` |
+| `obscureText` | `bool` | `false` | Testo nascosto (ignorato se `type` è `password`) |
+| `autofocus` | `bool` | `false` | Focus automatico |
+| `suffix` | `Widget?` | — | Widget a destra (es. freccia select) |
+| `keyboardType` | `TextInputType?` | — | Override tastiera (altrimenti derivato da `type`) |
+| `maxLines` | `int` | `1` | Righe del campo |
+
+---
+
 ### HUFSelect
 
-Select con menu a comparsa, allineato al design HeroUI. Supporta selezione singola o multipla, sezioni con intestazione e [HUFSeparator](#hufseparator), voci con `leading`/`subtitle` (es. avatar + email) e `itemBuilder` custom. Colori e border radius seguono [HUFTheme](#sistema-di-temi); il menu si apre con animazione fade/scale nella posizione finale e, se non c’è spazio, si capovolge (`top` ↔ `bottom`). Un secondo tap sul trigger chiude il menu.
+Select con menu a comparsa, allineato al design HeroUI. Il trigger usa [HUFInput](#hufinput) (`label`, `hintText`, `isFullWidth`, bordo in focus). Con `search: true`, all’apertura del menu il campo diventa modificabile e filtra le voci per `label` e `subtitle`. Supporta selezione singola o multipla, sezioni con intestazione e [HUFSeparator](#hufseparator), voci con `leading`/`subtitle` (es. avatar + email) e `itemBuilder` custom. Il menu si apre con animazione fade/scale nella posizione finale e, se non c’è spazio, si capovolge (`top` ↔ `bottom`). Un secondo tap sul trigger chiude il menu.
 
 **Singola** — elenco piatto:
 
 ```dart
 HUFSelect<String>(
   label: 'State',
-  placeholder: 'Select one',
+  hintText: 'Select one',
   isFullWidth: true,
   items: const [
     HUFSelectItem(value: 'fl', label: 'Florida'),
@@ -1128,7 +1204,7 @@ HUFSelect<String>(
 ```dart
 HUFSelect<String>(
   label: 'Country',
-  placeholder: 'Select a country',
+  hintText: 'Select a country',
   isFullWidth: true,
   sections: [
     const HUFSelectSection(
@@ -1147,6 +1223,20 @@ HUFSelect<String>(
       ],
     ),
   ],
+  value: selected,
+  onChanged: (v) => setState(() => selected = v),
+)
+```
+
+**Ricerca** — filtra le opzioni mentre il menu è aperto:
+
+```dart
+HUFSelect<String>(
+  label: 'State',
+  hintText: 'Cerca o seleziona',
+  search: true,
+  isFullWidth: true,
+  items: states,
   value: selected,
   onChanged: (v) => setState(() => selected = v),
 )
@@ -1180,7 +1270,9 @@ HUFSelectItem(
 | Proprietà | Tipo | Default | Descrizione |
 | --------- | ---- | ------- | ----------- |
 | `label` | `String?` | — | Label sopra il trigger |
-| `placeholder` | `String` | `'Select one'` | Testo se nessuna selezione |
+| `hintText` | `String?` | — | Placeholder interno (prioritario) |
+| `placeholder` | `String` | `'Select one'` | Alias di `hintText` (retrocompatibilità) |
+| `search` | `bool` | `false` | Campo di ricerca con menu aperto |
 | `items` | `List<HUFSelectItem<T>>?` | — | Elenco piatto (o usa `sections`) |
 | `sections` | `List<HUFSelectSection<T>>?` | — | Gruppi con header opzionale |
 | `value` | `T?` | — | Valore (singola) |
@@ -1259,6 +1351,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Switch** — `HUFSwitch`
 - **Switch Group** — `HUFSwitchGroup`
 - **Popover** — `HUFButtonPopover`, `HUFPopoverContent` (via `HUFButton.popover`)
+- **Input** — `HUFInput`
 - **Select** — `HUFSelect`, `HUFSelectItem`, `HUFSelectSection`
 - **Separator** — `HUFSeparator` (orizzontale e verticale)
 
@@ -1272,7 +1365,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Datepicker** (range)
 - **Drawer**
 - **Dropdown**
-- **Input — text**
 - **Input — number**
 - **Input — email**
 - **Input — password**
@@ -1299,7 +1391,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Popover, Radio Button, Select, Separator, Slider, Switch.
+Pagine showcase disponibili: Accordion, Alert, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Input, Popover, Radio Button, Select, Separator, Slider, Switch.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 

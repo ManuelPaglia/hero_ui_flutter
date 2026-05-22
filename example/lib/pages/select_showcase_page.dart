@@ -17,6 +17,9 @@ class SelectShowcasePage extends StatelessWidget {
           ShowcaseSubsectionTitle('Full width'),
           _StateSelectDemo(),
           SizedBox(height: 32),
+          ShowcaseSubsectionTitle('Con ricerca (search)'),
+          _SearchableSelectDemo(),
+          SizedBox(height: 32),
           ShowcaseSubsectionTitle('Sezioni'),
           _CountrySelectDemo(),
           SizedBox(height: 32),
@@ -30,6 +33,39 @@ class SelectShowcasePage extends StatelessWidget {
           _UserSelectDemo(),
         ],
       ),
+    );
+  }
+}
+
+class _SearchableSelectDemo extends StatefulWidget {
+  const _SearchableSelectDemo();
+
+  @override
+  State<_SearchableSelectDemo> createState() => _SearchableSelectDemoState();
+}
+
+class _SearchableSelectDemoState extends State<_SearchableSelectDemo> {
+  String? _value;
+
+  static const _states = [
+    HUFSelectItem(value: 'fl', label: 'Florida'),
+    HUFSelectItem(value: 'de', label: 'Delaware'),
+    HUFSelectItem(value: 'ca', label: 'California'),
+    HUFSelectItem(value: 'tx', label: 'Texas'),
+    HUFSelectItem(value: 'ny', label: 'New York'),
+    HUFSelectItem(value: 'wa', label: 'Washington'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return HUFSelect<String>(
+      label: 'State',
+      hintText: 'Cerca o seleziona uno stato',
+      search: true,
+      isFullWidth: true,
+      items: _states,
+      value: _value,
+      onChanged: (v) => setState(() => _value = v),
     );
   }
 }
@@ -57,7 +93,7 @@ class _StateSelectDemoState extends State<_StateSelectDemo> {
   Widget build(BuildContext context) {
     return HUFSelect<String>(
       label: 'State',
-      placeholder: 'Select one',
+      hintText: 'Select one',
       isFullWidth: true,
       items: _states,
       value: _value,
@@ -111,7 +147,7 @@ class _CountrySelectDemoState extends State<_CountrySelectDemo> {
   Widget build(BuildContext context) {
     return HUFSelect<String>(
       label: 'Country',
-      placeholder: 'Select a country',
+      hintText: 'Select a country',
       isFullWidth: true,
       sections: _sections,
       value: _value,
@@ -145,13 +181,13 @@ class _ContentWidthSelectDemoState extends State<_ContentWidthSelectDemo> {
       children: [
         HUFSelect<String>(
           label: 'Compatto',
-          placeholder: 'Scegli',
+          hintText: 'Scegli',
           items: _items,
           value: _value,
           onChanged: (v) => setState(() => _value = v),
         ),
         HUFSelect<String>(
-          placeholder: 'Senza label',
+          hintText: 'Senza label',
           items: _items,
           value: _value,
           onChanged: (v) => setState(() => _value = v),
@@ -188,7 +224,7 @@ class _MultiCountrySelectDemoState extends State<_MultiCountrySelectDemo> {
       alignment: Alignment.bottomCenter,
       child: HUFSelect<String>(
         label: 'Countries',
-        placeholder: 'Select countries',
+        hintText: 'Select countries',
         isFullWidth: true,
         items: _countries,
         multiSelect: true,
@@ -254,7 +290,7 @@ class _UserSelectDemoState extends State<_UserSelectDemo> {
       alignment: Alignment.bottomCenter,
       child: HUFSelect<String>(
         label: 'Team member',
-        placeholder: 'Select a user',
+        hintText: 'Select a user',
         isFullWidth: true,
         items: [
           for (final user in _users)

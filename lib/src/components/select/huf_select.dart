@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../layout/huf_shrink_wrap_width.dart';
 import '../../theme/huf_theme.dart';
+import '../input/huf_input.dart';
 import '../separator/huf_separator.dart';
 import 'huf_select_item.dart';
 import 'huf_select_placement.dart';
@@ -40,7 +40,9 @@ class HUFSelect<T> extends StatefulWidget {
   const HUFSelect({
     super.key,
     this.label,
+    this.hintText,
     this.placeholder = 'Select one',
+    this.search = false,
     this.items,
     this.sections,
     this.value,
@@ -75,7 +77,16 @@ class HUFSelect<T> extends StatefulWidget {
         closeOnSelect = closeOnSelect ?? !multiSelect;
 
   final String? label;
+
+  /// Testo suggerito nel campo quando non c'è selezione.
+  final String? hintText;
+
+  /// Alias di [hintText] per retrocompatibilità.
   final String placeholder;
+
+  /// Se `true`, con il menu aperto il trigger diventa un campo di ricerca
+  /// che filtra le voci per label e subtitle.
+  final bool search;
 
   /// Elenco piatto di opzioni (alternativa a [sections]).
   final List<HUFSelectItem<T>>? items;
@@ -136,14 +147,19 @@ class HUFSelect<T> extends StatefulWidget {
 
 class _HUFSelectState<T> extends State<HUFSelect<T>> {
   final _triggerKey = GlobalKey();
+  final _fieldController = TextEditingController();
+  final _fieldFocusNode = FocusNode();
   final Object _tapRegionGroup = Object();
   OverlayEntry? _overlayEntry;
   int _overlayGeneration = 0;
 
   late bool _isOpen;
+  String _searchQuery = '';
 
   /// Selezione locale mentre il menu è aperto (aggiornamento immediato del popup).
   Set<T>? _menuSelectedValues;
+
+  String get _effectiveHintText => widget.hintText ?? widget.placeholder;
 
   bool get _isControlled => widget.isOpen != null;
   bool get _open => _isControlled ? widget.isOpen! : _isOpen;
@@ -154,6 +170,39 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
     return widget.sections!
         .expand((section) => section.items)
         .toList(growable: false);
+  }
+
+  bool _matchesSearch(HUFSelectItem<T> item) {
+    if (!widget.search || _searchQuery.isEmpty) return true;
+    final query = _searchQuery.toLowerCase();
+    if (item.label.toLowerCase().contains(query)) return true;
+    final subtitle = item.subtitle;
+    if (subtitle != null && subtitle.toLowerCase().contains(query)) {
+      return true;
+    }
+    return false;
+  }
+
+  List<HUFSelectItem<T>> get _filteredItems {
+    return _allItems.where(_matchesSearch).toList(growable: false);
+  }
+
+  List<HUFSelectSection<T>>? get _filteredSections {
+    if (widget.sections == null) return null;
+    final result = <HUFSelectSection<T>>[];
+    for (final section in widget.sections!) {
+      final items =
+          section.items.where(_matchesSearch).toList(growable: false);
+      if (items.isEmpty) continue;
+      result.add(
+        HUFSelectSection<T>(
+          header: section.header,
+          items: items,
+          showSeparatorBefore: section.showSeparatorBefore,
+        ),
+      );
+    }
+    return result;
   }
 
   HUFSelectItem<T>? _itemForValue(T value) {
@@ -218,6 +267,8 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
   void initState() {
     super.initState();
     _isOpen = widget.isOpen ?? widget.initialOpen;
+    _syncFieldFocusPolicy();
+    _syncFieldDisplayText();
     if (_isOpen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _open) _showOverlay();
@@ -231,6 +282,9 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
     if (_isControlled && widget.isOpen != oldWidget.isOpen) {
       _setOpen(widget.isOpen!, notify: false);
     }
+    if (widget.search != oldWidget.search || widget.enabled != oldWidget.enabled) {
+      _syncFieldFocusPolicy();
+    }
     if (widget.placement != oldWidget.placement && _open) {
       _scheduleRefreshOpenMenu();
     }
@@ -243,13 +297,71 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
         widget.value != oldWidget.value) {
       _scheduleRefreshOpenMenu();
     }
+    if (!_open) {
+      if (widget.value != oldWidget.value ||
+          widget.values != oldWidget.values ||
+          widget.hintText != oldWidget.hintText ||
+          widget.placeholder != oldWidget.placeholder) {
+        _syncFieldDisplayText();
+      }
+    }
   }
 
   @override
   void dispose() {
     _overlayGeneration++;
     _removeOverlay();
+    _fieldController.dispose();
+    _fieldFocusNode.dispose();
     super.dispose();
+  }
+
+  void _syncFieldDisplayText() {
+    if (_open && widget.search) return;
+    final label = _triggerLabel();
+    if (label == null) {
+      if (_fieldController.text.isNotEmpty) {
+        _fieldController.clear();
+      }
+      return;
+    }
+    if (_fieldController.text != label) {
+      _fieldController.value = TextEditingValue(
+        text: label,
+        selection: TextSelection.collapsed(offset: label.length),
+      );
+    }
+  }
+
+  void _beginSearchSession() {
+    _searchQuery = '';
+    _fieldController.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _open && widget.search) {
+        _fieldFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _endSearchSession() {
+    _searchQuery = '';
+    _syncFieldDisplayText();
+  }
+
+  /// Solo in modalità [HUFSelect.search] con menu aperto il trigger può ricevere focus.
+  void _syncFieldFocusPolicy() {
+    final allowFocus = widget.enabled && widget.search && _open;
+    if (_fieldFocusNode.canRequestFocus != allowFocus) {
+      _fieldFocusNode.canRequestFocus = allowFocus;
+    }
+    if (!allowFocus && _fieldFocusNode.hasFocus) {
+      _fieldFocusNode.unfocus();
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() => _searchQuery = query);
+    _refreshOpenMenu();
   }
 
   void _toggle() {
@@ -271,10 +383,21 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
       setState(() => _isOpen = open);
     }
 
+    _syncFieldFocusPolicy();
+
     if (open) {
+      if (widget.search) {
+        _beginSearchSession();
+      }
       _showOverlay();
     } else {
+      if (widget.search) {
+        _endSearchSession();
+      } else {
+        _syncFieldDisplayText();
+      }
       _removeOverlay();
+      _syncFieldFocusPolicy();
     }
 
     if (notify) {
@@ -375,7 +498,11 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
     }
 
     widget.onChanged?.call(value);
-    if (widget.closeOnSelect) _close();
+    if (widget.closeOnSelect) {
+      _close();
+    } else {
+      _syncFieldDisplayText();
+    }
   }
 
   Widget _buildMenu(BuildContext context) {
@@ -383,7 +510,16 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
     final metrics = hufSelectMetricsFor(theme.borderRadius);
     final colors = hufSelectColorsFor(theme.colors);
 
-    if (widget.sections != null) {
+    final sections = _filteredSections;
+    if (sections != null) {
+      if (sections.isEmpty) {
+        return _HUFSelectMenuPanel(
+          metrics: metrics,
+          colors: colors,
+          child: _HUFSelectEmptyResults(metrics: metrics, colors: colors),
+        );
+      }
+
       return _HUFSelectMenuPanel(
         metrics: metrics,
         colors: colors,
@@ -396,11 +532,20 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (var i = 0; i < widget.sections!.length; i++)
-                _buildSection(context, widget.sections![i], i > 0),
+              for (var i = 0; i < sections.length; i++)
+                _buildSection(context, sections[i], i > 0),
             ],
           ),
         ),
+      );
+    }
+
+    final items = _filteredItems;
+    if (items.isEmpty) {
+      return _HUFSelectMenuPanel(
+        metrics: metrics,
+        colors: colors,
+        child: _HUFSelectEmptyResults(metrics: metrics, colors: colors),
       );
     }
 
@@ -416,8 +561,7 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final item in widget.items!)
-              _buildItem(context, item),
+            for (final item in items) _buildItem(context, item),
           ],
         ),
       ),
@@ -474,157 +618,56 @@ class _HUFSelectState<T> extends State<HUFSelect<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.hufTheme;
-    final metrics = hufSelectMetricsFor(theme.borderRadius);
-    final colors = hufSelectColorsFor(theme.colors);
-    final displayText = _triggerLabel();
-    final hasValue = displayText != null;
+    final searchActive = widget.search && _open;
 
-    final trigger = KeyedSubtree(
+    return KeyedSubtree(
       key: _triggerKey,
       child: TapRegion(
         groupId: _tapRegionGroup,
-        child: _HUFSelectTrigger(
-          metrics: metrics,
-          colors: colors,
-          placeholder: widget.placeholder,
-          displayText: displayText,
-          hasValue: hasValue,
-          isOpen: _open,
-          isDisabled: _isDisabled,
+        child: HUFInput(
+          label: widget.label,
+          hintText: _effectiveHintText,
+          controller: _fieldController,
+          focusNode: _fieldFocusNode,
+          enabled: widget.enabled,
           isFullWidth: widget.isFullWidth,
-          onTap: _toggle,
+          readOnly: !searchActive,
+          autofocus: searchActive,
+          onChanged: searchActive ? _onSearchChanged : null,
+          onTap: searchActive ? null : _toggle,
+          suffix: Icon(
+            _open
+                ? Icons.keyboard_arrow_up_rounded
+                : Icons.keyboard_arrow_down_rounded,
+          ),
         ),
       ),
     );
-
-    Widget field;
-    if (widget.label == null) {
-      field = trigger;
-    } else {
-      field = Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            widget.label!,
-            style: hufSelectTextStyle(
-              fontSize: metrics.labelFontSize,
-              fontWeight: FontWeight.w500,
-              color: colors.label,
-            ),
-          ),
-          SizedBox(height: metrics.labelGap),
-          trigger,
-        ],
-      );
-    }
-
-    field = DefaultTextStyle(
-      style: hufSelectTextStyle(
-        fontSize: metrics.triggerFontSize,
-        color: colors.triggerForeground,
-      ),
-      child: field,
-    );
-
-    if (widget.isFullWidth) {
-      return SizedBox(width: double.infinity, child: field);
-    }
-
-    return HUFShrinkWrapWidth(child: field);
   }
 }
 
-class _HUFSelectTrigger extends StatelessWidget {
-  const _HUFSelectTrigger({
+class _HUFSelectEmptyResults extends StatelessWidget {
+  const _HUFSelectEmptyResults({
     required this.metrics,
     required this.colors,
-    required this.placeholder,
-    required this.displayText,
-    required this.hasValue,
-    required this.isOpen,
-    required this.isDisabled,
-    required this.isFullWidth,
-    required this.onTap,
   });
 
   final HUFSelectMetrics metrics;
   final HUFSelectColors colors;
-  final String placeholder;
-  final String? displayText;
-  final bool hasValue;
-  final bool isOpen;
-  final bool isDisabled;
-  final bool isFullWidth;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(metrics.borderRadius);
-    final textColor = isDisabled
-        ? colors.disabledForeground
-        : hasValue
-            ? colors.triggerForeground
-            : colors.placeholder;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: isDisabled ? null : onTap,
-        borderRadius: radius,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: isDisabled
-                ? colors.triggerBackground.withValues(alpha: 0.6)
-                : colors.triggerBackground,
-            borderRadius: radius,
-            border: Border.all(color: colors.triggerBorder),
-          ),
-          child: SizedBox(
-            width: isFullWidth ? double.infinity : null,
-            height: metrics.triggerHeight,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: metrics.triggerHorizontalPadding,
-              ),
-              child: Row(
-                mainAxisSize:
-                    isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-                children: [
-                  if (isFullWidth)
-                    Expanded(child: _buildTriggerText(textColor))
-                  else
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: _buildTriggerText(textColor),
-                    ),
-                  Icon(
-                    isOpen
-                        ? Icons.keyboard_arrow_up_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                    size: metrics.iconSize,
-                    color: isDisabled
-                        ? colors.disabledForeground
-                        : colors.triggerForeground,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: metrics.itemVerticalPadding,
+        horizontal: metrics.itemHorizontalPadding,
       ),
-    );
-  }
-
-  Widget _buildTriggerText(Color textColor) {
-    return Text(
-      displayText ?? placeholder,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: hufSelectTextStyle(
-        fontSize: metrics.triggerFontSize,
-        color: textColor,
+      child: Text(
+        'Nessun risultato',
+        style: hufSelectTextStyle(
+          fontSize: metrics.itemFontSize,
+          color: colors.itemSubtitle,
+        ),
       ),
     );
   }

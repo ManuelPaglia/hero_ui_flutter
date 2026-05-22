@@ -130,7 +130,9 @@ class HUFAccordionItem extends StatelessWidget {
             onTap: enabled && onExpansionChanged != null
                 ? () => onExpansionChanged!(!expanded)
                 : null,
-            child: Padding(
+            child: SizedBox(
+              width: double.infinity,
+              child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: metrics.headerHorizontalPadding,
                 vertical: metrics.headerVerticalPadding,
@@ -168,6 +170,7 @@ class HUFAccordionItem extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ),
@@ -386,8 +389,8 @@ class _HUFAccordionState<T> extends State<HUFAccordion<T>> {
         borderRadius: borderRadius,
         border: Border.all(color: theme.colors.border),
       ),
-      child: Padding(
-        padding: metrics.cardPadding,
+      child: ClipRRect(
+        borderRadius: borderRadius,
         child: content,
       ),
     );

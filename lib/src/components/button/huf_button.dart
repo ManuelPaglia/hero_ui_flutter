@@ -80,6 +80,7 @@ class _HUFButtonState extends State<HUFButton> with HUFButtonPressScaleMixin {
     if (popover != null) {
       return HUFPopover(
         placement: popover.placement,
+        align: popover.align,
         showArrow: popover.showArrow,
         offset: popover.offset,
         isOpen: popover.isOpen,

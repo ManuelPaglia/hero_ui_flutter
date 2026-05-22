@@ -105,6 +105,7 @@ class HUFPopover extends StatefulWidget {
     required this.triggerBuilder,
     required this.child,
     this.placement = HUFPopoverPlacement.bottom,
+    this.align = HUFPopoverAlign.center,
     this.showArrow = false,
     this.offset,
     this.isOpen,
@@ -121,6 +122,9 @@ class HUFPopover extends StatefulWidget {
 
   /// Posizione preferita rispetto al trigger.
   final HUFPopoverPlacement placement;
+
+  /// Allineamento del popover sul trigger (`center`, `left`, `right`).
+  final HUFPopoverAlign align;
 
   /// Mostra una freccia che punta verso il trigger.
   final bool showArrow;
@@ -173,7 +177,9 @@ class _HUFPopoverState extends State<HUFPopover> {
     if (_isControlled && widget.isOpen != oldWidget.isOpen) {
       _setOpen(widget.isOpen!, notify: false);
     }
-    if (widget.placement != oldWidget.placement && _open) {
+    if ((widget.placement != oldWidget.placement ||
+            widget.align != oldWidget.align) &&
+        _open) {
       _overlayEntry?.markNeedsBuild();
     }
   }
@@ -246,6 +252,7 @@ class _HUFPopoverState extends State<HUFPopover> {
           triggerRect: triggerRect,
           popoverSize: Size.zero,
           placement: widget.placement,
+          align: widget.align,
           gap: gap,
           viewport: viewport,
         );
@@ -257,6 +264,7 @@ class _HUFPopoverState extends State<HUFPopover> {
           triggerKey: _triggerKey,
           tapRegionGroup: _tapRegionGroup,
           requestedPlacement: widget.placement,
+          align: widget.align,
           showArrow: widget.showArrow,
           gap: gap,
           initialPosition: initialPosition,
@@ -298,6 +306,7 @@ class _HUFPopoverOverlay extends StatefulWidget {
     required this.triggerKey,
     required this.tapRegionGroup,
     required this.requestedPlacement,
+    required this.align,
     required this.showArrow,
     required this.gap,
     required this.initialPosition,
@@ -309,6 +318,7 @@ class _HUFPopoverOverlay extends StatefulWidget {
   final GlobalKey triggerKey;
   final Object tapRegionGroup;
   final HUFPopoverPlacement requestedPlacement;
+  final HUFPopoverAlign align;
   final bool showArrow;
   final double gap;
   final Offset? initialPosition;
@@ -359,7 +369,8 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
   @override
   void didUpdateWidget(_HUFPopoverOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.requestedPlacement != widget.requestedPlacement) {
+    if (oldWidget.requestedPlacement != widget.requestedPlacement ||
+        oldWidget.align != widget.align) {
       _resolvedPlacement = null;
       _position = null;
       _positionFinalized = false;
@@ -369,12 +380,20 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
     WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
   }
 
-  Alignment _scaleAlignmentFor(HUFPopoverPlacement placement) {
+  Alignment _scaleAlignmentFor(
+    HUFPopoverPlacement placement,
+    HUFPopoverAlign align,
+  ) {
+    final crossAxis = switch (align) {
+      HUFPopoverAlign.center => 0.0,
+      HUFPopoverAlign.left => -1.0,
+      HUFPopoverAlign.right => 1.0,
+    };
     return switch (placement) {
-      HUFPopoverPlacement.bottom => Alignment.topCenter,
-      HUFPopoverPlacement.top => Alignment.bottomCenter,
-      HUFPopoverPlacement.start => Alignment.centerRight,
-      HUFPopoverPlacement.end => Alignment.centerLeft,
+      HUFPopoverPlacement.bottom => Alignment(crossAxis, -1),
+      HUFPopoverPlacement.top => Alignment(crossAxis, 1),
+      HUFPopoverPlacement.start => Alignment(1, crossAxis),
+      HUFPopoverPlacement.end => Alignment(-1, crossAxis),
     };
   }
 
@@ -418,6 +437,7 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
         triggerRect: triggerRect,
         popoverSize: Size.zero,
         placement: placement,
+        align: widget.align,
         gap: widget.gap,
         viewport: viewport,
       );
@@ -434,6 +454,7 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
     final popoverSize = popoverBox.size;
     final resolved = _resolvePlacementFor(
       requested: widget.requestedPlacement,
+      align: widget.align,
       triggerRect: triggerRect,
       popoverSize: popoverSize,
       viewport: viewport,
@@ -444,6 +465,7 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
       triggerRect: triggerRect,
       popoverSize: popoverSize,
       placement: resolved,
+      align: widget.align,
       gap: widget.gap,
       viewport: viewport,
     );
@@ -476,11 +498,33 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
         ? hufPopoverArrowEdgeForPlacement(placement)
         : null;
 
+    double? arrowCrossAxisOffset;
+    if (arrowEdge != null && _position != null) {
+      final triggerBox =
+          widget.triggerKey.currentContext?.findRenderObject() as RenderBox?;
+      if (triggerBox != null && triggerBox.hasSize) {
+        final triggerRect =
+            triggerBox.localToGlobal(Offset.zero) & triggerBox.size;
+        final overlayBox = context.findRenderObject() as RenderBox?;
+        if (overlayBox != null && overlayBox.hasSize) {
+          final popoverGlobalTopLeft =
+              overlayBox.localToGlobal(_position!);
+          arrowCrossAxisOffset = hufPopoverArrowCrossAxisOffset(
+            edge: arrowEdge,
+            triggerRect: triggerRect,
+            popoverGlobalTopLeft: popoverGlobalTopLeft,
+            arrowSize: metrics.arrowSize,
+          );
+        }
+      }
+    }
+
     final surface = _HUFPopoverSurface(
       key: _popoverKey,
       metrics: metrics,
       colors: colors,
       arrowEdge: arrowEdge,
+      arrowCrossAxisOffset: arrowCrossAxisOffset,
       child: widget.child,
     );
 
@@ -515,7 +559,7 @@ class _HUFPopoverOverlayState extends State<_HUFPopoverOverlay>
                   scale: Tween<double>(begin: 0.96, end: 1).animate(
                     _entranceAnimation,
                   ),
-                  alignment: _scaleAlignmentFor(placement),
+                  alignment: _scaleAlignmentFor(placement, widget.align),
                   child: popover,
                 ),
               ),
@@ -538,12 +582,14 @@ class _HUFPopoverSurface extends StatelessWidget {
     required this.metrics,
     required this.colors,
     required this.arrowEdge,
+    this.arrowCrossAxisOffset,
     required this.child,
   });
 
   final HUFPopoverMetrics metrics;
   final HUFPopoverColors colors;
   final HUFPopoverArrowEdge? arrowEdge;
+  final double? arrowCrossAxisOffset;
   final Widget child;
 
   @override
@@ -577,6 +623,7 @@ class _HUFPopoverSurface extends StatelessWidget {
         card,
         _HUFPopoverArrow(
           edge: edge,
+          crossAxisOffset: arrowCrossAxisOffset,
           fillColor: colors.background,
           borderColor: colors.border,
           size: metrics.arrowSize,
@@ -589,12 +636,14 @@ class _HUFPopoverSurface extends StatelessWidget {
 class _HUFPopoverArrow extends StatelessWidget {
   const _HUFPopoverArrow({
     required this.edge,
+    this.crossAxisOffset,
     required this.fillColor,
     required this.borderColor,
     required this.size,
   });
 
   final HUFPopoverArrowEdge edge;
+  final double? crossAxisOffset;
   final Color fillColor;
   final Color borderColor;
   final double size;
@@ -616,28 +665,39 @@ class _HUFPopoverArrow extends StatelessWidget {
       HUFPopoverArrowEdge.right => RotatedBox(quarterTurns: 1, child: arrow),
     };
 
+    final crossAxis = crossAxisOffset;
+    final centerOnCrossAxis = crossAxis == null;
+
     return Positioned(
       top: switch (edge) {
         HUFPopoverArrowEdge.top => -size + 1,
-        HUFPopoverArrowEdge.left || HUFPopoverArrowEdge.right => 0,
+        HUFPopoverArrowEdge.left ||
+        HUFPopoverArrowEdge.right =>
+          centerOnCrossAxis ? 0 : crossAxis,
         _ => null,
       },
       bottom: switch (edge) {
         HUFPopoverArrowEdge.bottom => -size + 1,
-        HUFPopoverArrowEdge.left || HUFPopoverArrowEdge.right => 0,
+        HUFPopoverArrowEdge.left ||
+        HUFPopoverArrowEdge.right =>
+          centerOnCrossAxis ? 0 : null,
         _ => null,
       },
       left: switch (edge) {
         HUFPopoverArrowEdge.left => -size + 1,
-        HUFPopoverArrowEdge.top || HUFPopoverArrowEdge.bottom => 0,
+        HUFPopoverArrowEdge.top ||
+        HUFPopoverArrowEdge.bottom =>
+          centerOnCrossAxis ? 0 : crossAxis,
         _ => null,
       },
       right: switch (edge) {
         HUFPopoverArrowEdge.right => -size + 1,
-        HUFPopoverArrowEdge.top || HUFPopoverArrowEdge.bottom => 0,
+        HUFPopoverArrowEdge.top ||
+        HUFPopoverArrowEdge.bottom =>
+          centerOnCrossAxis ? 0 : null,
         _ => null,
       },
-      child: Center(child: rotated),
+      child: centerOnCrossAxis ? Center(child: rotated) : rotated,
     );
   }
 }
@@ -698,25 +758,33 @@ Offset _popoverTopLeftFor({
   required Rect triggerRect,
   required Size popoverSize,
   required HUFPopoverPlacement placement,
+  required HUFPopoverAlign align,
   required double gap,
   required Rect viewport,
 }) {
+  final crossAxis = hufPopoverAlignAxisOffset(
+    align: align,
+    placement: placement,
+    triggerRect: triggerRect,
+    popoverSize: popoverSize,
+  );
+
   final raw = switch (placement) {
     HUFPopoverPlacement.bottom => Offset(
-        triggerRect.center.dx - popoverSize.width / 2,
+        crossAxis,
         triggerRect.bottom + gap,
       ),
     HUFPopoverPlacement.top => Offset(
-        triggerRect.center.dx - popoverSize.width / 2,
+        crossAxis,
         triggerRect.top - gap - popoverSize.height,
       ),
     HUFPopoverPlacement.start => Offset(
         triggerRect.left - gap - popoverSize.width,
-        triggerRect.center.dy - popoverSize.height / 2,
+        crossAxis,
       ),
     HUFPopoverPlacement.end => Offset(
         triggerRect.right + gap,
-        triggerRect.center.dy - popoverSize.height / 2,
+        crossAxis,
       ),
   };
 
@@ -742,12 +810,14 @@ Rect _popoverRectFor({
   required Rect triggerRect,
   required Size popoverSize,
   required HUFPopoverPlacement placement,
+  required HUFPopoverAlign align,
   required double gap,
 }) {
   final topLeft = _popoverTopLeftFor(
     triggerRect: triggerRect,
     popoverSize: popoverSize,
     placement: placement,
+    align: align,
     gap: gap,
     viewport: const Rect.fromLTWH(0, 0, double.infinity, double.infinity),
   );
@@ -763,6 +833,7 @@ bool _fitsInViewport(Rect rect, Rect viewport) {
 
 HUFPopoverPlacement _resolvePlacementFor({
   required HUFPopoverPlacement requested,
+  required HUFPopoverAlign align,
   required Rect triggerRect,
   required Size popoverSize,
   required Rect viewport,
@@ -772,6 +843,7 @@ HUFPopoverPlacement _resolvePlacementFor({
     triggerRect: triggerRect,
     popoverSize: popoverSize,
     placement: requested,
+    align: align,
     gap: gap,
   );
 
@@ -784,6 +856,7 @@ HUFPopoverPlacement _resolvePlacementFor({
     triggerRect: triggerRect,
     popoverSize: popoverSize,
     placement: flipped,
+    align: align,
     gap: gap,
   );
 

@@ -3,12 +3,6 @@ import 'package:flutter/material.dart';
 import '../../theme/huf_theme.dart';
 import 'huf_accordion_variant.dart';
 
-/// Padding interno del contenitore card.
-const EdgeInsets kHufAccordionCardPadding = EdgeInsets.symmetric(
-  horizontal: 4,
-  vertical: 4,
-);
-
 /// Padding orizzontale dell'header di ogni item.
 const double kHufAccordionHeaderHorizontalPadding = 12;
 
@@ -34,7 +28,6 @@ const double kHufAccordionSeparatorInset = 12;
 class HUFAccordionMetrics {
   const HUFAccordionMetrics({
     required this.borderRadius,
-    required this.cardPadding,
     required this.headerHorizontalPadding,
     required this.headerVerticalPadding,
     required this.leadingGap,
@@ -48,7 +41,6 @@ class HUFAccordionMetrics {
   });
 
   final double borderRadius;
-  final EdgeInsets cardPadding;
   final double headerHorizontalPadding;
   final double headerVerticalPadding;
   final double leadingGap;
@@ -81,7 +73,6 @@ class HUFAccordionColors {
 HUFAccordionMetrics hufAccordionMetricsFor(HUFBorderRadius borderRadius) {
   return HUFAccordionMetrics(
     borderRadius: borderRadius.value,
-    cardPadding: kHufAccordionCardPadding,
     headerHorizontalPadding: kHufAccordionHeaderHorizontalPadding,
     headerVerticalPadding: kHufAccordionHeaderVerticalPadding,
     leadingGap: kHufAccordionLeadingGap,

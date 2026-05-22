@@ -134,6 +134,40 @@ class PopoverShowcasePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
+          const ShowcaseSubsectionTitle('Allineamento'),
+          const Text(
+            'Con placement bottom, `align` allinea il popover rispetto al '
+            'bordo del pulsante. La freccia punta sempre al centro del trigger.',
+            style: TextStyle(height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final entry in [
+                (HUFPopoverAlign.left, 'Left'),
+                (HUFPopoverAlign.center, 'Center'),
+                (HUFPopoverAlign.right, 'Right'),
+              ])
+                HUFButton(
+                  label: entry.$2,
+                  variant: HUFButtonVariant.outlined,
+                  size: HUFButtonSize.medium,
+                  popover: HUFButtonPopover(
+                    align: entry.$1,
+                    showArrow: true,
+                    child: HUFPopoverContent(
+                      title: 'Align ${entry.$2}',
+                      description:
+                          'Popover allineato a ${entry.$2.toLowerCase()}.',
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 32),
           const ShowcaseSubsectionTitle('Profilo (contenuto custom)'),
           Center(
             child: HUFButton(

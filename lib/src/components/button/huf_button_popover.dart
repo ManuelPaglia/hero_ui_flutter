@@ -10,6 +10,7 @@ class HUFButtonPopover {
   const HUFButtonPopover({
     required this.child,
     this.placement = HUFPopoverPlacement.bottom,
+    this.align = HUFPopoverAlign.center,
     this.showArrow = false,
     this.offset,
     this.isOpen,
@@ -23,6 +24,9 @@ class HUFButtonPopover {
 
   /// Posizione preferita rispetto al pulsante.
   final HUFPopoverPlacement placement;
+
+  /// Allineamento del popover sul pulsante (`center`, `left`, `right`).
+  final HUFPopoverAlign align;
 
   /// Mostra una freccia che punta verso il pulsante.
   final bool showArrow;

@@ -2282,6 +2282,73 @@ void main() {
     expect(find.text('Azioni'), findsOneWidget);
   });
 
+  test('hufPopoverAlignAxisOffset allinea il popover al trigger', () {
+    const trigger = Rect.fromLTWH(100, 50, 80, 32);
+    const popoverSize = Size(200, 120);
+
+    expect(
+      hufPopoverAlignAxisOffset(
+        align: HUFPopoverAlign.center,
+        placement: HUFPopoverPlacement.bottom,
+        triggerRect: trigger,
+        popoverSize: popoverSize,
+      ),
+      40,
+    );
+    expect(
+      hufPopoverAlignAxisOffset(
+        align: HUFPopoverAlign.left,
+        placement: HUFPopoverPlacement.bottom,
+        triggerRect: trigger,
+        popoverSize: popoverSize,
+      ),
+      100,
+    );
+    expect(
+      hufPopoverAlignAxisOffset(
+        align: HUFPopoverAlign.right,
+        placement: HUFPopoverPlacement.bottom,
+        triggerRect: trigger,
+        popoverSize: popoverSize,
+      ),
+      -20,
+    );
+    expect(
+      hufPopoverAlignAxisOffset(
+        align: HUFPopoverAlign.left,
+        placement: HUFPopoverPlacement.start,
+        triggerRect: trigger,
+        popoverSize: popoverSize,
+      ),
+      50,
+    );
+  });
+
+  test('hufPopoverArrowCrossAxisOffset punta al centro del trigger', () {
+    const trigger = Rect.fromLTWH(100, 50, 80, 32);
+    const popoverTopLeft = Offset(100, 90);
+    const arrowSize = 8.0;
+
+    expect(
+      hufPopoverArrowCrossAxisOffset(
+        edge: HUFPopoverArrowEdge.top,
+        triggerRect: trigger,
+        popoverGlobalTopLeft: popoverTopLeft,
+        arrowSize: arrowSize,
+      ),
+      32,
+    );
+    expect(
+      hufPopoverArrowCrossAxisOffset(
+        edge: HUFPopoverArrowEdge.top,
+        triggerRect: trigger,
+        popoverGlobalTopLeft: const Offset(40, 90),
+        arrowSize: arrowSize,
+      ),
+      92,
+    );
+  });
+
   test('hufPopoverArrowEdgeForPlacement segue il placement risolto', () {
     expect(
       hufPopoverArrowEdgeForPlacement(HUFPopoverPlacement.bottom),
@@ -2427,30 +2494,45 @@ void main() {
 
     await tester.pumpWidget(
       _wrap(
-        StatefulBuilder(
-          builder: (context, setState) {
-            return HUFSelect<String>(
-              label: 'State',
-              placeholder: 'Select one',
-              items: const [
-                HUFSelectItem(value: 'fl', label: 'Florida'),
-                HUFSelectItem(value: 'ca', label: 'California'),
-              ],
-              value: selected,
-              onChanged: (v) => setState(() => selected = v),
-            );
-          },
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return HUFSelect<String>(
+                  label: 'State',
+                  placeholder: 'Select one',
+                  placement: HUFSelectPlacement.top,
+                  items: const [
+                    HUFSelectItem(value: 'fl', label: 'Florida'),
+                    HUFSelectItem(value: 'ca', label: 'California'),
+                  ],
+                  value: selected,
+                  onChanged: (v) => setState(() => selected = v),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Select one'));
+    await tester.tap(find.descendant(
+      of: find.byType(HUFSelect<String>),
+      matching: find.byType(TextField),
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.text('Florida'), findsOneWidget);
 
-    await tester.tap(find.text('Florida'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(TapRegion),
+        matching: find.text('Florida'),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -2482,7 +2564,7 @@ void main() {
 
     final triggerFinder = find.descendant(
       of: find.byType(HUFSelect<String>),
-      matching: find.byType(Ink),
+      matching: find.byType(AnimatedContainer),
     );
     final triggerWidth = tester.getSize(triggerFinder.first).width;
     expect(triggerWidth, lessThan(parentWidth));
@@ -2502,13 +2584,13 @@ void main() {
       ),
     );
 
-    final triggerInk = tester.widget<Ink>(
+    final triggerShell = tester.widget<AnimatedContainer>(
       find.descendant(
         of: find.byType(HUFSelect<String>),
-        matching: find.byType(Ink),
+        matching: find.byType(AnimatedContainer),
       ).first,
     );
-    final decoration = triggerInk.decoration! as BoxDecoration;
+    final decoration = triggerShell.decoration! as BoxDecoration;
     final radius = decoration.borderRadius! as BorderRadius;
 
     expect(radius.topLeft.x, large.value);
@@ -2519,35 +2601,50 @@ void main() {
 
     await tester.pumpWidget(
       _wrap(
-        StatefulBuilder(
-          builder: (context, setState) {
-            return HUFSelect<String>(
-              placeholder: 'Countries',
-              multiSelect: true,
-              closeOnSelect: false,
-              values: values,
-              onMultiChanged: (v) => setState(() => values = v),
-              items: const [
-                HUFSelectItem(value: 'es', label: 'Spain'),
-                HUFSelectItem(value: 'nz', label: 'New Zealand'),
-              ],
-            );
-          },
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return HUFSelect<String>(
+                  placeholder: 'Countries',
+                  placement: HUFSelectPlacement.top,
+                  multiSelect: true,
+                  closeOnSelect: false,
+                  values: values,
+                  onMultiChanged: (v) => setState(() => values = v),
+                  items: const [
+                    HUFSelectItem(value: 'es', label: 'Spain'),
+                    HUFSelectItem(value: 'nz', label: 'New Zealand'),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Countries'));
+    await tester.tap(find.descendant(
+      of: find.byType(HUFSelect<String>),
+      matching: find.byType(TextField),
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.tap(find.text('New Zealand'));
+    final newZealandInMenu = find.descendant(
+      of: find.byType(Overlay),
+      matching: find.text('New Zealand'),
+    );
+
+    await tester.tap(newZealandInMenu);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
 
-    await tester.tap(find.text('New Zealand').last);
+    await tester.tap(newZealandInMenu);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -2559,32 +2656,295 @@ void main() {
 
     await tester.pumpWidget(
       _wrap(
-        StatefulBuilder(
-          builder: (context, setState) {
-            return HUFSelect<String>(
-              placeholder: 'Countries',
-              multiSelect: true,
-              values: values,
-              onMultiChanged: (v) => setState(() => values = v),
-              items: const [
-                HUFSelectItem(value: 'es', label: 'Spain'),
-                HUFSelectItem(value: 'nz', label: 'New Zealand'),
-              ],
-            );
-          },
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return HUFSelect<String>(
+                  placeholder: 'Countries',
+                  placement: HUFSelectPlacement.top,
+                  multiSelect: true,
+                  values: values,
+                  onMultiChanged: (v) => setState(() => values = v),
+                  items: const [
+                    HUFSelectItem(value: 'es', label: 'Spain'),
+                    HUFSelectItem(value: 'nz', label: 'New Zealand'),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
 
-    await tester.tap(find.text('Spain'));
+    await tester.tap(find.descendant(
+      of: find.byType(HUFSelect<String>),
+      matching: find.byType(TextField),
+    ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.tap(find.text('New Zealand'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(TapRegion),
+        matching: find.text('New Zealand'),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(values, containsAll(['es', 'nz']));
+  });
+
+  testWidgets('HUFInput mostra bordo primary in focus', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFInput(
+          label: 'Email',
+          hintText: 'Enter your email',
+          isFullWidth: true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.pump(kHufFieldBorderAnimationDuration);
+
+    final fieldShell = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFInput),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    final decoration = fieldShell.decoration! as BoxDecoration;
+    final border = decoration.border! as Border;
+
+    expect(border.top.color, HUFTheme.light().colors.primary);
+    expect(border.top.width, kHufFieldFocusBorderWidth);
+  });
+
+  testWidgets('HUFInput perde il focus al tap esterno', (tester) async {
+    final theme = HUFTheme.light();
+
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: [
+            const HUFInput(
+              label: 'Campo',
+              hintText: 'Test',
+              isFullWidth: true,
+            ),
+            TextButton(
+              onPressed: () {},
+              child: const Text('Fuori dal campo'),
+            ),
+          ],
+        ),
+        theme: theme,
+      ),
+    );
+
+    AnimatedContainer fieldShell(WidgetTester tester) {
+      return tester.widget<AnimatedContainer>(
+        find.descendant(
+          of: find.byType(HUFInput),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+    }
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.pump(kHufFieldBorderAnimationDuration);
+
+    expect(
+      (fieldShell(tester).decoration! as BoxDecoration).border!.top.color,
+      theme.colors.primary,
+    );
+
+    await tester.tap(find.text('Fuori dal campo'));
+    await tester.pump();
+    await tester.pump(kHufFieldBorderAnimationDuration);
+
+    expect(
+      (fieldShell(tester).decoration! as BoxDecoration).border!.top.color,
+      theme.colors.border,
+    );
+  });
+
+  testWidgets('HUFInput email rifiuta caratteri non validi', (tester) async {
+    final controller = TextEditingController();
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFInput(
+          type: HUFInputType.email,
+          controller: controller,
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'ok@mail.it');
+    expect(controller.text, 'ok@mail.it');
+
+    await tester.enterText(find.byType(TextField), 'bad space');
+    expect(controller.text, 'ok@mail.it');
+  });
+
+  testWidgets('HUFInput password ha toggle visibilità', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFInput(
+          type: HUFInputType.password,
+          hintText: 'Password',
+        ),
+      ),
+    );
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.obscureText, isTrue);
+
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.pump();
+
+    expect(tester.widget<TextField>(find.byType(TextField)).obscureText, isFalse);
+  });
+
+  testWidgets('HUFInput tel accetta solo cifre', (tester) async {
+    final controller = TextEditingController();
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFInput(
+          type: HUFInputType.tel,
+          controller: controller,
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'abc12x3');
+    expect(controller.text, '123');
+  });
+
+  testWidgets('HUFInput OTP avanza il focus alla cella successiva', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFInput(
+          type: HUFInputType.otp,
+          otpLength: 4,
+        ),
+      ),
+    );
+
+    final fields = find.byType(TextField);
+    expect(fields, findsNWidgets(4));
+
+    await tester.enterText(fields.at(0), '1');
+    await tester.pump();
+
+    expect(tester.widget<TextField>(fields.at(1)).focusNode?.hasFocus, isTrue);
+  });
+
+  testWidgets('HUFInput clear svuota il valore', (tester) async {
+    final controller = TextEditingController(text: 'test');
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFInput(
+          controller: controller,
+          clear: true,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pump();
+
+    expect(controller.text, isEmpty);
+  });
+
+  testWidgets('HUFSelect toglie il focus alla chiusura del menu', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        Align(
+          alignment: Alignment.topCenter,
+          child: HUFSelect<String>(
+            hintText: 'Cerca',
+            search: true,
+            placement: HUFSelectPlacement.top,
+            items: const [HUFSelectItem(value: 'a', label: 'Alpha')],
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.pump(kHufFieldBorderAnimationDuration);
+
+    final focusedBorder = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFSelect<String>),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    expect(
+      (focusedBorder.decoration! as BoxDecoration).border!.top.color,
+      HUFTheme.light().colors.primary,
+    );
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+    await tester.pump(kHufFieldBorderAnimationDuration);
+
+    final idleBorder = tester.widget<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFSelect<String>),
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+    expect(
+      (idleBorder.decoration! as BoxDecoration).border!.top.color,
+      HUFTheme.light().colors.border,
+    );
+  });
+
+  testWidgets('HUFSelect search filtra le voci nel menu', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFSelect<String>(
+          hintText: 'Cerca stato',
+          search: true,
+          items: const [
+            HUFSelectItem(value: 'fl', label: 'Florida'),
+            HUFSelectItem(value: 'ca', label: 'California'),
+          ],
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Florida'), findsOneWidget);
+    expect(find.text('California'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'cali');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('California'), findsOneWidget);
+    expect(find.text('Florida'), findsNothing);
   });
 }
 
