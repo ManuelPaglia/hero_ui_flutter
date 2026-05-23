@@ -857,6 +857,255 @@ void main() {
     );
   });
 
+  testWidgets('HUFCheckboxCardGroup united unisce le card senza spacing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFCheckboxCardGroup<String>(
+          layout: HUFBoxListLayout.united,
+          showSeparators: true,
+          children: const [
+            HUFCheckboxCard(optionValue: 'a', title: 'A'),
+            HUFCheckboxCard(optionValue: 'b', title: 'B'),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byType(Divider), findsOneWidget);
+    expect(find.byType(HUFCheckboxCard), findsNWidgets(2));
+    expect(find.byType(ClipRRect), findsOneWidget);
+  });
+
+  testWidgets('HUFBoxList united applica radius solo agli estremi', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFBoxList(
+          layout: HUFBoxListLayout.united,
+          showSeparators: false,
+          children: const [
+            HUFBoxItem(
+              title: 'Primo',
+              action: Icon(Icons.chevron_right),
+            ),
+            HUFBoxItem(
+              title: 'Centro',
+              action: Icon(Icons.chevron_right),
+            ),
+            HUFBoxItem(
+              title: 'Ultimo',
+              action: Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final containers = tester.widgetList<AnimatedContainer>(
+      find.descendant(
+        of: find.byType(HUFBoxList),
+        matching: find.byType(AnimatedContainer),
+      ),
+    ).toList();
+
+    expect(containers.length, 3);
+    expect(
+      (containers[1].decoration! as BoxDecoration).borderRadius,
+      BorderRadius.zero,
+    );
+  });
+
+  testWidgets('HUFBoxList mixed accetta control card diverse', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFBoxList(
+          layout: HUFBoxListLayout.separated,
+          children: [
+            const HUFCheckboxCard(
+              title: 'Checkbox',
+              value: true,
+              onChanged: _noopBool,
+            ),
+            HUFSwitchCard(
+              title: 'Switch',
+              value: false,
+              onChanged: (_) {},
+            ),
+            const HUFRadioButtonCard(
+              title: 'Radio',
+              value: false,
+              onChanged: _noopBool,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byType(HUFCheckboxCard), findsOneWidget);
+    expect(find.byType(HUFSwitchCard), findsOneWidget);
+    expect(find.byType(HUFRadioButtonCard), findsOneWidget);
+  });
+
+  testWidgets('HUFSwitchCard risponde al tap e inverte value', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFSwitchCard(
+              title: 'Push',
+              subtitle: 'Notifiche app',
+              value: value,
+              onChanged: (v) => setState(() => value = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(HUFSwitchCard));
+    await tester.pump();
+
+    expect(value, isTrue);
+  });
+
+  testWidgets('HUFSwitchCard disabilitata non invoca onChanged', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFSwitchCard(
+          title: 'Disabilitata',
+          value: value,
+          onChanged: null,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFSwitchCard));
+    await tester.pump();
+
+    expect(value, isFalse);
+  });
+
+  testWidgets('HUFSwitchCardGroup gestisce toggle multiplo', (tester) async {
+    Set<String>? lastActive;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFSwitchCardGroup<String>(
+          initialValues: {'email'},
+          onChanged: (values) => lastActive = values,
+          children: const [
+            HUFSwitchCard(
+              optionValue: 'email',
+              title: 'Email',
+            ),
+            HUFSwitchCard(
+              optionValue: 'sms',
+              title: 'SMS',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('SMS'));
+    await tester.pump();
+
+    expect(lastActive, {'email', 'sms'});
+  });
+
+  test('HUFSwitchCardGroup richiede almeno un elemento', () {
+    expect(
+      () => HUFSwitchCardGroup<String>(children: []),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('HUFRadioButtonCard seleziona al tap sulla card', (tester) async {
+    var value = false;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFRadioButtonCard(
+              title: 'Piano Pro',
+              value: value,
+              onChanged: (v) => setState(() => value = v),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(HUFRadioButtonCard));
+    await tester.pump();
+
+    expect(value, isTrue);
+  });
+
+  testWidgets('HUFRadioButtonCard già selezionata non reagisce al tap', (
+    tester,
+  ) async {
+    var taps = 0;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButtonCard(
+          title: 'Selezionata',
+          value: true,
+          onChanged: (_) => taps++,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(HUFRadioButtonCard));
+    await tester.pump();
+
+    expect(taps, 0);
+  });
+
+  testWidgets('HUFRadioButtonCardGroup gestisce selezione singola', (
+    tester,
+  ) async {
+    String? lastSelection;
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFRadioButtonCardGroup<String>(
+          initialValue: 'email',
+          onChanged: (value) => lastSelection = value,
+          children: const [
+            HUFRadioButtonCard(optionValue: 'email', title: 'Email'),
+            HUFRadioButtonCard(optionValue: 'sms', title: 'SMS'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('SMS'));
+    await tester.pump();
+
+    expect(lastSelection, 'sms');
+  });
+
+  test('HUFRadioButtonCardGroup richiede almeno un elemento', () {
+    expect(
+      () => HUFRadioButtonCardGroup<String>(children: []),
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('HUFRadioButton seleziona al tap', (tester) async {
     var value = false;
 

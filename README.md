@@ -27,12 +27,18 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFAvatar](#hufavatar)
   - [HUFCheckbox](#hufcheckbox)
   - [HUFCheckboxGroup](#hufcheckboxgroup)
+  - [HUFBoxItem](#hufboxitem)
+  - [HUFBoxList](#hufboxlist)
   - [HUFCheckboxCard](#hufcheckboxcard)
   - [HUFCheckboxCardGroup](#hufcheckboxcardgroup)
   - [HUFRadioButton](#hufradiobutton)
   - [HUFRadioButtonGroup](#hufradiobuttongroup)
+  - [HUFRadioButtonCard](#hufradiobuttoncard)
+  - [HUFRadioButtonCardGroup](#hufradiobuttoncardgroup)
   - [HUFSwitch](#hufswitch)
   - [HUFSwitchGroup](#hufswitchgroup)
+  - [HUFSwitchCard](#hufswitchcard)
+  - [HUFSwitchCardGroup](#hufswitchcardgroup)
   - [HUFSlider](#hufslider)
   - [HUFRangeSlider](#hufrangeslider)
   - [HUFPopover](#hufpopover)
@@ -913,9 +919,68 @@ HUFCheckboxGroup<String>(
 
 ---
 
+### HUFBoxItem
+
+Riga base con icona leading, titolo, sottotitolo e [action] personalizzabile a destra.
+Usata da checkbox/radio/switch card e da [HUFBoxList].
+
+```dart
+HUFBoxItem(
+  title: 'Profilo',
+  subtitle: 'Modifica i tuoi dati',
+  icon: Icon(Icons.person_outline),
+  highlighted: true,
+  onTap: () {},
+  action: Icon(Icons.chevron_right),
+)
+```
+
+| Proprietà      | Tipo                 | Default  | Descrizione                          |
+| -------------- | -------------------- | -------- | ------------------------------------ |
+| `title`        | `String`             | —        | Titolo                               |
+| `action`       | `Widget`             | —        | Widget trailing (controllo, icona, …) |
+| `subtitle`     | `String?`            | `null`   | Sottotitolo                          |
+| `icon`         | `Widget?`            | `null`   | Icona leading                        |
+| `onTap`        | `VoidCallback?`      | —        | Tap sull'intera riga                 |
+| `enabled`      | `bool`               | `true`   | Abilitato                            |
+| `highlighted`  | `bool`               | `false`  | Sfondo “attivo/selezionato”          |
+| `size`         | `HUFBoxItemSize`     | `medium` | Dimensione                           |
+| `colors`       | `HUFBoxItemColors?`  | tema     | Override colori                      |
+| `activeColor`  | `Color?`             | tema     | Colore accent per sfondo/icona       |
+| `layout`       | `HUFBoxListLayout?`  | scope    | Override layout (da [HUFBoxList])    |
+
+---
+
+### HUFBoxList
+
+Contenitore per [HUFBoxItem] e widget derivati (mix checkbox, switch, radio card).
+
+```dart
+HUFBoxList(
+  layout: HUFBoxListLayout.united,
+  showSeparators: true,
+  children: [
+    HUFCheckboxCard(title: 'Email', value: true, onChanged: (_) {}),
+    HUFSwitchCard(title: 'Push', value: false, onChanged: (_) {}),
+  ],
+)
+```
+
+| Proprietà        | Tipo               | Default      | Descrizione                    |
+| ---------------- | ------------------ | ------------ | ------------------------------ |
+| `children`       | `List<Widget>`     | —            | Item (box item o control card) |
+| `layout`         | `HUFBoxListLayout` | `separated`  | `separated` · `united`         |
+| `showSeparators` | `bool`             | `true`       | Divider se `united`            |
+| `spacing`        | `double`           | `12`         | Spaziatura (separated)         |
+| `direction`      | `Axis`             | `vertical`   | Disposizione                   |
+
+`HUFControlCardLayout` è un alias di `HUFBoxListLayout`.
+
+---
+
 ### HUFCheckboxCard
 
-Card cliccabile con indicatore checkbox, titolo e sottotitolo.
+Card cliccabile con indicatore checkbox, costruita su [HUFBoxItem].
 
 ```dart
 HUFCheckboxCard(
@@ -945,7 +1010,6 @@ HUFCheckboxCard(
 | `checkColor`    | `Color?`              | tema     | Colore check               |
 | `borderColor`   | `Color?`              | tema     | Colore bordo               |
 
-
 ---
 
 ### HUFCheckboxCardGroup
@@ -963,7 +1027,14 @@ HUFCheckboxCardGroup<String>(
 )
 ```
 
-Proprietà identiche a `HUFCheckboxGroup`.
+Proprietà identiche a `HUFCheckboxGroup`, più:
+
+| Proprietà         | Tipo                    | Default      | Descrizione                                      |
+| ----------------- | ----------------------- | ------------ | ------------------------------------------------ |
+| `layout`          | `HUFBoxListLayout`  | `separated`  | `separated` · `united` (via [HUFBoxList])    |
+| `showSeparators`  | `bool`              | `true`       | Divider tra item se `layout` è `united`          |
+
+Con `layout: united` usare `direction: Axis.vertical`.
 
 ---
 
@@ -1023,6 +1094,59 @@ HUFRadioButtonGroup<String>(
 | `runSpacing`   | `double`               | `12`       | Spaziatura tra righe              |
 | `direction`    | `Axis`                 | `vertical` | Disposizione                      |
 
+
+---
+
+### HUFRadioButtonCard
+
+Card cliccabile con indicatore radio, titolo e sottotitolo.
+
+```dart
+HUFRadioButtonCard(
+  title: 'Piano Pro',
+  subtitle: '€9.99/mese',
+  icon: Icon(Icons.star),
+  value: _selected,
+  onChanged: (v) => setState(() => _selected = v),
+  size: HUFRadioButtonSize.medium,
+)
+```
+
+
+| Proprietà     | Tipo                  | Default  | Descrizione                |
+| ------------- | --------------------- | -------- | -------------------------- |
+| `title`       | `String`              | —        | Titolo                     |
+| `subtitle`    | `String?`             | `null`   | Sottotitolo                |
+| `icon`        | `Widget?`             | `null`   | Icona leading              |
+| `value`       | `bool?`               | —        | Stato (uso singolo)        |
+| `onChanged`   | `ValueChanged<bool>?` | —        | Callback (uso singolo)     |
+| `optionValue` | `Object?`             | —        | ID opzione (uso in gruppo) |
+| `enabled`     | `bool`                | `true`   | Abilitato                  |
+| `size`        | `HUFRadioButtonSize`  | `medium` | Dimensione                 |
+| `glowSize`    | `HUFGlowSize?`        | tema     | Override glow              |
+| `activeColor` | `Color?`              | tema     | Bordo/glow selezionato     |
+| `dotColor`    | `Color?`              | tema     | Pallino interno            |
+| `borderColor` | `Color?`              | tema     | Colore bordo               |
+| `layout`      | `HUFControlCardLayout`| `separated` | `separated` · `united`  |
+
+
+---
+
+### HUFRadioButtonCardGroup
+
+Gruppo di `HUFRadioButtonCard` con la stessa API di `HUFRadioButtonGroup`.
+
+```dart
+HUFRadioButtonCardGroup<String>(
+  children: [
+    HUFRadioButtonCard(optionValue: 'basic', title: 'Basic', subtitle: 'Gratuito'),
+    HUFRadioButtonCard(optionValue: 'pro', title: 'Pro', subtitle: '€9.99'),
+  ],
+  onChanged: (value) {},
+)
+```
+
+Proprietà identiche a `HUFRadioButtonGroup`, più `layout` e `showSeparators` (vedi [HUFCheckboxCardGroup](#hufcheckboxcardgroup)).
 
 ---
 
@@ -1086,6 +1210,61 @@ HUFSwitchGroup<String>(
 | `runSpacing`    | `double`                | `12`         | Spaziatura tra righe          |
 | `direction`     | `Axis`                  | `horizontal` | Disposizione                  |
 
+
+---
+
+### HUFSwitchCard
+
+Card cliccabile con indicatore switch, titolo e sottotitolo.
+
+```dart
+HUFSwitchCard(
+  title: 'Notifiche push',
+  subtitle: 'Ricevi aggiornamenti in tempo reale',
+  icon: Icon(Icons.notifications),
+  value: _enabled,
+  onChanged: (v) => setState(() => _enabled = v),
+  size: HUFSwitchSize.medium,
+)
+```
+
+
+| Proprietà            | Tipo                  | Default  | Descrizione                |
+| -------------------- | --------------------- | -------- | -------------------------- |
+| `title`              | `String`              | —        | Titolo                     |
+| `subtitle`           | `String?`             | `null`   | Sottotitolo                |
+| `icon`               | `Widget?`             | `null`   | Icona leading              |
+| `value`              | `bool?`               | —        | Stato ON/OFF (uso singolo) |
+| `onChanged`          | `ValueChanged<bool>?` | —        | Callback (uso singolo)     |
+| `optionValue`        | `Object?`             | —        | ID opzione (uso in gruppo) |
+| `enabled`            | `bool`                | `true`   | Abilitato                  |
+| `size`               | `HUFSwitchSize`       | `medium` | Dimensione                 |
+| `glowSize`           | `HUFGlowSize?`        | tema     | Override glow              |
+| `switchIcon`         | `Widget?`             | `null`   | Icona nel thumb            |
+| `activeColor`        | `Color?`              | tema     | Track attivo               |
+| `thumbColor`         | `Color?`              | tema     | Colore thumb               |
+| `inactiveTrackColor` | `Color?`              | tema     | Track spento               |
+| `iconColor`          | `Color?`              | tema     | Colore icona thumb         |
+| `layout`             | `HUFControlCardLayout`| `separated` | `separated` · `united`  |
+
+
+---
+
+### HUFSwitchCardGroup
+
+Gruppo di `HUFSwitchCard` con la stessa API di `HUFSwitchGroup`.
+
+```dart
+HUFSwitchCardGroup<String>(
+  children: [
+    HUFSwitchCard(optionValue: 'email', title: 'Email', subtitle: 'Via email'),
+    HUFSwitchCard(optionValue: 'push', title: 'Push', subtitle: 'Via app'),
+  ],
+  onChanged: (active) {},
+)
+```
+
+Proprietà identiche a `HUFSwitchGroup` (con `direction` default `vertical`), più `layout` e `showSeparators` (vedi [HUFCheckboxCardGroup](#hufcheckboxcardgroup)).
 
 ---
 
@@ -1532,16 +1711,22 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Button Group** — `HUFButtonGroup`
 - **Card** — `HUFCard`
 - **Checkbox** — `HUFCheckbox`
-- **Checkbox Card** — `HUFCheckboxCard`
-- **Checkbox Card Group** — `HUFCheckboxCardGroup`
+- **Box Item** — `HUFBoxItem`
+- **Box List** — `HUFBoxList`
+- **Checkbox Card** — `HUFCheckboxCard` (su `HUFBoxItem`)
+- **Checkbox Card Group** — `HUFCheckboxCardGroup` (su `HUFBoxList`)
 - **Checkbox Group** — `HUFCheckboxGroup`
 - **Chip** — `HUFChip`
 - **Radio Button** — `HUFRadioButton`
 - **Radio Button Group** — `HUFRadioButtonGroup`
+- **Radio Button Card** — `HUFRadioButtonCard`
+- **Radio Button Card Group** — `HUFRadioButtonCardGroup`
 - **Slider** — `HUFSlider`
 - **Range Slider** — `HUFRangeSlider`
 - **Switch** — `HUFSwitch`
 - **Switch Group** — `HUFSwitchGroup`
+- **Switch Card** — `HUFSwitchCard`
+- **Switch Card Group** — `HUFSwitchCardGroup`
 - **Popover** — `HUFButtonPopover`, `HUFPopoverContent` (via `HUFButton.popover`)
 - **Input** — `HUFInput`
 - **Select** — `HUFSelect`, `HUFSelectItem`, `HUFSelectSection`
@@ -1571,7 +1756,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Radio Button, Select, Separator, Slider, Switch, Toast.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Radio Button, Radio Button Card, Select, Separator, Slider, Switch, Switch Card, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 

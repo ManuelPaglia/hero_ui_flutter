@@ -6,6 +6,7 @@ import 'accordion_showcase_page.dart';
 import 'alert_dialogs_showcase_page.dart';
 import 'alerts_showcase_page.dart';
 import 'avatars_showcase_page.dart';
+import 'box_items_showcase_page.dart';
 import 'button_groups_showcase_page.dart';
 import 'buttons_showcase_page.dart';
 import 'chips_showcase_page.dart';
@@ -15,10 +16,12 @@ import 'drawers_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'input_showcase_page.dart';
 import 'popover_showcase_page.dart';
+import 'radio_button_cards_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
 import 'select_showcase_page.dart';
 import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
+import 'switch_cards_showcase_page.dart';
 import 'switches_showcase_page.dart';
 import 'toasts_showcase_page.dart';
 
@@ -89,6 +92,11 @@ class HomePage extends StatelessWidget {
       page: CardsShowcasePage(),
     ),
     _HomeShowcaseEntry(
+      title: 'Box item / list',
+      actionLabel: 'Apri',
+      page: BoxItemsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
       title: 'Checkbox card',
       actionLabel: 'Apri',
       page: CheckboxCardsShowcasePage(),
@@ -102,6 +110,11 @@ class HomePage extends StatelessWidget {
       title: 'Radio button',
       actionLabel: 'Apri',
       page: RadioButtonsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Radio button card',
+      actionLabel: 'Apri',
+      page: RadioButtonCardsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Select',
@@ -122,6 +135,11 @@ class HomePage extends StatelessWidget {
       title: 'Switch',
       actionLabel: 'Apri',
       page: SwitchesShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Switch card',
+      actionLabel: 'Apri',
+      page: SwitchCardsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Toast',
