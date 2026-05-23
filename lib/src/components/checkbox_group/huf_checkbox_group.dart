@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../checkbox/huf_checkbox.dart';
@@ -63,7 +64,8 @@ class _HUFCheckboxGroupState<T> extends State<HUFCheckboxGroup<T>> {
     if (widget.children != oldWidget.children) {
       _assertChildren();
     }
-    if (_isControlled && widget.values != oldWidget.values) {
+    if (_isControlled &&
+        !setEquals(widget.values, oldWidget.values)) {
       _selected = Set<T>.from(widget.values!);
     }
   }
@@ -84,7 +86,8 @@ class _HUFCheckboxGroupState<T> extends State<HUFCheckboxGroup<T>> {
   }
 
   void _handleItemChanged(T value, bool checked) {
-    final next = Set<T>.from(_selected);
+    final base = _isControlled ? widget.values! : _selected;
+    final next = Set<T>.from(base);
 
     if (widget.multiSelect) {
       if (checked) {
@@ -101,7 +104,7 @@ class _HUFCheckboxGroupState<T> extends State<HUFCheckboxGroup<T>> {
     }
 
     if (_isControlled) {
-      _notifyChange();
+      widget.onChanged?.call(Set<T>.unmodifiable(next));
       return;
     }
 

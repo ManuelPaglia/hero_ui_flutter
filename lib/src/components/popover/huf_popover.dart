@@ -153,6 +153,7 @@ class _HUFPopoverState extends State<HUFPopover> {
   final Object _tapRegionGroup = Object();
   OverlayEntry? _overlayEntry;
   int _overlayGeneration = 0;
+  int _overlayContentRebuildGeneration = 0;
 
   late bool _isOpen;
 
@@ -171,16 +172,36 @@ class _HUFPopoverState extends State<HUFPopover> {
     }
   }
 
+  /// Evita `markNeedsBuild` durante il build (es. setState dal contenuto).
+  void _scheduleOverlayContentRebuild() {
+    if (!_open || _overlayEntry == null) return;
+
+    final generation = ++_overlayContentRebuildGeneration;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          !_open ||
+          generation != _overlayContentRebuildGeneration) {
+        return;
+      }
+      _overlayEntry?.markNeedsBuild();
+    });
+  }
+
   @override
   void didUpdateWidget(HUFPopover oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isControlled && widget.isOpen != oldWidget.isOpen) {
       _setOpen(widget.isOpen!, notify: false);
     }
-    if ((widget.placement != oldWidget.placement ||
-            widget.align != oldWidget.align) &&
-        _open) {
-      _overlayEntry?.markNeedsBuild();
+    if (!_open || _overlayEntry == null) return;
+
+    final placementChanged =
+        widget.placement != oldWidget.placement ||
+        widget.align != oldWidget.align;
+    final contentChanged = widget.child != oldWidget.child;
+
+    if (placementChanged || contentChanged) {
+      _scheduleOverlayContentRebuild();
     }
   }
 

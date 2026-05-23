@@ -1380,6 +1380,138 @@ HUFProgress(
 
 ---
 
+### HUFTable
+
+Tabella dati con varianti visive, selezione righe, ordinamento colonne, albero espandibile, celle custom, stato vuoto, footer di paginazione e corpo virtualizzato.
+
+**Base** — colonne con `valueBuilder` o `cellBuilder`:
+
+```dart
+HUFTable<Employee>(
+  columns: const [
+    HUFTableColumn(
+      key: 'name',
+      label: 'Name',
+      flex: 2,
+      valueBuilder: employeeName,
+    ),
+    HUFTableColumn(key: 'role', label: 'Role', valueBuilder: employeeRole),
+  ],
+  rows: employees,
+  rowKey: (e) => e.id,
+)
+```
+
+**Selezione** — checkbox per riga, "seleziona tutto" e riepilogo sotto la tabella:
+
+```dart
+HUFTable<Employee>(
+  selectionMode: HUFTableSelectionMode.multiple,
+  selectedKeys: selected,
+  onSelectionChanged: (keys) => setState(() => selected = keys),
+  showSelectionSummary: true,
+  // ...
+)
+```
+
+**Ordinamento** — `allowsSorting` sulla colonna, stato controllato:
+
+```dart
+HUFTable<Employee>(
+  sortDescriptor: sort,
+  onSortChange: (d) => setState(() => sort = d),
+  columns: const [
+    HUFTableColumn(
+      key: 'email',
+      label: 'Email',
+      allowsSorting: true,
+      valueBuilder: employeeEmail,
+    ),
+  ],
+  // ...
+)
+```
+
+**Albero** — `childrenOf` e colonna `isTreeColumn: true`:
+
+```dart
+HUFTable<FileNode>(
+  expandedKeys: expanded,
+  onExpandedChange: (keys) => setState(() => expanded = keys),
+  childrenOf: (node) => node.children,
+  columns: const [
+    HUFTableColumn(
+      key: 'name',
+      label: 'Name',
+      isTreeColumn: true,
+      valueBuilder: nodeName,
+    ),
+  ],
+  // ...
+)
+```
+
+**Paginazione** — [HUFTablePaginationFooter] nel parametro `footer`:
+
+```dart
+HUFTable<Employee>(
+  footer: HUFTablePaginationFooter(
+    currentPage: page,
+    totalPages: 2,
+    totalItems: 8,
+    pageSize: 4,
+    onPageChanged: (p) => setState(() => page = p),
+  ),
+  // ...
+)
+```
+
+**Virtualizzazione** — `maxBodyHeight` + `striped` per dataset lunghi:
+
+```dart
+HUFTable<Employee>(
+  maxBodyHeight: 280,
+  striped: true,
+  rows: largeList,
+  // ...
+)
+```
+
+**Mobile / viewport stretti** — se la larghezza disponibile è inferiore al minimo
+calcolato dalle colonne (`flex`, `minWidth`), header e righe scrollano in
+orizzontale senza comprimere il contenuto; le ombre [HUFScrollShadow] indicano
+contenuto fuori viewport al posto della scrollbar nativa. Imposta `minWidth` sulle
+colonne larghe (es. Member, Actions) per controllare la soglia.
+
+Badge stato per celle custom: [HUFTableStatusBadge] con [HUFTableStatusTone].
+
+| Proprietà | Tipo | Default | Descrizione |
+| --------- | ---- | ------- | ----------- |
+| `columns` | `List<HUFTableColumn<T>>` | — | Definizione colonne |
+| `rows` | `List<T>` | — | Dati (radici se albero) |
+| `rowKey` | `Object Function(T)` | — | Chiave univoca riga |
+| `variant` | `HUFTableVariant` | `primary` | `primary` (header + pannello righe incassato) · `secondary` (header pill) |
+| `selectionMode` | `HUFTableSelectionMode` | `none` | `none` · `single` · `multiple` |
+| `selectedKeys` / `onSelectionChanged` | — | — | Selezione controllata |
+| `sortDescriptor` / `onSortChange` | — | — | Ordinamento controllato |
+| `comparator` | `int Function(...)?` | — | Comparatore custom |
+| `childrenOf` | `List<T>? Function(T)?` | — | Figli per righe ad albero |
+| `expandedKeys` / `onExpandedChange` | — | — | Espansione controllata |
+| `striped` | `bool` | `false` | Righe alternate |
+| `horizontalScroll` | `bool` | `true` | Scroll orizzontale automatico se serve |
+| `maxBodyHeight` | `double?` | — | Scroll virtualizzato del corpo |
+| `footer` | `Widget?` | — | Es. [HUFTablePaginationFooter] |
+| `emptyState` | `Widget?` | — | Override stato vuoto |
+| `showSelectionSummary` | `bool` | `false` | Testo selezione sotto la tabella |
+| `bodyBackgroundColor` | `Color?` | tema | Sfondo pannello righe (`cardSecondary`) in `primary` |
+
+In variante **primary** le righe vivono sempre in un pannello interno con padding
+fisso di `10px` (il “bordo” tra contenitore e righe). Solo gli angoli del
+pannello cambiano: `max(radius esterno − 10px, 0)` — con radius none il pannello
+resta colorato e incassato ma con angoli squadrati.
+
+---
+
 ### HUFScrollShadow
 
 Ombre a gradiente sui bordi di un contenitore scrollabile. Indicano che c’è altro contenuto oltre il viewport: l’ombra iniziale (sopra o a sinistra) sparisce all’inizio dello scroll; quella finale (sotto o a destra) alla fine.
@@ -1820,6 +1952,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Input** — `HUFInput`
 - **Select** — `HUFSelect`, `HUFSelectItem`, `HUFSelectSection`
 - **Separator** — `HUFSeparator` (orizzontale e verticale)
+- **Table** — `HUFTable`, `HUFTablePaginationFooter`, `HUFTableStatusBadge`
 
 ### Da implementare
 
@@ -1827,7 +1960,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Datepicker** (single)
 - **Datepicker** (range)
 - **Skeleton**
-- **Table**
 
 ---
 
@@ -1840,7 +1972,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Progress, Radio Button, Radio Button Card, Scroll Shadow, Select, Separator, Slider, Switch, Switch Card, Toast.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Progress, Radio Button, Radio Button Card, Scroll Shadow, Select, Separator, Slider, Switch, Switch Card, Table, Tabs, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 

@@ -659,6 +659,37 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
   });
 
+  testWidgets('HUFCheckboxGroup controllato aggiorna values al tap', (
+    tester,
+  ) async {
+    var selected = {'a', 'b'};
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFCheckboxGroup<String>(
+              values: selected,
+              onChanged: (values) => setState(() => selected = values),
+              children: const [
+                HUFCheckbox(optionValue: 'a', label: 'Opzione A'),
+                HUFCheckbox(optionValue: 'b', label: 'Opzione B'),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.check_rounded), findsNWidgets(2));
+
+    await tester.tap(find.text('Opzione A'));
+    await tester.pump();
+
+    expect(selected, {'b'});
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+  });
+
   testWidgets('HUFCheckboxGroup single select consente una sola opzione', (
     tester,
   ) async {
@@ -2247,6 +2278,212 @@ void main() {
     final tabs = tester.widget<HUFTabs<String>>(find.byType(HUFTabs<String>));
     expect(tabs.value, isNull);
     expect(find.text('Second'), findsOneWidget);
+  });
+
+  testWidgets('HUFTable mostra righe e stato vuoto', (tester) async {
+    const rows = ['Alpha', 'Beta'];
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFTable<String>(
+          columns: const [
+            HUFTableColumn(
+              key: 'name',
+              label: 'Name',
+              valueBuilder: _tableRowLabel,
+            ),
+          ],
+          rows: rows,
+          rowKey: (r) => r,
+        ),
+      ),
+    );
+
+    expect(find.text('Alpha'), findsOneWidget);
+    expect(find.text('Beta'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFTable<String>(
+          columns: const [
+            HUFTableColumn(
+              key: 'name',
+              label: 'Name',
+              valueBuilder: _tableRowLabel,
+            ),
+          ],
+          rows: const [],
+          rowKey: (r) => r,
+        ),
+      ),
+    );
+
+    expect(find.text('No results found'), findsOneWidget);
+  });
+
+  testWidgets('HUFTable selezione multipla e summary', (tester) async {
+    const rows = ['A', 'B'];
+    var selected = <Object>{};
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFTable<String>(
+              columns: const [
+                HUFTableColumn(
+                  key: 'name',
+                  label: 'Name',
+                  valueBuilder: _tableRowLabel,
+                ),
+              ],
+              rows: rows,
+              rowKey: (r) => r,
+              selectionMode: HUFTableSelectionMode.multiple,
+              selectedKeys: selected,
+              onSelectionChanged: (keys) => setState(() => selected = keys),
+              showSelectionSummary: true,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Selected: None'), findsOneWidget);
+
+    await tester.tap(find.byType(HUFCheckbox).at(1));
+    await tester.pump();
+
+    expect(selected, {'A'});
+    expect(find.text('Selected: 1 row'), findsOneWidget);
+  });
+
+  testWidgets('HUFTable ordinamento notifica onSortChange', (tester) async {
+  HUFTableSortDescriptor? sort;
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFTable<String>(
+              columns: const [
+                HUFTableColumn(
+                  key: 'name',
+                  label: 'Name',
+                  allowsSorting: true,
+                  valueBuilder: _tableRowLabel,
+                ),
+              ],
+              rows: const ['Zeta', 'Alpha'],
+              rowKey: (r) => r,
+              sortDescriptor: sort,
+              onSortChange: (d) => setState(() => sort = d),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Name'));
+    await tester.pump();
+
+    expect(sort?.columnKey, 'name');
+    expect(sort?.ascending, isTrue);
+    expect(find.text('Alpha'), findsWidgets);
+  });
+
+  testWidgets('HUFTable primary mantiene pannello incassato anche senza radius', (
+    tester,
+  ) async {
+    final theme = HUFTheme.light(
+      borderRadius: HUFBorderRadius.none,
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFTable<String>(
+          columns: const [
+            HUFTableColumn(
+              key: 'name',
+              label: 'Name',
+              valueBuilder: _tableRowLabel,
+            ),
+          ],
+          rows: const ['Alpha'],
+          rowKey: (r) => r,
+        ),
+        theme: theme,
+      ),
+    );
+
+    expect(find.byType(ColoredBox), findsWidgets);
+    expect(find.text('Alpha'), findsOneWidget);
+  });
+
+  testWidgets('HUFTable scrolla in orizzontale su viewport stretto', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 320,
+          child: HUFTable<String>(
+            columns: [
+              HUFTableColumn(
+                key: 'a',
+                label: 'Name',
+                flex: 2,
+                valueBuilder: _tableRowLabel,
+              ),
+              HUFTableColumn(
+                key: 'b',
+                label: 'Email',
+                flex: 2,
+                valueBuilder: _tableRowLabel,
+              ),
+              HUFTableColumn(
+                key: 'c',
+                label: 'Role',
+                flex: 2,
+                valueBuilder: _tableRowLabel,
+              ),
+            ],
+            rows: ['Alpha', 'Beta'],
+            rowKey: (r) => r,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(HUFScrollShadow), findsOneWidget);
+  });
+
+  testWidgets('HUFTable footer paginazione', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTable<String>(
+          columns: const [
+            HUFTableColumn(
+              key: 'name',
+              label: 'Name',
+              valueBuilder: _tableRowLabel,
+            ),
+          ],
+          rows: const ['Row'],
+          rowKey: (r) => r,
+          footer: const HUFTablePaginationFooter(
+            currentPage: 1,
+            totalPages: 2,
+            totalItems: 8,
+            pageSize: 4,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('1 to 4 of 8 results'), findsOneWidget);
+    expect(find.text('Prev'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
   });
 
   testWidgets('HUFCard con una action la espande a tutta la larghezza', (
@@ -4347,3 +4584,4 @@ class _StandaloneAccordionTestState extends State<_StandaloneAccordionTest> {
   }
 }
 
+String _tableRowLabel(String row) => row;

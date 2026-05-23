@@ -74,3 +74,4 @@ export 'switch/huf_switch_size.dart';
 export 'switch_group/huf_switch_group.dart';
 export 'tabs/huf_tabs.dart';
 export 'tabs/huf_tabs_style.dart';
+export 'table/huf_table.dart';

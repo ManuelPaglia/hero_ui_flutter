@@ -25,6 +25,7 @@ import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switch_cards_showcase_page.dart';
 import 'switches_showcase_page.dart';
+import 'table_showcase_page.dart';
 import 'tabs_showcase_page.dart';
 import 'toasts_showcase_page.dart';
 
@@ -148,6 +149,11 @@ class HomePage extends StatelessWidget {
       title: 'Switch',
       actionLabel: 'Apri',
       page: SwitchesShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Table',
+      actionLabel: 'Apri',
+      page: TableShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Tabs',
