@@ -2486,6 +2486,56 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
+  testWidgets(
+    'HUFTable con footer arrotonda il pannello righe solo in alto',
+    (tester) async {
+      final theme = HUFTheme.light(borderRadius: HUFBorderRadius.large);
+      final bodyBackground = theme.colors.cardSecondary;
+
+      await tester.pumpWidget(
+        _wrap(
+          HUFTable<String>(
+            columns: const [
+              HUFTableColumn(
+                key: 'name',
+                label: 'Name',
+                valueBuilder: _tableRowLabel,
+              ),
+            ],
+            rows: const ['Alpha'],
+            rowKey: (r) => r,
+            footer: const HUFTablePaginationFooter(
+              currentPage: 1,
+              totalPages: 2,
+              totalItems: 8,
+              pageSize: 4,
+            ),
+          ),
+          theme: theme,
+        ),
+      );
+
+      final bodyPanel = tester
+          .widgetList<DecoratedBox>(find.descendant(
+            of: find.byType(HUFTable<String>),
+            matching: find.byType(DecoratedBox),
+          ))
+          .firstWhere(
+            (box) =>
+                box.decoration is BoxDecoration &&
+                (box.decoration! as BoxDecoration).color == bodyBackground &&
+                (box.decoration! as BoxDecoration).borderRadius != null,
+          );
+
+      final radius =
+          (bodyPanel.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+      expect(radius.bottomLeft, Radius.zero);
+      expect(radius.bottomRight, Radius.zero);
+      expect(radius.topLeft.x, 6);
+      expect(radius.topRight.x, 6);
+    },
+  );
+
   testWidgets('HUFCard con una action la espande a tutta la larghezza', (
     tester,
   ) async {

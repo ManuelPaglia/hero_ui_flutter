@@ -123,6 +123,19 @@ double hufTableBodyBorderRadius(double containerRadius, double bodyInset) {
   return inner > 0 ? inner : 0;
 }
 
+/// [BorderRadius] del pannello righe primary; con [hasFooter] solo angoli superiori.
+BorderRadius hufTableBodyPanelShape({
+  required double bodyRadius,
+  required bool hasFooter,
+}) {
+  if (bodyRadius <= 0) return BorderRadius.zero;
+  final radius = Radius.circular(bodyRadius);
+  if (hasFooter) {
+    return BorderRadius.only(topLeft: radius, topRight: radius);
+  }
+  return BorderRadius.all(radius);
+}
+
 /// Larghezze fisse per colonna quando la tabella scrolla in orizzontale.
 List<double> hufTableColumnWidthsFor<T>(
   List<HUFTableColumn<T>> columns,

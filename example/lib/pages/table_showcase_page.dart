@@ -77,6 +77,38 @@ class _TableShowcasePageState extends State<TableShowcasePage> {
     ),
   ];
 
+  static const _paginationEmployees = [
+    ..._employees,
+    _Employee(
+      id: '5',
+      name: 'Emily Davis',
+      role: 'Product Manager',
+      status: 'Inactive',
+      email: 'emily@acme.com',
+    ),
+    _Employee(
+      id: '6',
+      name: 'Alex Turner',
+      role: 'Engineer',
+      status: 'Active',
+      email: 'alex@acme.com',
+    ),
+    _Employee(
+      id: '7',
+      name: 'Lisa Chen',
+      role: 'Designer',
+      status: 'Active',
+      email: 'lisa@acme.com',
+    ),
+    _Employee(
+      id: '8',
+      name: 'Tom Wilson',
+      role: 'HR',
+      status: 'On Leave',
+      email: 'tom@acme.com',
+    ),
+  ];
+
   static const _sortEmployees = [
     _Employee(
       id: 'e1',
@@ -209,10 +241,19 @@ class _TableShowcasePageState extends State<TableShowcasePage> {
     };
   }
 
+  static const _paginationPageSize = 4;
+
+  List<_Employee> _paginationPageRows() {
+    final start = (_page - 1) * _paginationPageSize;
+    return _paginationEmployees.sublist(
+      start,
+      start + _paginationPageSize,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.hufTheme.colors;
-    final paged = _employees.sublist(0, 4);
 
     return Scaffold(
       appBar: const ShowcaseAppBar(title: 'Table'),
@@ -389,13 +430,13 @@ class _TableShowcasePageState extends State<TableShowcasePage> {
           const ShowcaseSectionTitle('Paginazione'),
           HUFTable<_Employee>(
             columns: _employeeColumns,
-            rows: paged,
+            rows: _paginationPageRows(),
             rowKey: (e) => e.id,
             footer: HUFTablePaginationFooter(
               currentPage: _page,
-              totalPages: 2,
-              totalItems: 8,
-              pageSize: 4,
+              totalPages: _paginationEmployees.length ~/ _paginationPageSize,
+              totalItems: _paginationEmployees.length,
+              pageSize: _paginationPageSize,
               onPageChanged: (p) => setState(() => _page = p),
             ),
           ),

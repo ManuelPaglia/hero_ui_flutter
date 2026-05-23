@@ -406,6 +406,7 @@ class _HUFTableState<T> extends State<HUFTable<T>> {
                   metrics: metrics,
                   colors: colors,
                   useInsetBody: useInsetBody,
+                  hasFooter: widget.footer != null,
                   child: bodyWidget,
                 ),
                 if (widget.footer != null) ...[
@@ -414,7 +415,11 @@ class _HUFTableState<T> extends State<HUFTable<T>> {
                     thickness: 1,
                     color: colors.dividerColor,
                   ),
-                  widget.footer!,
+                  _wrapFooter(
+                    metrics: metrics,
+                    useInsetBody: useInsetBody,
+                    child: widget.footer!,
+                  ),
                 ],
               ],
             );
@@ -466,10 +471,29 @@ class _HUFTableState<T> extends State<HUFTable<T>> {
     return 'Selected: ${keys.length} rows';
   }
 
+  Widget _wrapFooter({
+    required HUFTableMetrics metrics,
+    required bool useInsetBody,
+    required Widget child,
+  }) {
+    if (!useInsetBody) return child;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        metrics.bodyInset,
+        0,
+        metrics.bodyInset,
+        metrics.bodyInset,
+      ),
+      child: child,
+    );
+  }
+
   Widget _wrapBodySection({
     required HUFTableMetrics metrics,
     required HUFTableColors colors,
     required bool useInsetBody,
+    required bool hasFooter,
     required Widget child,
   }) {
     if (!useInsetBody) return child;
@@ -478,16 +502,17 @@ class _HUFTableState<T> extends State<HUFTable<T>> {
       metrics.borderRadius,
       metrics.bodyInset,
     );
-    final bodyShape = bodyRadius > 0
-        ? BorderRadius.circular(bodyRadius)
-        : BorderRadius.zero;
+    final bodyShape = hufTableBodyPanelShape(
+      bodyRadius: bodyRadius,
+      hasFooter: hasFooter,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
         metrics.bodyInset,
         metrics.headerBodyGap,
         metrics.bodyInset,
-        metrics.bodyInset,
+        hasFooter ? 0 : metrics.bodyInset,
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(

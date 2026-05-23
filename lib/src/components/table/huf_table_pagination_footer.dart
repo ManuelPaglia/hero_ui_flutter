@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../theme/huf_theme.dart';
@@ -42,6 +44,8 @@ class HUFTablePaginationFooter extends StatelessWidget {
 
     final canGoPrev = currentPage > 1 && onPageChanged != null;
     final canGoNext = currentPage < totalPages && onPageChanged != null;
+    final navButtonRadius = math.max(metrics.borderRadius / 2, 4.0);
+    final pageButtonRadius = math.min(16.0, metrics.borderRadius);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -66,6 +70,7 @@ class HUFTablePaginationFooter extends StatelessWidget {
             enabled: canGoPrev,
             foreground: colors.bodyTextColor,
             muted: colors.footerTextColor,
+            borderRadius: navButtonRadius,
             onTap: canGoPrev ? () => onPageChanged!(currentPage - 1) : null,
           ),
           const SizedBox(width: 8),
@@ -80,6 +85,7 @@ class HUFTablePaginationFooter extends StatelessWidget {
                 activeColor: colors.rowSelectedColor,
                 textColor: colors.bodyTextColor,
                 mutedColor: colors.footerTextColor,
+                borderRadius: pageButtonRadius,
                 onTap: onPageChanged != null && !isActive
                     ? () => onPageChanged!(page)
                     : null,
@@ -93,6 +99,7 @@ class HUFTablePaginationFooter extends StatelessWidget {
             enabled: canGoNext,
             foreground: colors.bodyTextColor,
             muted: colors.footerTextColor,
+            borderRadius: navButtonRadius,
             onTap: canGoNext ? () => onPageChanged!(currentPage + 1) : null,
           ),
         ],
@@ -108,6 +115,7 @@ class _NavButton extends StatelessWidget {
     required this.enabled,
     required this.foreground,
     required this.muted,
+    required this.borderRadius,
     this.iconOnStart = false,
     this.onTap,
   });
@@ -118,6 +126,7 @@ class _NavButton extends StatelessWidget {
   final bool enabled;
   final Color foreground;
   final Color muted;
+  final double borderRadius;
   final VoidCallback? onTap;
 
   @override
@@ -151,7 +160,7 @@ class _NavButton extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(borderRadius),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: child,
@@ -167,6 +176,7 @@ class _PageNumber extends StatelessWidget {
     required this.activeColor,
     required this.textColor,
     required this.mutedColor,
+    required this.borderRadius,
     this.onTap,
   });
 
@@ -175,6 +185,7 @@ class _PageNumber extends StatelessWidget {
   final Color activeColor;
   final Color textColor;
   final Color mutedColor;
+  final double borderRadius;
   final VoidCallback? onTap;
 
   @override
@@ -194,10 +205,12 @@ class _PageNumber extends StatelessWidget {
       ),
     );
 
+    final shape = BorderRadius.circular(borderRadius);
+
     if (!isActive && onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: shape,
         child: content,
       );
     }
@@ -205,7 +218,7 @@ class _PageNumber extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: isActive ? activeColor : null,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: shape,
       ),
       child: content,
     );
