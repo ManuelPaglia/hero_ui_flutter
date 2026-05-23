@@ -1746,6 +1746,509 @@ void main() {
     expect(find.text('50'), findsOneWidget);
   });
 
+  testWidgets('HUFProgress mostra label e percentuale', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFProgress(
+          label: 'Medium',
+          value: 60,
+          maxValue: 100,
+        ),
+      ),
+    );
+
+    expect(find.text('Medium'), findsOneWidget);
+    expect(find.text('60%'), findsOneWidget);
+  });
+
+  testWidgets('HUFProgress con valueSuffix personalizzato', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFProgress(
+          label: 'Upload',
+          value: 240,
+          maxValue: 500,
+          valueSuffix: ' MB',
+        ),
+      ),
+    );
+
+    expect(find.text('240 MB'), findsOneWidget);
+  });
+
+  testWidgets('HUFProgress loading nasconde il valore', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const HUFProgress(
+          label: 'Loading...',
+          value: 40,
+          isLoading: true,
+        ),
+      ),
+    );
+
+    expect(find.text('Loading...'), findsOneWidget);
+    expect(find.text('40%'), findsNothing);
+  });
+
+  testWidgets('HUFProgress loading anima il segmento', (tester) async {
+    const fillColor = Color(0xFFFF6B00);
+
+    Finder fillFinder() => find.byWidgetPredicate(
+          (widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).color == fillColor,
+        );
+
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          width: 200,
+          child: HUFProgress(
+            label: 'Loading...',
+            isLoading: true,
+            fillColor: fillColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    final startLeft = tester.getTopLeft(fillFinder()).dx;
+
+    await tester.pump(const Duration(milliseconds: 800));
+    final midLeft = tester.getTopLeft(fillFinder()).dx;
+
+    expect(midLeft, greaterThan(startLeft));
+  });
+
+  testWidgets('HUFProgress applica border radius del tema', (tester) async {
+    const small = HUFBorderRadius.small;
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFProgress(label: 'Test', value: 50),
+        theme: HUFTheme.light(borderRadius: small),
+      ),
+    );
+
+    const expectedRadius = BorderRadius.all(Radius.circular(4));
+
+    final clip = tester.widget<ClipRRect>(find.byType(ClipRRect));
+    expect(clip.borderRadius, expectedRadius);
+
+    final fill = tester.widget<Container>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration! as BoxDecoration).color ==
+                HUFThemeColors.light.warning,
+      ),
+    );
+    expect(
+      (fill.decoration! as BoxDecoration).borderRadius,
+      expectedRadius,
+    );
+  });
+
+  testWidgets('HUFProgress applica colori personalizzati', (tester) async {
+    const fill = Color(0xFF22C55E);
+    const track = Color(0xFF3F3F46);
+
+    await tester.pumpWidget(
+      _wrap(
+        const HUFProgress(
+          label: 'Test',
+          value: 50,
+          fillColor: fill,
+          trackColor: track,
+        ),
+      ),
+    );
+
+    final fills = tester.widgetList<Container>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration! as BoxDecoration).color == fill,
+      ),
+    );
+    expect(fills, isNotEmpty);
+
+    final boxes = tester.widgetList<ColoredBox>(find.byType(ColoredBox));
+    expect(boxes.any((box) => box.color == track), isTrue);
+  });
+
+  testWidgets('HUFScrollShadow nasconde ombra iniziale a scroll 0', (
+    tester,
+  ) async {
+    const card = Color(0xFF27272A);
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          height: 120,
+          child: HUFScrollShadow.verticalList(
+            color: card,
+            children: const [
+              SizedBox(height: 400, child: ColoredBox(color: Colors.red)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsNothing);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsOneWidget);
+  });
+
+  testWidgets('HUFScrollShadow mostra ombra iniziale dopo lo scroll', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          height: 120,
+          child: HUFScrollShadow.verticalList(
+            children: const [
+              SizedBox(height: 400, child: ColoredBox(color: Colors.red)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(Scrollable), const Offset(0, -80));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsOneWidget);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsOneWidget);
+  });
+
+  testWidgets('HUFScrollShadow nasconde ombra finale a fine scroll', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          height: 120,
+          child: HUFScrollShadow.verticalList(
+            children: const [
+              SizedBox(height: 400, child: ColoredBox(color: Colors.red)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(Scrollable), const Offset(0, -400));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsOneWidget);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsNothing);
+  });
+
+  testWidgets('HUFScrollShadow orizzontale gestisce sinistra e destra', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 200,
+          height: 80,
+          child: HUFScrollShadow.horizontalList(
+            children: const [
+              SizedBox(width: 400, child: ColoredBox(color: Colors.blue)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsNothing);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsOneWidget);
+
+    await tester.drag(find.byType(Scrollable), const Offset(-120, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsOneWidget);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsOneWidget);
+  });
+
+  testWidgets('HUFScrollShadow applica size personalizzato', (tester) async {
+    const shadowSize = 48.0;
+
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          height: 120,
+          child: HUFScrollShadow.verticalList(
+            size: shadowSize,
+            children: const [
+              SizedBox(height: 400, child: ColoredBox(color: Colors.green)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final endShadowSize = tester.getSize(
+      find.byKey(const Key('huf_scroll_shadow_end')),
+    );
+    expect(endShadowSize.height, shadowSize);
+  });
+
+  testWidgets('HUFScrollShadow senza overflow non mostra ombre', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          height: 200,
+          child: HUFScrollShadow.verticalList(
+            children: const [
+              SizedBox(height: 40, child: ColoredBox(color: Colors.orange)),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('huf_scroll_shadow_start')), findsNothing);
+    expect(find.byKey(const Key('huf_scroll_shadow_end')), findsNothing);
+  });
+
+  testWidgets('HUFTabs notifica onChanged e rispetta value controllato', (
+    tester,
+  ) async {
+    String? selected = 'a';
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFTabs<String>(
+              value: selected,
+              onChanged: (value) => setState(() => selected = value),
+              items: const [
+                HUFTabItem(label: 'Tab A', value: 'a'),
+                HUFTabItem(label: 'Tab B', value: 'b'),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Tab A'), findsOneWidget);
+    expect(selected, 'a');
+
+    await tester.tap(find.text('Tab B'));
+    await tester.pump();
+    await tester.pump(HUFTabs.indicatorAnimationDuration);
+
+    expect(selected, 'b');
+  });
+
+  testWidgets('HUFTabs non seleziona voci disabilitate', (tester) async {
+    String? selected = 'active';
+
+    await tester.pumpWidget(
+      _wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return HUFTabs<String>(
+              value: selected,
+              onChanged: (value) => setState(() => selected = value),
+              items: const [
+                HUFTabItem(label: 'Active', value: 'active'),
+                HUFTabItem(
+                  label: 'Disabled',
+                  value: 'disabled',
+                  enabled: false,
+                ),
+                HUFTabItem(label: 'Available', value: 'available'),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Disabled'));
+    await tester.pump();
+
+    expect(selected, 'active');
+  });
+
+  testWidgets('HUFTabs secondary usa indicatore personalizzato', (tester) async {
+    const indicator = Color(0xFFFF6B00);
+
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          variant: HUFTabVariant.secondary,
+          initialValue: 'a',
+          indicatorColor: indicator,
+          items: const [
+            HUFTabItem(label: 'Overview', value: 'a'),
+            HUFTabItem(label: 'Analytics', value: 'b'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+
+    final indicators = tester.widgetList<ColoredBox>(
+      find.byWidgetPredicate(
+        (widget) => widget is ColoredBox && widget.color == indicator,
+      ),
+    );
+    expect(indicators, isNotEmpty);
+  });
+
+  testWidgets('HUFTabs primary mostra chip con dimensioni valide', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          initialValue: 'b',
+          items: const [
+            HUFTabItem(label: 'Tab A', value: 'a'),
+            HUFTabItem(label: 'Tab B', value: 'b'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+
+    final indicator = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFTabs<String>),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).color ==
+                  hufTabsPrimaryIndicatorColor(HUFThemeColors.light),
+        ),
+      ),
+    );
+
+    expect(indicator, isNotEmpty);
+  });
+
+  testWidgets('HUFTabs primary verticale usa angoli solo sopra e sotto', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          direction: HUFTabDirection.vertical,
+          initialValue: 'a',
+          items: const [
+            HUFTabItem(label: 'Account', value: 'a'),
+            HUFTabItem(label: 'Security', value: 'b'),
+          ],
+        ),
+        theme: HUFTheme.dark(),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump();
+
+    final decorated = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(HUFTabs<String>),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).color ==
+                  HUFThemeColors.dark.cardSecondary,
+        ),
+      ).first,
+    );
+
+    final radius =
+        (decorated.decoration as BoxDecoration).borderRadius! as BorderRadius;
+    expect(radius.topLeft, radius.topRight);
+    expect(radius.bottomLeft, radius.bottomRight);
+    expect(radius.topLeft.x, greaterThan(0));
+    expect(radius.topLeft.x, lessThan(40));
+  });
+
+  testWidgets('HUFTabs verticale in ListView non va in overflow di layout', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        ListView(
+          children: [
+            HUFTabs<String>(
+              direction: HUFTabDirection.vertical,
+              initialValue: 'account',
+              items: const [
+                HUFTabItem(label: 'Account', value: 'account'),
+                HUFTabItem(label: 'Security', value: 'security'),
+                HUFTabItem(label: 'Billing', value: 'billing'),
+              ],
+            ),
+            HUFTabs<String>(
+              direction: HUFTabDirection.vertical,
+              variant: HUFTabVariant.secondary,
+              initialValue: 'account',
+              items: const [
+                HUFTabItem(label: 'Account', value: 'account'),
+                HUFTabItem(label: 'Security', value: 'security'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Account'), findsNWidgets(2));
+  });
+
+  testWidgets('HUFTabs modalità non controllata aggiorna selezione interna', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          initialValue: 'first',
+          items: const [
+            HUFTabItem(label: 'First', value: 'first'),
+            HUFTabItem(label: 'Second', value: 'second'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Second'));
+    await tester.pump();
+    await tester.pump(HUFTabs.indicatorAnimationDuration);
+
+    final tabs = tester.widget<HUFTabs<String>>(find.byType(HUFTabs<String>));
+    expect(tabs.value, isNull);
+    expect(find.text('Second'), findsOneWidget);
+  });
+
   testWidgets('HUFCard con una action la espande a tutta la larghezza', (
     tester,
   ) async {

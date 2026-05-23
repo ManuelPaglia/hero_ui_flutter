@@ -41,6 +41,8 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFSwitchCardGroup](#hufswitchcardgroup)
   - [HUFSlider](#hufslider)
   - [HUFRangeSlider](#hufrangeslider)
+  - [HUFProgress](#hufprogress)
+  - [HUFScrollShadow](#hufscrollshadow)
   - [HUFPopover](#hufpopover)
   - [HUFInput](#hufinput)
   - [HUFSelect](#hufselect)
@@ -1342,6 +1344,91 @@ HUFRangeSlider(
 
 ---
 
+### HUFProgress
+
+Barra di progresso con label, valore opzionale e modalità loading indeterminata.
+
+```dart
+HUFProgress(
+  label: 'Medium',
+  value: 60,
+  maxValue: 100,
+  valueSuffix: '%',
+  showValue: true,
+  size: HUFProgressSize.medium,
+)
+
+HUFProgress(
+  label: 'Loading...',
+  isLoading: true,
+)
+```
+
+
+| Proprietà     | Tipo               | Default  | Descrizione                                              |
+| ------------- | ------------------ | -------- | -------------------------------------------------------- |
+| `label`       | `String`           | —        | Label sopra la barra                                     |
+| `value`       | `double`           | `0`      | Valore corrente                                          |
+| `maxValue`    | `double`           | `100`    | Valore massimo (scala per fill e percentuale)            |
+| `valueSuffix` | `String`           | `%`      | Suffisso valore; con `%` mostra percentuale arrotondata |
+| `showValue`   | `bool`             | `true`   | Mostra valore a destra (nascosto se `isLoading`)         |
+| `isLoading`   | `bool`             | `false`  | Segmento che esce dal track e rientra (ease-in)          |
+| `size`        | `HUFProgressSize`  | `medium` | `small` · `medium` · `large`                               |
+| `fillColor`   | `Color?`           | tema     | Colore riempimento (`warning` di default)                |
+| `trackColor`  | `Color?`           | tema     | Colore track (`secondary` di default)                    |
+
+
+---
+
+### HUFScrollShadow
+
+Ombre a gradiente sui bordi di un contenitore scrollabile. Indicano che c’è altro contenuto oltre il viewport: l’ombra iniziale (sopra o a sinistra) sparisce all’inizio dello scroll; quella finale (sotto o a destra) alla fine.
+
+Avvolge qualsiasi scrollable (`ListView`, `SingleChildScrollView`, …) oppure usa i factory per liste e layout comuni:
+
+```dart
+// ListView verticale
+HUFScrollShadow.verticalList(
+  color: theme.colors.card,
+  size: 40,
+  children: [
+    Text('…'),
+    Text('…'),
+  ],
+)
+
+// ListView orizzontale
+HUFScrollShadow.horizontalList(
+  color: theme.colors.card,
+  size: 40,
+  children: [/* card orizzontali */],
+)
+
+// Column / Row in SingleChildScrollView
+HUFScrollShadow.column(children: [/* … */])
+HUFScrollShadow.row(children: [/* … */])
+
+// Scrollable personalizzato
+HUFScrollShadow(
+  direction: Axis.vertical,
+  color: theme.colors.card,
+  size: 32,
+  child: ListView.builder(
+    itemCount: 100,
+    itemBuilder: (_, i) => ListTile(title: Text('Item $i')),
+  ),
+)
+```
+
+| Proprietà   | Tipo     | Default              | Descrizione                                              |
+| ----------- | -------- | -------------------- | -------------------------------------------------------- |
+| `child`     | `Widget` | —                    | Widget scrollabile da avvolgere                            |
+| `direction` | `Axis`   | `Axis.vertical`      | Asse dello scroll (`vertical` · `horizontal`)            |
+| `size`      | `double` | `32`                 | Profondità del gradiente (px)                            |
+| `color`     | `Color?` | `colors.card` (tema) | Colore solido del gradiente (sfuma verso trasparente)    |
+
+---
+
 ### HUFPopover
 
 Pannello contestuale che si apre al tap su un [HUFButton](#hufbutton), passando `popover: HUFButtonPopover(...)`. Il popover è posizionato rispetto al pulsante (`bottom` di default) e, se non c’è spazio nel viewport, si capovolge automaticamente (es. `bottom` → `top`). All’apertura usa la stessa animazione fade/scale di [HUFSelect](#hufselect), direttamente in posizione (senza scatto dall’angolo dello schermo).
@@ -1723,6 +1810,8 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Radio Button Card Group** — `HUFRadioButtonCardGroup`
 - **Slider** — `HUFSlider`
 - **Range Slider** — `HUFRangeSlider`
+- **Progress** — `HUFProgress`
+- **Scroll Shadow** — `HUFScrollShadow`
 - **Switch** — `HUFSwitch`
 - **Switch Group** — `HUFSwitchGroup`
 - **Switch Card** — `HUFSwitchCard`
@@ -1737,13 +1826,8 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Calendar**
 - **Datepicker** (single)
 - **Datepicker** (range)
-- **Listbox**
-- **Listbox Item**
-- **Meter / Progress Bar**
-- **Scroll Shadow**
 - **Skeleton**
 - **Table**
-- **Tabs**
 
 ---
 
@@ -1756,7 +1840,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Radio Button, Radio Button Card, Select, Separator, Slider, Switch, Switch Card, Toast.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Progress, Radio Button, Radio Button Card, Scroll Shadow, Select, Separator, Slider, Switch, Switch Card, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 

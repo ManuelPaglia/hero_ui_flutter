@@ -16,6 +16,8 @@ import 'drawers_showcase_page.dart';
 import 'checkboxes_showcase_page.dart';
 import 'input_showcase_page.dart';
 import 'popover_showcase_page.dart';
+import 'progress_showcase_page.dart';
+import 'scroll_shadow_showcase_page.dart';
 import 'radio_button_cards_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
 import 'select_showcase_page.dart';
@@ -23,6 +25,7 @@ import 'separators_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switch_cards_showcase_page.dart';
 import 'switches_showcase_page.dart';
+import 'tabs_showcase_page.dart';
 import 'toasts_showcase_page.dart';
 
 class _HomeShowcaseEntry {
@@ -107,6 +110,11 @@ class HomePage extends StatelessWidget {
       page: PopoverShowcasePage(),
     ),
     _HomeShowcaseEntry(
+      title: 'Progress',
+      actionLabel: 'Apri',
+      page: ProgressShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
       title: 'Radio button',
       actionLabel: 'Apri',
       page: RadioButtonsShowcasePage(),
@@ -122,6 +130,11 @@ class HomePage extends StatelessWidget {
       page: SelectShowcasePage(),
     ),
     _HomeShowcaseEntry(
+      title: 'Scroll Shadow',
+      actionLabel: 'Apri',
+      page: ScrollShadowShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
       title: 'Separator',
       actionLabel: 'Apri',
       page: SeparatorsShowcasePage(),
@@ -135,6 +148,11 @@ class HomePage extends StatelessWidget {
       title: 'Switch',
       actionLabel: 'Apri',
       page: SwitchesShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Tabs',
+      actionLabel: 'Apri',
+      page: TabsShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Switch card',
