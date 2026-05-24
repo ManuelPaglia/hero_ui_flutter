@@ -28,7 +28,7 @@ class _TabsShowcasePageState extends State<TabsShowcasePage> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const ShowcaseSectionTitle('Primary · orizzontale'),
+          const ShowcaseSectionTitle('Primary · orizzontale (full width)'),
           HUFTabs<String>(
             value: _primaryHorizontal,
             onChanged: (value) => setState(() => _primaryHorizontal = value),
@@ -36,6 +36,16 @@ class _TabsShowcasePageState extends State<TabsShowcasePage> {
               HUFTabItem(label: 'Overview', value: 'overview'),
               HUFTabItem(label: 'Analytics', value: 'analytics'),
               HUFTabItem(label: 'Reports', value: 'reports'),
+            ],
+          ),
+          const SizedBox(height: 32),
+          const ShowcaseSectionTitle('Primary · orizzontale (larghezza contenuto)'),
+          HUFTabs<String>(
+            fullWidth: false,
+            initialValue: 'a',
+            items: const [
+              HUFTabItem(label: 'Tab A', value: 'a'),
+              HUFTabItem(label: 'Tab B', value: 'b'),
             ],
           ),
           const SizedBox(height: 32),

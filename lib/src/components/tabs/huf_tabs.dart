@@ -17,6 +17,10 @@ export 'huf_tab_variant.dart';
 /// [HUFTabVariant.primary] (pill con sfondo scorrevole) e
 /// [HUFTabVariant.secondary] (track con indicatore spesso).
 ///
+/// Con [direction] orizzontale, [fullWidth] (default `true`) distribuisce le
+/// voci su tutta la larghezza del genitore; con `false` la barra resta alla
+/// larghezza intrinseca del contenuto. Ignorato in layout verticale.
+///
 /// In modalità non controllata usa [initialValue]; in modalità controllata
 /// passa [value] e aggiorna lo stato dal parent tramite [onChanged].
 ///
@@ -30,6 +34,7 @@ class HUFTabs<T> extends StatefulWidget {
     this.initialValue,
     this.onChanged,
     this.direction = HUFTabDirection.horizontal,
+    this.fullWidth = true,
     this.variant = HUFTabVariant.primary,
     this.containerColor,
     this.containerBorderColor,
@@ -48,6 +53,11 @@ class HUFTabs<T> extends StatefulWidget {
   final T? initialValue;
   final ValueChanged<T>? onChanged;
   final HUFTabDirection direction;
+
+  /// Distribuisce le voci su tutta la larghezza disponibile (solo
+  /// [HUFTabDirection.horizontal]).
+  final bool fullWidth;
+
   final HUFTabVariant variant;
   final Color? containerColor;
   final Color? containerBorderColor;
@@ -77,6 +87,8 @@ class _HUFTabsState<T> extends State<HUFTabs<T>> {
   bool get _isControlled => widget.value != null;
 
   bool get _isHorizontal => widget.direction == HUFTabDirection.horizontal;
+
+  bool get _useFullWidth => _isHorizontal && widget.fullWidth;
 
   int get _selectedIndex {
     final selected = _isControlled ? widget.value : _selected;
@@ -196,6 +208,7 @@ class _HUFTabsState<T> extends State<HUFTabs<T>> {
           label: item.label,
           isSelected: i == selectedIndex,
           enabled: item.enabled,
+          expand: _useFullWidth,
           metrics: metrics,
           colors: colors,
           onTap: () => _handleTap(item),
@@ -205,9 +218,12 @@ class _HUFTabsState<T> extends State<HUFTabs<T>> {
 
     final tabStrip = _isHorizontal
         ? Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize:
+                _useFullWidth ? MainAxisSize.max : MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: tabs,
+            children: _useFullWidth
+                ? [for (final tab in tabs) Expanded(child: tab)]
+                : tabs,
           )
         : IntrinsicWidth(
             child: Column(
@@ -234,6 +250,10 @@ class _HUFTabsState<T> extends State<HUFTabs<T>> {
           tabStrip: tabStrip,
         ),
     };
+
+    if (_useFullWidth) {
+      return SizedBox(width: double.infinity, child: content);
+    }
 
     return HUFShrinkWrapWidth(child: content);
   }
@@ -286,7 +306,9 @@ class _HUFTabsState<T> extends State<HUFTabs<T>> {
       return Column(
         key: _measureKey,
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: _useFullWidth
+            ? CrossAxisAlignment.stretch
+            : CrossAxisAlignment.start,
         children: [
           tabStrip,
           SizedBox(height: metrics.trackGap),
@@ -430,6 +452,7 @@ class _HufTabCell extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.enabled,
+    this.expand = false,
     required this.metrics,
     required this.colors,
     required this.onTap,
@@ -438,6 +461,7 @@ class _HufTabCell extends StatelessWidget {
   final String label;
   final bool isSelected;
   final bool enabled;
+  final bool expand;
   final HUFTabsMetrics metrics;
   final HUFTabsColors colors;
   final VoidCallback onTap;
@@ -461,7 +485,9 @@ class _HufTabCell extends StatelessWidget {
           horizontal: metrics.tabHorizontalPadding,
           vertical: metrics.tabVerticalPadding,
         ),
-        child: AnimatedDefaultTextStyle(
+        child: SizedBox(
+          width: expand ? double.infinity : null,
+          child: AnimatedDefaultTextStyle(
           duration: HUFTabs.indicatorAnimationDuration,
           curve: HUFTabs.indicatorAnimationCurve,
           style: TextStyle(
@@ -474,6 +500,7 @@ class _HufTabCell extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
           ),
+        ),
         ),
       ),
     );

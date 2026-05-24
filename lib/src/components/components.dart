@@ -47,6 +47,7 @@ export 'switch_card/huf_switch_card_group.dart';
 export 'progress/huf_progress.dart';
 export 'progress/huf_progress_size.dart';
 export 'scroll_shadow/huf_scroll_shadow.dart';
+export 'skeleton/huf_skeleton.dart';
 export 'popover/huf_popover.dart' show HUFPopoverContent;
 export 'popover/huf_popover_placement.dart';
 export 'popover/huf_popover_style.dart';

@@ -22,6 +22,7 @@ import 'radio_button_cards_showcase_page.dart';
 import 'radio_buttons_showcase_page.dart';
 import 'select_showcase_page.dart';
 import 'separators_showcase_page.dart';
+import 'skeleton_showcase_page.dart';
 import 'sliders_showcase_page.dart';
 import 'switch_cards_showcase_page.dart';
 import 'switches_showcase_page.dart';
@@ -139,6 +140,11 @@ class HomePage extends StatelessWidget {
       title: 'Separator',
       actionLabel: 'Apri',
       page: SeparatorsShowcasePage(),
+    ),
+    _HomeShowcaseEntry(
+      title: 'Skeleton',
+      actionLabel: 'Apri',
+      page: SkeletonShowcasePage(),
     ),
     _HomeShowcaseEntry(
       title: 'Slider',

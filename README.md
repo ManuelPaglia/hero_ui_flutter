@@ -47,6 +47,7 @@ Questa libreria **non è affiliata ufficilmente** con HeroUI Inc. È un progetto
   - [HUFInput](#hufinput)
   - [HUFSelect](#hufselect)
   - [HUFSeparator](#hufseparator)
+  - [HUFSkeleton](#hufskeleton)
 - [Roadmap componenti](#roadmap-componenti)
 - [App di esempio](#app-di-esempio)
 - [Licenza](#licenza)
@@ -1914,6 +1915,43 @@ Usato anche nelle sezioni di [HUFSelect](#hufselect) (`showSeparatorBefore` su `
 
 ---
 
+### HUFSkeleton
+
+Wrapper che sostituisce i componenti Hero UI nel [child] con placeholder a dimensioni coerenti, mentre il layout (colonne, righe, spaziature) resta invariato.
+
+Con `active: false` (default) viene mostrato il contenuto reale; con `active: true` ogni widget `HUF*` riconosciuto nell’albero viene sostituito da un blocco skeleton (avatar circolare, barra progress, campo input, card, ecc.).
+
+```dart
+HUFSkeleton(
+  active: isLoading,
+  animation: HUFSkeletonAnimation.shimmer,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      HUFAvatar(initials: 'AB'),
+      const SizedBox(height: 16),
+      HUFButton(label: 'Continua', onPressed: () {}),
+      const SizedBox(height: 16),
+      HUFInput(
+        label: 'Email',
+        hintText: 'nome@esempio.it',
+        isFullWidth: true,
+      ),
+    ],
+  ),
+)
+```
+
+**Componenti mappati** (dimensioni derivate dalle metriche del design system): `HUFButton`, `HUFButtonGroup`, `HUFChip`, `HUFAvatar`, `HUFAvatarGroup`, `HUFCard`, `HUFInput`, `HUFSelect`, `HUFProgress`, `HUFSlider`, `HUFRangeSlider`, `HUFCheckbox`, `HUFRadioButton`, `HUFSwitch`, gruppi e card di controllo, `HUFTabs`, `HUFSeparator`, `HUFAccordion`, `HUFBoxItem`, `HUFBoxList`.
+
+| Proprietà   | Tipo                    | Default    | Descrizione |
+| ----------- | ----------------------- | ---------- | ----------- |
+| `child`     | `Widget`                | —          | Contenuto da skeletonizzare (uno o più componenti HUF, anche annidati in layout) |
+| `active`    | `bool`                  | `false`    | Se `true`, mostra gli skeleton al posto dei componenti HUF |
+| `animation` | `HUFSkeletonAnimation`  | `shimmer`  | `shimmer` · `pulse` · `none` |
+
+---
+
 ## Roadmap componenti
 
 Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già implementati sono spuntati.
@@ -1952,6 +1990,7 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Input** — `HUFInput`
 - **Select** — `HUFSelect`, `HUFSelectItem`, `HUFSelectSection`
 - **Separator** — `HUFSeparator` (orizzontale e verticale)
+- **Skeleton** — `HUFSkeleton`
 - **Table** — `HUFTable`, `HUFTablePaginationFooter`, `HUFTableStatusBadge`
 
 ### Da implementare
@@ -1959,7 +1998,6 @@ Elenco completo dei componenti HeroUI da portare su Flutter. Quelli già impleme
 - **Calendar**
 - **Datepicker** (single)
 - **Datepicker** (range)
-- **Skeleton**
 
 ---
 
@@ -1972,7 +2010,7 @@ cd example
 flutter run
 ```
 
-Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Progress, Radio Button, Radio Button Card, Scroll Shadow, Select, Separator, Slider, Switch, Switch Card, Table, Tabs, Toast.
+Pagine showcase disponibili: Accordion, Alert, Alert Dialog, Avatar, Box item / list, Chip, Bottoni, Button Group, Checkbox, Card, Checkbox Card, Drawer, Input, Popover, Progress, Radio Button, Radio Button Card, Scroll Shadow, Select, Separator, Skeleton, Slider, Switch, Switch Card, Table, Tabs, Toast.
 
 L’AppBar della showcase usa `HUFSelect` per il preset tema (con campione colore primary) e per il border radius globale.
 

@@ -2256,6 +2256,49 @@ void main() {
     expect(find.text('Account'), findsNWidgets(2));
   });
 
+  testWidgets('HUFTabs orizzontale fullWidth occupa tutta la larghezza', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          initialValue: 'a',
+          items: const [
+            HUFTabItem(label: 'Tab A', value: 'a'),
+            HUFTabItem(label: 'Tab B', value: 'b'),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final tabsBox = tester.getSize(find.byType(HUFTabs<String>));
+    final scaffoldBox = tester.getSize(find.byType(Scaffold));
+    expect(tabsBox.width, scaffoldBox.width);
+  });
+
+  testWidgets('HUFTabs orizzontale senza fullWidth resta alla larghezza contenuto', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFTabs<String>(
+          fullWidth: false,
+          initialValue: 'a',
+          items: const [
+            HUFTabItem(label: 'Short', value: 'a'),
+            HUFTabItem(label: 'Also short', value: 'b'),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final tabsBox = tester.getSize(find.byType(HUFTabs<String>));
+    final scaffoldBox = tester.getSize(find.byType(Scaffold));
+    expect(tabsBox.width, lessThan(scaffoldBox.width));
+  });
+
   testWidgets('HUFTabs modalità non controllata aggiorna selezione interna', (
     tester,
   ) async {
@@ -4552,6 +4595,33 @@ void main() {
 
     expect(find.text('California'), findsOneWidget);
     expect(find.text('Florida'), findsNothing);
+  });
+
+  testWidgets('HUFSkeleton sostituisce HUFCard mostrando il contenuto interno', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        HUFSkeleton(
+          active: true,
+          animation: HUFSkeletonAnimation.none,
+          child: HUFCard(
+            title: 'Titolo card',
+            subtitle: 'Sottotitolo descrittivo',
+            content: const Text('Contenuto della card.'),
+            actions: [
+              HUFButton(label: 'Azione', onPressed: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(HUFCard), findsNothing);
+    expect(find.text('Titolo card'), findsNothing);
+    expect(find.text('Contenuto della card.'), findsNothing);
+    expect(find.byType(HUFButton), findsNothing);
+    expect(find.byType(Align), findsAtLeast(3));
   });
 }
 
